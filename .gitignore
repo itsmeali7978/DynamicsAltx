@@ -1,0 +1,12 @@
+# Folders to ignore for C# ASP.NET Core
+backend/bin/
+backend/obj/
+
+# Local configuration
+backend/appsettings.Development.json
+
+# Visual Studio files
+.vs/
+
+# Mac OS
+.DS_Store

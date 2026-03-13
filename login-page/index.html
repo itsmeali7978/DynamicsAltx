@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome Backs - Login</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Remix Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- Animated background blobs -->
+    <div class="blob-c">
+        <div class="shape blob1"></div>
+        <div class="shape blob2"></div>
+    </div>
+
+    <div class="container">
+        <div class="login-wrapper">
+            <div class="login-header">
+                <div class="logo">
+                    <i class="ri-triangle-fill"></i>
+                </div>
+                <h2>Welcome back</h2>
+                <p>Please enter your details to sign in.</p>
+            </div>
+
+            <form class="login-form">
+                <div class="input-group">
+                    <label for="email">Email</label>
+                    <div class="input-wrapper">
+                        <i class="ri-mail-line icon"></i>
+                        <input type="email" id="email" placeholder="Enter your email" required />
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="password">Password</label>
+                    <div class="input-wrapper">
+                        <i class="ri-lock-2-line icon"></i>
+                        <input type="password" id="password" placeholder="••••••••" required />
+                        <i class="ri-eye-off-line toggle-password"></i>
+                    </div>
+                </div>
+
+                <div class="form-options">
+                    <label class="remember-me">
+                        <input type="checkbox" />
+                        <span class="checkmark"></span>
+                        Remember me
+                    </label>
+                    <a href="#" class="forgot-pass">Forgot password?</a>
+                </div>
+
+                <button type="submit" class="btn-primary">
+                    <span>Sign In</span>
+                    <i class="ri-arrow-right-line"></i>
+                </button>
+
+                <div class="social-login">
+                    <span class="divider">Or continue with</span>
+                    <div class="social-buttons">
+                        <button type="button" class="btn-social">
+                            <i class="ri-google-fill"></i>
+                            Google
+                        </button>
+                        <button type="button" class="btn-social">
+                            <i class="ri-github-fill"></i>
+                            GitHub
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <div class="login-footer">
+                <p>Don't have an account? <a href="#">Sign up</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom JS -->
+    <script src="script.js"></script>
+</body>
+
+</html>

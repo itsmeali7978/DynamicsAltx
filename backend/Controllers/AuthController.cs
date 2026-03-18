@@ -20,31 +20,31 @@ namespace Backend.Controllers
         {
             public string Email { get; set; } = string.Empty;
             public string Password { get; set; } = string.Empty;
+            public string? Name { get; set; }
+            public string? Location { get; set; }
         }
 
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            // First, find the user by email
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
 
-            if (user == null)
-            {
-                // In a real application, consider returning a generic "Invalid credentials" message
-                // to avoid email enumeration
-                return Unauthorized(new { message = "Invalid email or password" });
-            }
-
-            // Simple verification (in a real app, use a proper hashing library like BCrypt)
-            if (user.PasswordHash != request.Password)
+            if (user == null || user.PasswordHash != request.Password)
             {
                 return Unauthorized(new { message = "Invalid email or password" });
             }
 
-            return Ok(new { message = "Login successful", user = new { id = user.Id, email = user.Email } });
+            return Ok(new { 
+                message = "Login successful", 
+                user = new { 
+                    id = user.Id, 
+                    email = user.Email,
+                    name = user.Name?.Trim(),
+                    location = user.Location?.Trim()
+                } 
+            });
         }
 
-        // Optional: A simple signup endpoint for testing purposes
         [HttpPost("signup")]
         public async Task<IActionResult> Signup([FromBody] LoginRequest request)
         {
@@ -56,8 +56,9 @@ namespace Backend.Controllers
             var newUser = new User
             {
                 Email = request.Email,
-                // Simple pass-through (in a real app, hash the password here!)
-                PasswordHash = request.Password
+                PasswordHash = request.Password,
+                Name = request.Name ?? "New User",
+                Location = request.Location ?? "Main Office"
             };
 
             _context.Users.Add(newUser);

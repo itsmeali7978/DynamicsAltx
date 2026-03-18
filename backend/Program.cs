@@ -1,4 +1,5 @@
 using Backend.Data;
+using Backend.Models;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,7 +16,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend",
-        policy => policy.WithOrigins("http://localhost:8000", "http://127.0.0.1:8000", "null") // 'null' is often sent when opening files directly (file://)
+        policy => policy.WithOrigins("http://localhost:8000", "http://127.0.0.1:8000", "http://192.168.105.238:8000", "null")
                         .AllowAnyHeader()
                         .AllowAnyMethod());
 });
@@ -35,6 +36,20 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// Serve static files from the 'login-page' directory
+var loginPagePath = Path.GetFullPath(Path.Combine(builder.Environment.ContentRootPath, "..", "login-page"));
+if (Directory.Exists(loginPagePath))
+{
+    app.UseDefaultFiles(new DefaultFilesOptions
+    {
+        FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(loginPagePath)
+    });
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(loginPagePath)
+    });
+}
+
 // Enable CORS
 app.UseCors("AllowFrontend");
 
@@ -42,5 +57,25 @@ app.UseAuthorization();
 
 // Map controller routes
 app.MapControllers();
+
+// Seed Default User
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<AppDbContext>();
+    
+    // Automatically apply any pending migrations
+    context.Database.Migrate();
+
+    if (!context.Users.Any())
+    {
+        context.Users.Add(new User
+        {
+            Email = "admin@example.com",
+            PasswordHash = "password123" // In production, this should be hashed
+        });
+        context.SaveChanges();
+    }
+}
 
 app.Run();

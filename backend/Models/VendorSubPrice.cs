@@ -20,10 +20,10 @@ namespace Backend.Models
 
         [JsonIgnore]
         [ForeignKey("BidLineId")]
-        public BidLine BidLine { get; set; }
-
+        public BidLine BidLine { get; set; } = null!;
+ 
         [JsonIgnore]
         [ForeignKey("VendorId")]
-        public VendorSub VendorSub { get; set; }
+        public VendorSub VendorSub { get; set; } = null!;
     }
 }

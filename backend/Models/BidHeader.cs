@@ -5,7 +5,7 @@ namespace Backend.Models
     public class BidHeader
     {
         [Key]
-        public string BidNo { get; set; } // Format: BDREQ-100
+        public string BidNo { get; set; } = string.Empty; // Format: BDREQ-100
         
         [DataType(DataType.Date)]
         public DateTime CreatedDate { get; set; } = DateTime.Now.Date;

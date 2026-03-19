@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DynamicsAltx - Executive Login</title>
+    <!-- Google Fonts: Inter & Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Remix Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="main-viewport">
+        <!-- Abstract Background Elements -->
+        <div class="bg-mesh"></div>
+        <div class="glow-sphere sphere-1"></div>
+        <div class="glow-sphere sphere-2"></div>
+
+        <div class="login-container">
+            <div class="glass-card">
+                <div class="card-header">
+                    <div class="brand-logotype">
+                        <i class="ri-rhythm-line"></i>
+                        <span>DynamicsAltx</span>
+                    </div>
+                    <h1>Executive Access</h1>
+                    <p>Enter your professional credentials to continue</p>
+                </div>
+
+                <form class="login-form">
+                    <div class="form-section">
+                        <div class="input-field">
+                            <label for="email">Work Email</label>
+                            <div class="input-control">
+                                <i class="ri-shield-user-line field-icon"></i>
+                                <input type="email" id="email" placeholder="name@dynamicsaltx.com" required autocomplete="email">
+                            </div>
+                        </div>
+
+                        <div class="input-field">
+                            <label for="password">Security Token</label>
+                            <div class="input-control">
+                                <i class="ri-key-2-line field-icon"></i>
+                                <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password">
+                                <i class="ri-eye-close-line toggle-password"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <label class="premium-check">
+                            <input type="checkbox">
+                            <span class="checkmark"></span>
+                            Persistent Session
+                        </label>
+                        <a href="#" class="auth-helper">Forgot access?</a>
+                    </div>
+
+                    <button type="submit" class="btn-executive">
+                        <span class="btn-label">Authenticate Session</span>
+                        <div class="btn-glow"></div>
+                        <i class="ri-arrow-right-up-line"></i>
+                    </button>
+                </form>
+
+                <div class="card-footer">
+                    <div class="utility-row">
+                        <span class="system-status">
+                            <span class="status-dot"></span>
+                            System Operational
+                        </span>
+                        <div class="lang-selector">
+                            <i class="ri-global-line"></i>
+                            <span>International (EN)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="copyright-notice">
+                &copy; 2026 DynamicsAltx Corporation. Secured by Advanced Agentic Systems.
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom JS -->
+    <script src="script.js"></script>
+</body>
+
+</html>

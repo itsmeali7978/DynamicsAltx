@@ -36,17 +36,23 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// Serve static files from the 'login-page' directory
+// Serve static files (Fallback from local wwwroot to development login-page)
+var wwwrootPath = Path.Combine(builder.Environment.ContentRootPath, "wwwroot");
 var loginPagePath = Path.GetFullPath(Path.Combine(builder.Environment.ContentRootPath, "..", "login-page"));
-if (Directory.Exists(loginPagePath))
+
+string? activeStaticPath = null;
+if (Directory.Exists(wwwrootPath)) activeStaticPath = wwwrootPath;
+else if (Directory.Exists(loginPagePath)) activeStaticPath = loginPagePath;
+
+if (activeStaticPath != null)
 {
     app.UseDefaultFiles(new DefaultFilesOptions
     {
-        FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(loginPagePath)
+        FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(activeStaticPath)
     });
     app.UseStaticFiles(new StaticFileOptions
     {
-        FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(loginPagePath)
+        FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(activeStaticPath)
     });
 }
 

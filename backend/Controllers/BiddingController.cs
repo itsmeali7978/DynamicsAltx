@@ -322,16 +322,16 @@ namespace Backend.Controllers
 
     public class BidCreateDto
     {
-        public List<BidLineDto> Lines { get; set; }
+        public List<BidLineDto> Lines { get; set; } = new List<BidLineDto>();
     }
 
     public class BidLineDto
     {
-        public string NAVDocNo { get; set; }
+        public string NAVDocNo { get; set; } = string.Empty;
         public int NAVSku { get; set; }
-        public string UOM { get; set; }
+        public string UOM { get; set; } = string.Empty;
         public decimal Quantity { get; set; }
-        public List<VendorPriceDto> Prices { get; set; }
+        public List<VendorPriceDto> Prices { get; set; } = new List<VendorPriceDto>();
     }
 
     public class VendorPriceDto
@@ -349,22 +349,22 @@ namespace Backend.Controllers
 
     public class UpdateStatusDto
     {
-        public string BidNo { get; set; }
-        public string NewStatus { get; set; }
+        public string BidNo { get; set; } = string.Empty;
+        public string NewStatus { get; set; } = string.Empty;
     }
 
     public class FetchRequestDto
     {
-        public string BidNo { get; set; }
-        public string NavDocNo { get; set; }
+        public string BidNo { get; set; } = string.Empty;
+        public string NavDocNo { get; set; } = string.Empty;
     }
 
     public class NavLineDto
     {
-        public string ItemNo { get; set; }
+        public string ItemNo { get; set; } = string.Empty;
         public decimal Quantity { get; set; }
-        public string UOM { get; set; }
-        public string Description { get; set; }
-        public string DocumentNo { get; set; }
+        public string UOM { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public string DocumentNo { get; set; } = string.Empty;
     }
 }

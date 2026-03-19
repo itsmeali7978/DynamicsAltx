@@ -6,10 +6,10 @@ namespace Backend.Models
     {
         [Key]
         public int Id { get; set; }
-        public string VendorName { get; set; }
-        public string DisplayName { get; set; }
-        public string NavReferCode { get; set; }
-        public string Email { get; set; }
-        public string MobileNo { get; set; }
+        public string VendorName { get; set; } = string.Empty;
+        public string DisplayName { get; set; } = string.Empty;
+        public string NavReferCode { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string MobileNo { get; set; } = string.Empty;
     }
 }

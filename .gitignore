@@ -3,6 +3,7 @@ backend/bin/
 backend/obj/
 
 # Local configuration
+backend/appsettings.json
 backend/appsettings.Development.json
 
 # Visual Studio files

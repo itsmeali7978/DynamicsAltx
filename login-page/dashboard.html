@@ -47,6 +47,7 @@
                             <i class="ri-arrow-down-s-line arrow"></i>
                         </div>
                         <ul class="submenu">
+                            <li><a href="voucher-history.html">Voucher History</a></li>
                             <li><a href="#">General Ledger</a></li>
                             <li><a href="#">Accounts Payable</a></li>
                             <li><a href="#">Accounts Receivable</a></li>
@@ -91,6 +92,7 @@
                             <i class="ri-arrow-down-s-line arrow"></i>
                         </div>
                         <ul class="submenu">
+                            <li><a href="reconciliation.html">Invoice Reconciliation</a></li>
                             <li><a href="#">Sales Pipeline</a></li>
                             <li><a href="#">Customers</a></li>
                             <li><a href="#">Lead Tracking</a></li>
@@ -104,11 +106,18 @@
                         </a>
                     </li>
 
-                    <li class="nav-item">
-                        <a href="#" class="nav-link">
+                    <li class="nav-group">
+                        <div class="group-header">
                             <i class="ri-settings-4-line"></i>
-                            <span>System Configuration</span>
-                        </a>
+                            <span>System</span>
+                            <i class="ri-arrow-down-s-line arrow"></i>
+                        </div>
+                        <ul class="submenu">
+                            <li><a href="users.html">User Management</a></li>
+                            <li><a href="locations.html">Locations</a></li>
+                            <li><a href="announcements.html">Announcements</a></li>
+                            <li><a href="settings.html">Account Settings</a></li>
+                        </ul>
                     </li>
                 </ul>
             </nav>
@@ -169,6 +178,45 @@
                         <div class="stat-mini">
                             <span class="label">Active Sessions</span>
                             <span class="value">24 Active</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Executive Insights Widget -->
+                <div class="insights-section animate-in" style="animation-delay: 0.1s;">
+                    <div class="insights-card">
+                        <div class="insight-item date-hijri">
+                            <div class="insight-icon">
+                                <i class="ri-moon-clear-line"></i>
+                            </div>
+                            <div class="insight-info">
+                                <span class="insight-label">Hijri Calendar</span>
+                                <h4 id="hijri-date">Loading...</h4>
+                            </div>
+                        </div>
+
+                        <div class="insight-divider"></div>
+
+                        <div class="insight-item date-gregorian">
+                            <div class="insight-icon">
+                                <i class="ri-calendar-event-line"></i>
+                            </div>
+                            <div class="insight-info">
+                                <span class="insight-label">Gregorian Date</span>
+                                <h4 id="gregorian-date">Loading...</h4>
+                            </div>
+                        </div>
+
+                        <div class="insight-divider"></div>
+
+                        <div class="insight-item weather-widget">
+                            <div class="insight-icon">
+                                <i class="ri-sun-cloudy-line" id="weather-icon"></i>
+                            </div>
+                            <div class="insight-info">
+                                <span class="insight-label">Local Weather</span>
+                                <h4 id="weather-temp">Loading...</h4>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -272,33 +320,33 @@
                         </div>
                     </div>
 
-                    <!-- Task Section -->
+                    <!-- ERP Updates & Insights -->
                     <div class="card task-section animate-in" style="animation-delay: 0.5s;">
                         <div class="card-header-row">
-                            <h3>My Priorities</h3>
-                            <button class="text-btn">Edit List</button>
+                            <h3>ERP Updates & Insights</h3>
+                            <i class="ri-megaphone-line" style="color: var(--primary); font-size: 1.25rem;"></i>
                         </div>
                         <ul class="task-list">
                             <li>
                                 <div class="task-info">
-                                    <div class="task-title">Review Q1 Financials</div>
-                                    <div class="task-due">Due Tomorrow</div>
+                                    <div class="task-title">Bidding Module Optimized</div>
+                                    <div class="task-due text-success">New implementation live</div>
                                 </div>
-                                <span class="priority high">High</span>
+                                <i class="ri-checkbox-circle-fill" style="color: var(--success);"></i>
                             </li>
                             <li>
                                 <div class="task-info">
-                                    <div class="task-title">Vendor Contract Renewal</div>
-                                    <div class="task-due">Due in 3 days</div>
+                                    <div class="task-title">System Maintenance</div>
+                                    <div class="task-due">Sunday, 2:00 AM - 4:00 AM</div>
                                 </div>
-                                <span class="priority medium">Medium</span>
+                                <i class="ri-error-warning-fill" style="color: var(--orange);"></i>
                             </li>
                             <li>
                                 <div class="task-info">
-                                    <div class="task-title">Update Inventory Records</div>
-                                    <div class="task-due">Due in 5 days</div>
+                                    <div class="task-title">User Profile Updates</div>
+                                    <div class="task-due">Please verify your contact info</div>
                                 </div>
-                                <span class="priority low">Low</span>
+                                <i class="ri-information-fill" style="color: var(--primary);"></i>
                             </li>
                         </ul>
                     </div>
@@ -309,8 +357,8 @@
     </div>
 
     <!-- Custom JS -->
-    <script src="common.js"></script>
-    <script src="dashboard.js"></script>
+    <script src="common.js?v=3"></script>
+    <script src="dashboard.js?v=2"></script>
 </body>
 
 </html>

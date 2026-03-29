@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DynamicsAltx - System Announcements</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@600;700&display=swap" rel="stylesheet">
+    <!-- Remix Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="dashboard.css">
+    <style>
+        .settings-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            max-width: 800px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .settings-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .settings-header h3 {
+            margin: 0;
+            font-size: 1.25rem;
+            color: var(--text-main);
+        }
+
+        .settings-header p {
+            margin: 0.5rem 0 0;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .form-section {
+            margin-bottom: 2rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 0;
+        }
+        
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-main);
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: var(--transition);
+            background: white;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        .btn-update {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .btn-update:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="erp-app">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand-logo">
+                    <i class="ri-rhythm-line"></i>
+                    <span>DynamicsAltx</span>
+                </div>
+                <button id="sidebar-toggle" class="icon-btn">
+                    <i class="ri-menu-fold-line"></i>
+                </button>
+            </div>
+
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="dashboard.html" class="nav-link">
+                            <i class="ri-dashboard-3-line"></i>
+                            <span>Overview</span>
+                        </a>
+                    </li>
+                    <li class="nav-group">
+                        <div class="group-header">
+                            <i class="ri-shopping-cart-2-line"></i>
+                            <span>Supply Chain</span>
+                            <i class="ri-arrow-down-s-line arrow"></i>
+                        </div>
+                        <ul class="submenu">
+                            <li><a href="vendors.html">Create Vendor</a></li>
+                            <li><a href="bidding-create.html">Create Bid</a></li>
+                            <li><a href="bidding-list.html">Bidding List</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-group">
+                        <div class="group-header">
+                            <i class="ri-customer-service-line"></i>
+                            <span>CRM & Sales</span>
+                            <i class="ri-arrow-down-s-line arrow"></i>
+                        </div>
+                        <ul class="submenu">
+                            <li><a href="reconciliation.html">Invoice Reconciliation</a></li>
+                            <li><a href="#">Sales Pipeline</a></li>
+                            <li><a href="#">Customers</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-group">
+                        <div class="group-header">
+                            <i class="ri-exchange-dollar-line"></i>
+                            <span>Financials</span>
+                            <i class="ri-arrow-down-s-line arrow"></i>
+                        </div>
+                        <ul class="submenu">
+                            <li><a href="voucher-history.html">Voucher Entries</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-group active">
+                        <div class="group-header">
+                            <i class="ri-settings-4-line"></i>
+                            <span>System</span>
+                            <i class="ri-arrow-down-s-line arrow"></i>
+                        </div>
+                        <ul class="submenu" style="display: block;">
+                            <li><a href="users.html">User Management</a></li>
+                            <li><a href="locations.html">Locations</a></li>
+                            <li><a href="announcements.html" class="active">Announcements</a></li>
+                            <li><a href="settings.html">Account Settings</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-block">
+                    <img src="https://ui-avatars.com/api/?name=Admin+User&background=6366f1&color=fff" alt="User" class="user-avatar">
+                    <div class="user-info">
+                        <p class="user-name">Admin User</p>
+                        <p class="user-role">System Administrator</p>
+                    </div>
+                    <button class="logout-btn icon-btn" title="Logout">
+                        <i class="ri-logout-box-r-line"></i>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="main-content">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="hamburger-menu" id="mobile-menu-btn">
+                        <i class="ri-menu-line"></i>
+                    </button>
+                    <h2 class="page-title">System Announcements</h2>
+                </div>
+            </header>
+
+            <div class="content">
+                <div class="settings-card animate-in">
+                    <div class="settings-header">
+                        <h3>Create New Announcement</h3>
+                        <p>Post updates, maintenance alerts, or news for all ERP users.</p>
+                    </div>
+
+                    <form id="announcement-form">
+                        <div class="form-section">
+                            <div class="form-group">
+                                <label for="ann-title">Title</label>
+                                <input type="text" id="ann-title" placeholder="e.g., System Maintenance" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="ann-type">Alert Type</label>
+                                <select id="ann-type">
+                                    <option value="Info">Info (Blue)</option>
+                                    <option value="Success">Success (Green)</option>
+                                    <option value="Warning">Warning (Orange)</option>
+                                </select>
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="ann-content">Message / Description</label>
+                                <input type="text" id="ann-content" placeholder="e.g., Scheduled for Sunday 2-4 AM. Please save your work." required>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-update">
+                            <i class="ri-megaphone-line"></i>
+                            Post Announcement
+                        </button>
+                    </form>
+                </div>
+
+                <div class="settings-card animate-in" style="margin-top: 2rem;">
+                    <div class="settings-header">
+                        <h3>Active Announcements</h3>
+                        <p>Manage existing announcements currently visible on the dashboard.</p>
+                    </div>
+                    
+                    <ul id="active-announcements-list" style="list-style: none; padding: 0;">
+                        <!-- Dynamic items populate here -->
+                    </ul>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Custom JS -->
+    <script src="common.js?v=3"></script>
+    <script src="announcements.js"></script>
+</body>
+
+</html>

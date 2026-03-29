@@ -73,14 +73,34 @@ using (var scope = app.Services.CreateScope())
     // Automatically apply any pending migrations
     context.Database.Migrate();
 
-    if (!context.Users.Any())
+    // Seeding/Updating Admin
+    var adminUser = await context.Users.FirstOrDefaultAsync(u => u.Email == "admin@example.com");
+    if (adminUser == null)
     {
         context.Users.Add(new User
         {
             Email = "admin@example.com",
-            PasswordHash = "password123" // In production, this should be hashed
+            Name = "Admin User",
+            PasswordHash = "password123",
+            Location = "HO",
+            Role = "Admin"
         });
-        context.SaveChanges();
+        await context.SaveChangesAsync();
+    }
+    else
+    {
+        // Ensure existing admin@example.com is an Admin and has the correct password for this session
+        adminUser.Role = "Admin";
+        adminUser.PasswordHash = "password123";
+        await context.SaveChangesAsync();
+
+        // Remove any other "Admin User" named duplicates if they exist with different emails (optional but clean)
+        var duplicates = await context.Users.Where(u => u.Name == "Admin User" && u.Email != "admin@example.com").ToListAsync();
+        if (duplicates.Any())
+        {
+            context.Users.RemoveRange(duplicates);
+            await context.SaveChangesAsync();
+        }
     }
 }
 

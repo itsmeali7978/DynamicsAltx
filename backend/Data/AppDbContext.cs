@@ -12,5 +12,8 @@ namespace Backend.Data
         public DbSet<BidHeader> BidHeaders { get; set; }
         public DbSet<BidLine> BidLines { get; set; }
         public DbSet<VendorSubPrice> VendorSubPrices { get; set; }
+        public DbSet<VoucherHistory> VoucherHistories { get; set; }
+        public DbSet<Announcement> Announcements { get; set; }
+        public DbSet<Location> Locations { get; set; }
     }
 }

@@ -17,6 +17,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
+const riyalSvg = `
+    <svg viewBox="0 0 1124.14 1256.39" style="height: 0.9em; width: auto; vertical-align: middle; fill: currentColor; margin-right: 4px;">
+        <path d="M699.62,1113.02h0c-20.06,44.48-33.32,92.75-38.4,143.37l424.51-90.24c20.06-44.47,33.31-92.75,38.4-143.37l-424.51,90.24Z"/>
+        <path d="M1085.73,895.8c20.06-44.47,33.32-92.75,38.4-143.37l-330.68,70.33v-135.2l292.27-62.11c20.06-44.47,33.32-92.75,38.4-143.37l-330.68,70.27V66.13c-50.67,28.45-95.67,66.32-132.25,110.99v403.35l-132.25,28.11V0c-50.67,28.44-95.67,66.32-132.25,110.99v525.69l-295.91,62.88c-20.06,44.47-33.33,92.75-38.42,143.37l334.33-71.05v170.26l-358.3,76.14c-20.06,44.47-33.32,92.75-38.4,143.37l375.04-79.7c30.53-6.35,56.77-24.4,73.83-49.24l68.78-101.97v-.02c7.14-10.55,11.3-23.27,11.3-36.97v-149.98l132.25-28.11v270.4l424.53-90.28Z"/>
+    </svg>
+`;
+
 async function loadExistingBid(bidNo) {
     try {
         const response = await fetch(`/api/Bidding/BidDetails/${bidNo}`);
@@ -29,6 +36,14 @@ async function loadExistingBid(bidNo) {
         document.getElementById('bid-identifier').style.display = 'flex';
         document.getElementById('fetch-section').style.display = 'block';
         document.getElementById('btn-new-bid').style.display = 'none';
+
+        // Display Linked Documents from Header
+        if (data.header && data.header.navDocNo) {
+            document.getElementById('nav-doc-no').value = data.header.navDocNo;
+            if (document.getElementById('multi-nav-doc')) {
+                document.getElementById('multi-nav-doc').value = data.header.navDocNo;
+            }
+        }
         
         renderBidLines(data);
         document.getElementById('lines-section').style.display = 'block';
@@ -93,6 +108,7 @@ document.getElementById('btn-new-bid').addEventListener('click', async () => {
         
         if (response.ok) {
             currentBidNo = data.bidNo;
+            currentBidData = data; // Initialize state
             document.getElementById('display-bid-no').innerText = currentBidNo;
             document.getElementById('bid-identifier').style.display = 'flex';
             document.getElementById('fetch-section').style.display = 'block';
@@ -109,23 +125,55 @@ document.getElementById('btn-new-bid').addEventListener('click', async () => {
 
 // Handler: Fetch & Sync Data
 document.getElementById('btn-fetch-data').addEventListener('click', async () => {
-    const initialInput = document.getElementById('nav-doc-no');
-    const multiInput = document.getElementById('multi-nav-doc');
-    const navDocNo = (multiInput && multiInput.value) || (initialInput && initialInput.value);
+    const mainInput = document.getElementById('nav-doc-no');
+    
+    // 1. Capture existing NAVDocNo from Header if it exists
+    let existingDocNos = [];
+    if (currentBidData && currentBidData.header && currentBidData.header.navDocNo) {
+        currentBidData.header.navDocNo.split('|').forEach(d => {
+            const trimmed = d.trim();
+            if (trimmed && !existingDocNos.includes(trimmed)) {
+                existingDocNos.push(trimmed);
+            }
+        });
+    }
+
+    // 2. Read new input from nav-doc-no field (user may have added new docs with pipe symbol)
+    const newInput = mainInput && mainInput.value.trim();
+    
+    // 3. Merge new input with existing header docs
+    let finalDocNos = [...existingDocNos];
+    if (newInput) {
+        newInput.split(/[|,]/).forEach(d => {
+            const trimmed = d.trim();
+            if (trimmed && !finalDocNos.includes(trimmed)) {
+                finalDocNos.push(trimmed);
+            }
+        });
+    }
+
+    const navDocNo = finalDocNos.join(' | ');
+
+    // Show the merged list in the nav-doc-no field immediately
+    if (mainInput) mainInput.value = navDocNo;
 
     if (!navDocNo) {
         showToast('Please enter a NavDocument No', 'warning');
         return;
     }
 
-    // Confirmation if records already exist
+    // 4. Confirmation if records already exist
     const hasExistingRecords = document.querySelectorAll('#bid-lines-body tr').length > 0;
     if (hasExistingRecords) {
         const confirmed = await showConfirm(
-            'all cost and information will lost, do you want continue',
-            'Data Overwrite Warning'
+            'The system will fetch data for: ' + navDocNo + '. Any existing items not in these documents will be removed. Existing costs will be preserved. Do you want to continue?',
+            'Confirm Data Fetch'
         );
         if (!confirmed) return;
+
+        // Second popup displaying all linked documents
+        const docList = navDocNo.split('|').map(s => s.trim()).join('\n');
+        await showAlert("Documents to be Synchronized:\n" + docList, "Linked Documents for Final Sync");
     }
 
     const btn = document.getElementById('btn-fetch-data');
@@ -148,7 +196,11 @@ document.getElementById('btn-fetch-data').addEventListener('click', async () => 
             currentBidData = data; // Store globally
             renderBidLines(data);
             document.getElementById('lines-section').style.display = 'block';
-            if (multiInput) multiInput.value = '';
+            
+            // Update nav-doc-no with the saved cumulative list from the header
+            if (data.header && data.header.navDocNo) {
+                if (mainInput) mainInput.value = data.header.navDocNo;
+            }
         } else {
             throw new Error(data.message || 'Failed to sync data');
         }
@@ -210,7 +262,7 @@ function renderBidLines(data) {
             vendorCells += `
                 <td class="vendor-cost-cell" data-vendor-id="${v.id}" data-cost="${cost}">
                     <div style="display: flex; align-items: center; gap: 0.5rem; background: #f0fdf4; padding: 0.25rem 0.5rem; border-radius: 8px; border: 1px solid #dcfce7;">
-                        <span style="font-size: 0.75rem; font-weight: 700; color: #166534;">SAR</span>
+                        <span style="font-size: 0.75rem; font-weight: 700; color: #166534;">${riyalSvg}</span>
                         <input type="number" 
                                value="${cost.toFixed(2)}" 
                                step="0.01"
@@ -440,7 +492,7 @@ function generateVendorPDF(vendorId) {
                         <th style="width: 15%;">SKU</th>
                         <th style="width: 55%;">Description (Arabic/English)</th>
                         <th style="width: 10%; text-align: center;">Qty</th>
-                        <th style="width: 20%; text-align: right;">Cost (SAR)</th>
+                        <th style="width: 20%; text-align: right;">Cost (Riyal)</th>
                     </tr>
                 </thead>
                 <tbody>

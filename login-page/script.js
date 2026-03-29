@@ -78,6 +78,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     localStorage.setItem('userName', data.user.name || 'ERP Admin');
                     localStorage.setItem('userLocation', data.user.location || 'Main Office');
                     localStorage.setItem('userEmail', data.user.email);
+                    localStorage.setItem('userRole', data.user.role || 'User');
+                    console.log("Session Role Assigned:", data.user.role);
                 }
 
                 // Dashboard Handover

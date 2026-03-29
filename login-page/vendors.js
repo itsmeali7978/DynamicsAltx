@@ -75,7 +75,7 @@ async function fetchVendors() {
     const emptyState = document.getElementById('grid-empty-state');
     
     try {
-        const response = await fetch('/api/Bidding/Vendors');
+        const response = await fetch('/api/VendorSubs');
         const vendors = await response.json();
 
         renderVendorGrid(vendors);

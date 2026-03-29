@@ -40,11 +40,11 @@ namespace Backend.Controllers
                     id = user.Id, 
                     email = user.Email,
                     name = user.Name?.Trim(),
-                    location = user.Location?.Trim()
+                    location = user.Location?.Trim(),
+                    role = user.Role
                 } 
             });
         }
-
         [HttpPost("signup")]
         public async Task<IActionResult> Signup([FromBody] LoginRequest request)
         {

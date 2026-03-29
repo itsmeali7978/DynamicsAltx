@@ -13,5 +13,7 @@ namespace Backend.Models
         [Required]
         [StringLength(50)]
         public string Status { get; set; } = "Active";
+
+        public string? NAVDocNo { get; set; }
     }
 }

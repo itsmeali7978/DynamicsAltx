@@ -10,3 +10,16 @@ backend/appsettings.Development.json
 
 # Mac OS
 .DS_Store
+
+# Build/Publish artifacts
+publish/
+publish_iis/
+backend/wwwroot/
+
+# Database files
+*.db
+*.mdf
+*.ldf
+
+# Frontend dependencies
+node_modules/

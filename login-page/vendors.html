@@ -254,23 +254,52 @@
                             <span>Overview</span>
                         </a>
                     </li>
-                    <li class="nav-item active">
-                        <a href="vendors.html" class="nav-link">
-                            <i class="ri-user-add-line"></i>
-                            <span>Create Vendor</span>
-                        </a>
+                    <li class="nav-group">
+                        <div class="group-header">
+                            <i class="ri-bank-line"></i>
+                            <span>Finance</span>
+                            <i class="ri-arrow-down-s-line arrow"></i>
+                        </div>
+                        <ul class="submenu">
+                            <li><a href="voucher-history.html">Voucher History</a></li>
+                        </ul>
                     </li>
-                    <li class="nav-item">
-                        <a href="bidding-create.html" class="nav-link">
-                            <i class="ri-auction-line"></i>
-                            <span>Create Bid</span>
-                        </a>
+                    <li class="nav-group active">
+                        <div class="group-header">
+                            <i class="ri-shopping-cart-2-line"></i>
+                            <span>Supply Chain</span>
+                            <i class="ri-arrow-down-s-line arrow"></i>
+                        </div>
+                        <ul class="submenu" style="display: block;">
+                            <li><a href="vendors.html" class="active">Create Vendor</a></li>
+                            <li><a href="bidding-create.html">Create Bid</a></li>
+                            <li><a href="bidding-list.html">Bidding List</a></li>
+                        </ul>
                     </li>
-                    <li class="nav-item">
-                        <a href="bidding-list.html" class="nav-link">
-                            <i class="ri-list-check-2"></i>
-                            <span>Bidding List</span>
-                        </a>
+                    <li class="nav-group">
+                        <div class="group-header">
+                            <i class="ri-customer-service-line"></i>
+                            <span>CRM & Sales</span>
+                            <i class="ri-arrow-down-s-line arrow"></i>
+                        </div>
+                        <ul class="submenu">
+                            <li><a href="reconciliation.html">Invoice Reconciliation</a></li>
+                            <li><a href="#">Sales Pipeline</a></li>
+                            <li><a href="#">Customers</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-group">
+                        <div class="group-header">
+                            <i class="ri-settings-4-line"></i>
+                            <span>System</span>
+                            <i class="ri-arrow-down-s-line arrow"></i>
+                        </div>
+                        <ul class="submenu">
+                            <li><a href="users.html">User Management</a></li>
+                            <li><a href="locations.html">Locations</a></li>
+                            <li><a href="announcements.html">Announcements</a></li>
+                            <li><a href="settings.html">Account Settings</a></li>
+                        </ul>
                     </li>
                 </ul>
             </nav>
@@ -382,7 +411,7 @@
     </div>
 
     <!-- Custom JS -->
-    <script src="common.js"></script>
+    <script src="common.js?v=3"></script>
     <script src="vendors.js"></script>
 </body>
 

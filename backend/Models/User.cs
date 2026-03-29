@@ -19,5 +19,9 @@ namespace Backend.Models
         [Required]
         [StringLength(25)]
         public string Location { get; set; } = string.Empty;
+
+        [Required]
+        [StringLength(20)]
+        public string Role { get; set; } = "User";
     }
 }

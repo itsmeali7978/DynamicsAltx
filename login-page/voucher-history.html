@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DynamicsAltx - Voucher History</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@600;700&display=swap"
+        rel="stylesheet">
+    <!-- Remix Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="dashboard.css">
+    <style>
+        .voucher-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .search-section {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            padding: 1.5rem;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+        }
+
+        .search-section input {
+            flex: 1;
+            padding: 0.8rem 1.2rem;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .search-section input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .btn-fetch {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-fetch:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .details-card {
+            display: none;
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .detail-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+        }
+
+        .detail-value {
+            font-size: 1.1rem;
+            color: var(--text-main);
+            font-weight: 700;
+        }
+
+        .post-section {
+            display: none;
+            background: var(--bg-app);
+            padding: 1.5rem;
+            border-radius: 16px;
+            border: 1px dashed var(--border-color);
+            margin-top: 1rem;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .post-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .btn-post {
+            background-color: var(--success);
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 100%;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+
+        .btn-post:hover {
+            background-color: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.2);
+        }
+
+        .info-message {
+            display: none;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            animation: fadeIn 0.3s ease-in;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-weight: 500;
+        }
+
+        .info-message.error {
+            background-color: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+        }
+
+        .info-message.success {
+            background-color: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .info-message.warning {
+            background-color: #ffedd5;
+            color: #9a3412;
+            border: 1px solid #fed7aa;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .amount-badge {
+            font-size: 1.5rem;
+            color: var(--primary);
+            font-family: 'Outfit', sans-serif;
+        }
+
+        /* Refined Visual Voucher Styles */
+        .visual-voucher {
+            display: none;
+            width: 100%;
+            max-width: 650px;
+            aspect-ratio: 1.9 / 1;
+            background: #f0f7f0;
+            background-image: 
+                linear-gradient(rgba(240, 247, 240, 0.9), rgba(240, 247, 240, 0.9)),
+                url('trolly.jpg'),
+                radial-gradient(circle at 50% 50%, rgba(45, 90, 39, 0.05) 0%, transparent 70%),
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 86c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm66-3c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM37 17c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm41 19c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM33 46c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm59 12c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm-54 25c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm6-14c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm-22 4c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm71 14c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm-36-34c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm-8 47c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm-54-17c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM45 6c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm60 67c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm-7 23c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm-23-71c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm-7 54c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm-23-48c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zm-22-16c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%232d5a27' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 20% bottom 10%;
+            background-size: auto, 35%, auto, auto;
+            border-radius: 4px;
+            padding: 25px;
+            position: relative;
+            box-shadow:
+                0 10px 30px rgba(0, 0, 0, 0.1),
+                inset 0 0 0 2px #fff,
+                inset 0 0 120px rgba(45, 90, 39, 0.1);
+            border: 1px solid #c8dcc8;
+            margin: 2rem auto;
+            color: #2d5a27;
+            overflow: hidden;
+            font-family: 'Times New Roman', serif;
+            /* Closer to the elegant serif look */
+        }
+
+        .visual-voucher .social-header {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            font-size: 0.65rem;
+            color: #4b6348;
+            font-family: sans-serif;
+            font-weight: 500;
+        }
+
+        .visual-voucher .social-icons {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 2px;
+        }
+
+        .visual-voucher .social-icons i {
+            font-size: 0.8rem;
+            color: #2d5a27;
+        }
+
+        .visual-voucher .top-placeholders {
+            position: absolute;
+            top: 20px;
+            left: 250px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .visual-voucher .p-box {
+            width: 45px;
+            height: 45px;
+            border: 1px dashed #6a8c66;
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .visual-voucher .main-titles {
+            position: absolute;
+            top: 55%;
+            left: 20px;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .visual-voucher .voucher-title-en {
+            font-size: 1.4rem;
+            line-height: 1.1;
+            font-weight: 900;
+            color: #3b5038;
+            letter-spacing: 1px;
+            text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.5);
+        }
+
+        .visual-voucher .arabic-vertical {
+            position: absolute;
+            right: 25px;
+            top: 15px;
+            bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: #2d5a27;
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            letter-spacing: -2px;
+            line-height: 1;
+        }
+
+        .visual-voucher .center-branding {
+            position: absolute;
+            left: 55%;
+            top: 45%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .visual-voucher .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 5px;
+        }
+
+        .visual-voucher .cart-roof-icon {
+            position: relative;
+            font-size: 2.5rem;
+            color: #059669;
+        }
+
+        .visual-voucher .cart-roof-icon::after {
+            content: "";
+            position: absolute;
+            top: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-bottom: 15px solid #e11d48;
+        }
+
+        .visual-voucher .brand-texts {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .visual-voucher .brand-ar {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: #2d5a27;
+            line-height: 1;
+        }
+
+        .visual-voucher .brand-en {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            font-size: 1rem;
+            display: flex;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 2px;
+        }
+
+        .visual-voucher .brand-en .red-part {
+            background: #e11d48;
+            color: white;
+            padding: 0 4px;
+        }
+
+        .visual-voucher .brand-en .green-part {
+            background: #059669;
+            color: white;
+            padding: 0 4px;
+        }
+
+        .visual-voucher .bottom-details {
+            position: absolute;
+            bottom: 25px;
+            right: 100px;
+            display: flex;
+            align-items: flex-end;
+            gap: 15px;
+        }
+
+        .visual-voucher .sr-no-container {
+            background: white;
+            border: 1px solid #c8dcc8;
+            padding: 5px 15px;
+            display: flex;
+            flex-direction: column;
+            min-width: 140px;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .visual-voucher .sr-no-label {
+            font-size: 0.6rem;
+            font-weight: 800;
+            color: #4b6348;
+            font-family: sans-serif;
+        }
+
+        .visual-voucher .sr-no-value {
+            font-size: 1.2rem;
+            font-weight: 900;
+            color: #000;
+            font-family: 'Outfit', sans-serif;
+            letter-spacing: 1px;
+        }
+
+        .visual-voucher .voucher-illustration-banknote {
+            position: absolute;
+            bottom: 10px;
+            left: 200px;
+            opacity: 0.15;
+            font-size: 4rem;
+        }
+
+        .visual-voucher .corner-ar {
+            position: absolute;
+            bottom: 10px;
+            left: 15px;
+            font-size: 0.55rem;
+            color: #6a8c66;
+            max-width: 120px;
+            line-height: 1.2;
+            text-align: left;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="erp-app">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand-logo">
+                    <i class="ri-rhythm-line"></i>
+                    <span>DynamicsAltx</span>
+                </div>
+                <button id="sidebar-toggle" class="icon-btn">
+                    <i class="ri-menu-fold-line"></i>
+                </button>
+            </div>
+
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="dashboard.html" class="nav-link">
+                            <i class="ri-dashboard-3-line"></i>
+                            <span>Overview</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-group active-group">
+                        <div class="group-header">
+                            <i class="ri-bank-line"></i>
+                            <span>Finance</span>
+                            <i class="ri-arrow-down-s-line arrow"></i>
+                        </div>
+                        <ul class="submenu show">
+                            <li class="active-sub"><a href="voucher-history.html">Voucher History</a></li>
+                            <li><a href="#">General Ledger</a></li>
+                            <li><a href="#">Accounts Payable</a></li>
+                            <li><a href="#">Accounts Receivable</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-group">
+                        <div class="group-header">
+                            <i class="ri-customer-service-line"></i>
+                            <span>CRM & Sales</span>
+                            <i class="ri-arrow-down-s-line arrow"></i>
+                        </div>
+                        <ul class="submenu">
+                            <li><a href="reconciliation.html">Invoice Reconciliation</a></li>
+                            <li><a href="#">Sales Pipeline</a></li>
+                            <li><a href="#">Customers</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-group">
+                        <div class="group-header">
+                            <i class="ri-shopping-cart-2-line"></i>
+                            <span>Supply Chain</span>
+                            <i class="ri-arrow-down-s-line arrow"></i>
+                        </div>
+                        <ul class="submenu">
+                            <li><a href="vendors.html">Create Vendor</a></li>
+                            <li><a href="bidding-create.html">Create Bid</a></li>
+                            <li><a href="bidding-list.html">Bidding List</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-group">
+                        <div class="group-header">
+                            <i class="ri-settings-4-line"></i>
+                            <span>System</span>
+                            <i class="ri-arrow-down-s-line arrow"></i>
+                        </div>
+                        <ul class="submenu">
+                            <li><a href="users.html">User Management</a></li>
+                            <li><a href="locations.html">Locations</a></li>
+                            <li><a href="announcements.html">Announcements</a></li>
+                            <li><a href="settings.html">Account Settings</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-block">
+                    <img src="https://ui-avatars.com/api/?name=Admin+User&background=6366f1&color=fff" alt="User">
+                    <div class="user-info">
+                        <p class="user-name">Admin User</p>
+                        <p class="user-role">System Administrator</p>
+                    </div>
+                    <button class="logout-btn icon-btn" title="Logout">
+                        <i class="ri-logout-box-r-line"></i>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="main-content">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="hamburger-menu" id="mobile-menu-btn">
+                        <i class="ri-menu-line"></i>
+                    </button>
+                    <h2 class="page-title">Voucher Processing</h2>
+                </div>
+            </header>
+
+            <div class="content">
+                <div class="voucher-container">
+                    <div id="message-container"></div>
+
+                    <div class="search-section">
+                        <input type="text" id="voucher-input" placeholder="Enter Voucher Number (e.g. VCH-001)...">
+                        <button class="btn-fetch" id="fetch-btn">
+                            <i class="ri-search-eye-line"></i>
+                            <span>Fetch Details</span>
+                        </button>
+                    </div>
+
+                    <div class="details-card" id="details-card">
+                        <div class="card-header-row">
+                            <h3>Voucher Information</h3>
+                            <div class="amount-badge" id="v-amount"></div>
+                        </div>
+                        <div class="details-grid">
+                            <div class="detail-item">
+                                <span class="detail-label">Voucher No</span>
+                                <span class="detail-value" id="v-no">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Voucher Date</span>
+                                <span class="detail-value" id="v-date">-</span>
+                            </div>
+                        </div>
+
+                        <!-- Refined Visual Voucher Component -->
+                        <div class="visual-voucher" id="visual-voucher">
+                            <!-- Top Left: Social & Contact -->
+                            <div class="social-header">
+                                <div class="social-icons">
+                                    <i class="ri-snapchat-line"></i>
+                                    <i class="ri-instagram-line"></i>
+                                    <i class="ri-facebook-box-line"></i>
+                                    <i class="ri-twitter-line"></i>
+                                </div>
+                                <div>housecare ksa</div>
+                                <div>Unified No : 920009039</div>
+                                <div>الفرع - ..........</div>
+                                <div>الاسم - ..........</div>
+                                <div>012 5322060</div>
+                            </div>
+
+                            <!-- Top Center: Placeholders -->
+                            <!--<div class="top-placeholders">
+                                <div class="p-box"></div>
+                                <div class="p-box"></div>
+                            </div>-->
+
+                            <!-- Right: Arabic Vertical Text -->
+                            <div class="arabic-vertical">قسيمة شرائية</div>
+
+                            <!-- Main Left: Shopping Voucher Title -->
+                            <div class="main-titles">
+                                <div class="voucher-title-en">SHOPPING<br>VOUCHER</div>
+                                <div style="font-size: 0.7rem; opacity: 0.8;" id="vv-date">Voucher Date: -</div>
+                            </div>
+
+                            <!-- Center: House Care Branding -->
+                            <div class="center-branding">
+                                <div class="logo-container">
+                                    <img src="logo.jpg" alt="House Care Logo" style="height: 80px; width: auto; margin-bottom: 10px;">
+                                    <div class="brand-texts">
+                                        <div class="brand-ar">هاوس كير</div>
+                                        <div class="brand-en">
+                                            <span class="red-part">House</span>
+                                            <span class="green-part">Care</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Bottom Right: SR NO Box -->
+                            <div class="bottom-details">
+                                <div class="sr-no-container">
+                                    <span class="sr-no-label">SR NO:</span>
+                                    <span class="sr-no-value" id="vv-no">-</span>
+                                </div>
+                            </div>
+
+                            <!-- Illustration Decorations -->
+                            <div class="voucher-illustration-banknote">
+                                <i class="ri-money-dollar-circle-line"></i>
+                            </div>
+
+                            <div class="corner-ar">
+                                للشروط في الخلف
+                            </div>
+
+                            <div class="riyal-amount" id="vv-amount"
+                                style="position: absolute; bottom: 20px; left: 15px; font-size: 1.2rem; opacity: 0.7;">
+                                -
+                            </div>
+                        </div>
+
+                        <div class="post-section" id="post-section">
+                            <form class="post-form" id="post-form">
+                                <div class="input-group">
+                                    <label for="trans-date">Transaction Date</label>
+                                    <input type="date" id="trans-date" required>
+                                </div>
+                                <button type="submit" class="btn-post">
+                                    <i class="ri-send-plane-fill"></i>
+                                    <span>Post</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="common.js?v=3"></script>
+    <script src="voucher-history.js"></script>
+</body>
+
+</html>

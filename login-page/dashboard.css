@@ -503,6 +503,98 @@ input[type=number] {
 
 .stat-mini .value.success { color: var(--success); }
 
+/* Executive Insights Specific Styles */
+.insights-section {
+    margin-bottom: 2rem;
+}
+
+.insights-card {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    border-radius: 20px;
+    padding: 1.25rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+    transition: var(--transition);
+}
+
+.insights-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary-light);
+}
+
+.insight-item {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    flex: 1;
+}
+
+.insight-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    transition: var(--transition);
+}
+
+/* Color coding for insights */
+.date-hijri .insight-icon { background: rgba(99, 102, 241, 0.1); color: var(--primary); }
+.date-gregorian .insight-icon { background: rgba(59, 130, 246, 0.1); color: var(--info); }
+.weather-widget .insight-icon { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+
+.insight-item:hover .insight-icon {
+    transform: scale(1.1) rotate(5deg);
+}
+
+.insight-label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.15rem;
+}
+
+.insight-info h4 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-main);
+    font-family: 'Outfit', sans-serif;
+}
+
+.insight-divider {
+    width: 1px;
+    height: 44px;
+    background: linear-gradient(to bottom, transparent, var(--border-color), transparent);
+    margin: 0 2rem;
+}
+
+@media (max-width: 992px) {
+    .insights-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1.5rem;
+        padding: 1.5rem;
+    }
+    .insight-divider {
+        display: none;
+    }
+    .insight-item {
+        width: 100%;
+    }
+}
+
 /* Card Components */
 .card {
     background-color: var(--bg-white);
@@ -917,18 +1009,19 @@ input[type=number] {
 .toast.info i { color: var(--info); }
 
 /* Custom Confirmation Modal */
+/* Custom Confirmation Modal - Enhanced Beauty */
 .confirm-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(15, 23, 42, 0.6);
-    backdrop-filter: blur(4px);
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(8px);
     z-index: 10000;
     display: flex;
     justify-content: center;
     align-items: center;
     opacity: 0;
     visibility: hidden;
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .confirm-overlay.active {
@@ -937,79 +1030,99 @@ input[type=number] {
 }
 
 .confirm-modal {
-    background: white;
+    background: rgba(255, 255, 255, 0.95);
     width: 90%;
     max-width: 440px;
-    border-radius: 20px;
-    padding: 2rem;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-    transform: scale(0.9) translateY(20px);
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    border-radius: 24px;
+    padding: 2.5rem;
+    box-shadow: 
+        0 20px 25px -5px rgba(0, 0, 0, 0.1), 
+        0 10px 10px -5px rgba(0, 0, 0, 0.04),
+        0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+    transform: scale(0.9) translateY(30px);
+    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
 }
 
 .confirm-overlay.active .confirm-modal {
     transform: scale(1) translateY(0);
 }
 
+.confirm-modal::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary), var(--primary-light));
+}
+
 .confirm-icon {
-    width: 56px;
-    height: 56px;
-    background: #fef2f2;
+    width: 64px;
+    height: 64px;
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
     color: #ef4444;
-    border-radius: 14px;
+    border-radius: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.75rem;
-    margin-bottom: 1.25rem;
+    font-size: 2rem;
+    margin: 0 auto 1.5rem auto;
+    box-shadow: 0 8px 15px -3px rgba(239, 68, 68, 0.15);
 }
 
 .confirm-modal h3 {
-    font-size: 1.25rem;
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.5rem;
     font-weight: 700;
-    color: #1e293b;
+    color: #0f172a;
     margin-bottom: 0.75rem;
 }
 
 .confirm-modal p {
-    color: var(--text-muted);
+    color: #64748b;
     line-height: 1.6;
-    font-size: 0.95rem;
-    margin-bottom: 2rem;
+    font-size: 1rem;
+    margin-bottom: 2.5rem;
 }
 
 .confirm-actions {
     display: flex;
     gap: 1rem;
-    justify-content: flex-end;
 }
 
 .confirm-btn {
-    padding: 0.75rem 1.5rem;
-    border-radius: 10px;
+    flex: 1;
+    padding: 1rem 1.5rem;
+    border-radius: 14px;
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     cursor: pointer;
-    transition: var(--transition);
+    transition: all 0.3s ease;
     border: none;
 }
 
 .confirm-btn-cancel {
-    background: #f1f5f9;
+    background: #f8fafc;
     color: #64748b;
+    border: 1px solid #e2e8f0;
 }
 
 .confirm-btn-cancel:hover {
-    background: #e2e8f0;
+    background: #f1f5f9;
+    color: #1e293b;
 }
 
 .confirm-btn-confirm {
-    background: #ef4444;
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
     color: white;
-    box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.2);
+    box-shadow: 0 10px 15px -3px rgba(239, 68, 68, 0.25);
 }
 
 .confirm-btn-confirm:hover {
-    background: #dc2626;
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    box-shadow: 0 15px 20px -5px rgba(239, 68, 68, 0.3);
 }

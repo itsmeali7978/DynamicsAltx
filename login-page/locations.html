@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DynamicsAltx - Location Management</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@600;700&display=swap" rel="stylesheet">
+    <!-- Remix Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="dashboard.css">
+    <style>
+        .settings-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            max-width: 1000px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .settings-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .settings-header h3 {
+            margin: 0;
+            font-size: 1.25rem;
+            color: var(--text-main);
+        }
+
+        .form-section {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 0;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-main);
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: var(--transition);
+            background: white;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-active { background: #d1fae5; color: #065f46; }
+        .status-passive { background: #f3f4f6; color: #374151; }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal.active { display: flex; }
+
+        .modal-content {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 700px;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            cursor: pointer;
+            font-size: 1.5rem;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="erp-app">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand-logo">
+                    <i class="ri-rhythm-line"></i>
+                    <span>DynamicsAltx</span>
+                </div>
+                <button id="sidebar-toggle" class="icon-btn">
+                    <i class="ri-menu-fold-line"></i>
+                </button>
+            </div>
+
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="dashboard.html" class="nav-link">
+                            <i class="ri-dashboard-3-line"></i>
+                            <span>Overview</span>
+                        </a>
+                    </li>
+                    <li class="nav-group">
+                        <div class="group-header">
+                            <i class="ri-shopping-cart-2-line"></i>
+                            <span>Supply Chain</span>
+                            <i class="ri-arrow-down-s-line arrow"></i>
+                        </div>
+                        <ul class="submenu">
+                            <li><a href="vendors.html">Create Vendor</a></li>
+                            <li><a href="bidding-create.html">Create Bid</a></li>
+                            <li><a href="bidding-list.html">Bidding List</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-group">
+                        <div class="group-header">
+                            <i class="ri-customer-service-line"></i>
+                            <span>CRM & Sales</span>
+                            <i class="ri-arrow-down-s-line arrow"></i>
+                        </div>
+                        <ul class="submenu">
+                            <li><a href="reconciliation.html">Invoice Reconciliation</a></li>
+                            <li><a href="#">Sales Pipeline</a></li>
+                            <li><a href="#">Customers</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-group">
+                        <div class="group-header">
+                            <i class="ri-exchange-dollar-line"></i>
+                            <span>Financials</span>
+                            <i class="ri-arrow-down-s-line arrow"></i>
+                        </div>
+                        <ul class="submenu">
+                            <li><a href="voucher-history.html">Voucher Entries</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-group active">
+                        <div class="group-header">
+                            <i class="ri-settings-4-line"></i>
+                            <span>System</span>
+                            <i class="ri-arrow-down-s-line arrow"></i>
+                        </div>
+                        <ul class="submenu" style="display: block;">
+                            <li><a href="users.html">User Management</a></li>
+                            <li><a href="locations.html" class="active">Locations</a></li>
+                            <li><a href="announcements.html">Announcements</a></li>
+                            <li><a href="settings.html">Account Settings</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-block">
+                    <img src="https://ui-avatars.com/api/?name=Admin+User&background=6366f1&color=fff" alt="User" class="user-avatar">
+                    <div class="user-info">
+                        <p class="user-name">Admin User</p>
+                        <p class="user-role">System Administrator</p>
+                    </div>
+                    <button class="logout-btn icon-btn" title="Logout">
+                        <i class="ri-logout-box-r-line"></i>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="main-content">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="hamburger-menu" id="mobile-menu-btn">
+                        <i class="ri-menu-line"></i>
+                    </button>
+                    <h2 class="page-title">Location Management</h2>
+                </div>
+                <div class="topbar-right">
+                    <button class="btn-primary" onclick="showAddModal()">
+                        <i class="ri-add-line"></i> New Location
+                    </button>
+                </div>
+            </header>
+
+            <div class="content">
+                <div class="settings-card animate-in">
+                    <div class="settings-header">
+                        <h3>Registered Locations</h3>
+                        <p style="color: var(--text-muted); font-size: 0.9rem;">Manage IP addresses and database credentials for your ERP nodes.</p>
+                    </div>
+
+                    <div class="data-table-wrapper">
+                        <table class="erp-table">
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Name</th>
+                                    <th>IP Address</th>
+                                    <th>Database</th>
+                                    <th>User</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="locations-table-body">
+                                <!-- Dynamic items populate here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add/Edit Modal -->
+    <div id="location-modal" class="modal">
+        <div class="modal-content">
+            <i class="ri-close-line close-modal" onclick="hideModal()"></i>
+            <h3 id="modal-title" style="margin-bottom: 2rem; font-family: 'Outfit';">Add New Location</h3>
+            
+            <form id="location-form">
+                <div class="form-section">
+                    <div class="form-group">
+                        <label for="loc-code">Location Code</label>
+                        <input type="text" id="loc-code" maxlength="15" placeholder="e.g., LOC01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="loc-name">Location Name</label>
+                        <input type="text" id="loc-name" maxlength="50" placeholder="e.g., Main Office" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="loc-ip">IP Address</label>
+                        <input type="text" id="loc-ip" maxlength="50" placeholder="e.g., 192.168.1.100">
+                    </div>
+                    <div class="form-group">
+                        <label for="loc-db">Database Name</label>
+                        <input type="text" id="loc-db" maxlength="50" placeholder="e.g., DynamicsAltx">
+                    </div>
+                    <div class="form-group">
+                        <label for="loc-user">Username</label>
+                        <input type="text" id="loc-user" maxlength="50" placeholder="e.g., sa">
+                    </div>
+                    <div class="form-group">
+                        <label for="loc-pass">Password</label>
+                        <div style="position: relative;">
+                            <input type="password" id="loc-pass" maxlength="50" placeholder="••••••••">
+                            <i class="ri-eye-line" style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--text-muted);" onclick="togglePassVisibility()"></i>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="loc-status">Status</label>
+                        <select id="loc-status">
+                            <option value="Active">Active</option>
+                            <option value="Passive" selected>Passive</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1rem;">
+                    <button type="button" class="btn-update" style="background: var(--bg-app); color: var(--text-main);" onclick="hideModal()">Cancel</button>
+                    <button type="submit" class="btn-primary">Save Location</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Custom JS -->
+    <script src="common.js?v=3"></script>
+    <script src="locations.js?v=6"></script>
+</body>
+
+</html>

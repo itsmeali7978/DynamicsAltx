@@ -98,6 +98,32 @@ document.addEventListener('DOMContentLoaded', () => {
             parentGroup.classList.add('expanded');
         }
     }
+
+    // 4. Role-based Navigation Control
+    const userRole = localStorage.getItem('userRole');
+    console.log('[DynamicsAltx] Current User Role:', userRole);
+
+    if (userRole && userRole.toLowerCase() !== 'admin') {
+        // Hide Admin-only menu items
+        const adminLinks = [
+            'users.html',
+            'announcements.html',
+            'locations.html'
+        ];
+        
+        console.log('[DynamicsAltx] Restricting access for non-admin role:', userRole);
+        document.querySelectorAll('.submenu li a').forEach(link => {
+            const href = link.getAttribute('href');
+            if (adminLinks.some(adminHref => href.includes(adminHref))) {
+                console.log('[DynamicsAltx] Hiding admin link:', href);
+                link.parentElement.style.display = 'none';
+            }
+        });
+
+        // If a whole group should be hidden (not needed yet, but good practice)
+    } else {
+        console.log('[DynamicsAltx] Full access granted for role:', userRole);
+    }
 });
 
 /**
@@ -197,5 +223,54 @@ window.showConfirm = function(message, title = 'Are you sure?') {
 
         btnYes.addEventListener('click', onYes);
         btnNo.addEventListener('click', onNo);
+    });
+};
+window.showAlert = function(message, title = 'Information') {
+    return new Promise((resolve) => {
+        // Remove any stale instance to ensure fresh state
+        const stale = document.getElementById('__alert-modal-root');
+        if (stale) stale.remove();
+
+        const overlay = document.createElement('div');
+        overlay.id = '__alert-modal-root';
+        overlay.style.cssText = [
+            'position:fixed', 'inset:0', 'z-index:99999',
+            'display:flex', 'align-items:center', 'justify-content:center',
+            'background:rgba(0,0,0,0.45)', 'animation:fadeInOverlay 0.2s ease'
+        ].join(';');
+
+        overlay.innerHTML = `
+            <div style="
+                background:#fff; border-radius:16px; padding:2rem;
+                width:420px; max-width:90vw; box-shadow:0 20px 60px rgba(0,0,0,0.25);
+                text-align:center; animation:slideInModal 0.25s ease;
+            ">
+                <div style="
+                    width:56px;height:56px;border-radius:50%;
+                    background:#e0f2fe;color:#0369a1;
+                    display:flex;align-items:center;justify-content:center;
+                    font-size:1.75rem;margin:0 auto 1rem;
+                "><i class="ri-information-line"></i></div>
+                <h3 style="margin:0 0 0.5rem;font-size:1.1rem;color:#1e293b;">${title}</h3>
+                <p style="
+                    white-space:pre-wrap;text-align:left;
+                    background:#f8fafc;border-radius:8px;padding:0.75rem 1rem;
+                    font-size:0.9rem;color:#334155;line-height:1.6;margin-bottom:1.25rem;
+                ">${message}</p>
+                <button id="__alert-ok-btn" style="
+                    width:100%;padding:0.75rem;border:none;border-radius:10px;
+                    background:#4f46e5;color:#fff;font-weight:600;font-size:0.95rem;
+                    cursor:pointer;
+                ">OK, I Understand</button>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+
+        const btn = overlay.querySelector('#__alert-ok-btn');
+        btn.addEventListener('click', () => {
+            overlay.remove();
+            resolve();
+        });
     });
 };

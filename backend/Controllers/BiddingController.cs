@@ -134,7 +134,9 @@ namespace Backend.Controllers
 
             _context.BidHeaders.Add(header);
             await _context.SaveChangesAsync();
-            return Ok(header);
+            
+            var vendors = await _context.VendorSubs.ToListAsync();
+            return Ok(new { header, lines = new List<BidLine>(), vendors });
         }
 
         // POST: api/Bidding/FetchAndSyncLines
@@ -148,20 +150,20 @@ namespace Backend.Controllers
                 var navLines = new List<NavLineDto>();
                 var navConnectionString = _configuration.GetConnectionString("NavisionConnection");
 
+                var docIds = dto.NavDocNo.Split('|', StringSplitOptions.RemoveEmptyEntries)
+                                         .Select(id => id.Trim())
+                                         .ToList();
+
+                if (!docIds.Any())
+                {
+                    return BadRequest(new { message = "No valid document numbers provided" });
+                }
+
                 using (var navConnection = new SqlConnection(navConnectionString))
                 {
                     await navConnection.OpenAsync();
                     using (var command = navConnection.CreateCommand())
                     {
-                        var docIds = dto.NavDocNo.Split('|', StringSplitOptions.RemoveEmptyEntries)
-                                                 .Select(id => id.Trim())
-                                                 .ToList();
-
-                        if (!docIds.Any())
-                        {
-                            return BadRequest(new { message = "No valid document numbers provided" });
-                        }
-
                         var parameterNames = docIds.Select((id, index) => $"@docNo{index}").ToList();
                         string inClause = string.Join(", ", parameterNames);
 
@@ -197,7 +199,18 @@ namespace Backend.Controllers
                     return NotFound(new { message = $"No records found in Navision for Document Nos: {dto.NavDocNo}" });
                 }
 
-                // 2. Delete existing BidLines and their VendorSubPrices for this bid
+                // 2. Cache existing costs BEFORE delete (mapping SKU + VendorId -> Cost)
+                var existingCosts = await _context.BidLines
+                    .Where(l => l.BidHNo == dto.BidNo)
+                    .SelectMany(l => l.Prices.Select(p => new { l.NAVSku, p.VendorId, p.Cost }))
+                    .ToListAsync();
+
+                // Create a lookup dictionary: (NAVSku, VendorId) -> Cost
+                var costMap = existingCosts
+                    .GroupBy(x => new { x.NAVSku, x.VendorId })
+                    .ToDictionary(g => g.Key, g => g.Max(x => x.Cost));
+
+                // Delete existing BidLines and their VendorSubPrices for this bid
                 var existingBidLines = await _context.BidLines
                     .Where(l => l.BidHNo == dto.BidNo)
                     .ToListAsync();
@@ -217,37 +230,65 @@ namespace Backend.Controllers
                     await _context.SaveChangesAsync();
                 }
 
-                // 3. Insert fresh records from Navision
+                // 3. Aggregate and Insert fresh records from Navision
                 var existingVendors = await _context.VendorSubs.ToListAsync();
 
-                foreach (var navLine in navLines)
+                // Update Header with cumulative NAVDocNo
+                var header = await _context.BidHeaders.FirstOrDefaultAsync(b => b.BidNo == dto.BidNo);
+                if (header != null)
                 {
-                    // Robust SKU Extraction: Get only numeric digits from ItemNo
-                    string numericPart = new string(navLine.ItemNo.Where(char.IsDigit).ToArray());
+                    var existingHeaderDocs = header.NAVDocNo?.Split('|', StringSplitOptions.RemoveEmptyEntries)
+                                                             .Select(d => d.Trim()) ?? Enumerable.Empty<string>();
                     
-                    if (string.IsNullOrEmpty(numericPart)) continue;
-                    if (!int.TryParse(numericPart, out int skuInt)) continue;
+                    var allDocs = existingHeaderDocs.Union(docIds).Distinct().ToList();
+                    header.NAVDocNo = string.Join(" | ", allDocs);
+                    _context.BidHeaders.Update(header);
+                }
 
-                    var newLine = new BidLine
+                var aggregatedLines = navLines
+                    .Select(nl => {
+                        string numericPart = new string(nl.ItemNo.Where(char.IsDigit).ToArray());
+                        int skuInt = -1;
+                        if (!string.IsNullOrEmpty(numericPart) && int.TryParse(numericPart, out int parsed))
+                        {
+                            skuInt = parsed;
+                        }
+                        return new { NavLine = nl, Sku = skuInt };
+                    })
+                    .Where(x => x.Sku != -1)
+                    .GroupBy(x => x.Sku)
+                    .Select(g => new BidLine
                     {
                         BidHNo = dto.BidNo,
-                        NAVDocNo = navLine.DocumentNo,
-                        NAVSku = skuInt,
-                        UOM = navLine.UOM,
-                        Quantity = navLine.Quantity,
-                        Description = navLine.Description
-                    };
-                    _context.BidLines.Add(newLine);
+                        NAVSku = g.Key,
+                        NAVDocNo = string.Join(" | ", g.Select(x => x.NavLine.DocumentNo).Distinct()),
+                        Quantity = g.Sum(x => x.NavLine.Quantity),
+                        Description = g.First().NavLine.Description,
+                        UOM = g.First().NavLine.UOM
+                    })
+                    .ToList();
+
+                foreach (var line in aggregatedLines)
+                {
+                    _context.BidLines.Add(line);
                     await _context.SaveChangesAsync(); // Get ID for VendorSubPrices
 
                     // Initialize VendorSubPrices for ALL vendors
                     foreach (var vendor in existingVendors)
                     {
+                        decimal preservedCost = 0;
+                        var key = new { NAVSku = line.NAVSku, VendorId = vendor.Id };
+                        
+                        if (costMap.TryGetValue(key, out var cost))
+                        {
+                            preservedCost = cost;
+                        }
+
                         _context.VendorSubPrices.Add(new VendorSubPrice
                         {
-                            BidLineId = newLine.Id,
+                            BidLineId = line.Id,
                             VendorId = vendor.Id,
-                            Cost = 0
+                            Cost = preservedCost
                         });
                     }
                 }
@@ -261,8 +302,7 @@ namespace Backend.Controllers
                     .ToListAsync();
 
                 var allVendors = await _context.VendorSubs.ToListAsync();
-
-                return Ok(new { lines = updatedLines, vendors = allVendors });
+                return Ok(new { header, lines = updatedLines, vendors = allVendors });
             }
             catch (Exception ex)
             {

@@ -15,11 +15,4 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.4" />
   </ItemGroup>
  
-  <ItemGroup>
-    <Content Include="..\login-page\**\*.*">
-      <Link>wwwroot\%(RecursiveDir)%(FileName)%(Extension)</Link>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
-  </ItemGroup>
-
 </Project>

@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Management - DynamicsAltx ERP</title>
+    
+    <!-- Icons & Fonts -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Hijri Date Picker Web Component -->
+    <script src="https://cdn.jsdelivr.net/npm/hijri-datepicker-component@latest/dist/datepicker-hijri/datepicker-hijri.esm.js" type="module"></script>
+    
+    <link rel="stylesheet" href="dashboard.css">
+    <style>
+        /* Employee specific styles */
+        .employees-container {
+            padding: 2rem;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .header-left h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.75rem;
+            color: var(--text-dark);
+            margin-bottom: 0.25rem;
+        }
+
+        .header-left p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .action-bar {
+            background: white;
+            padding: 1.25rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            align-items: center;
+        }
+
+        .search-box {
+            flex: 1;
+            position: relative;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .btn-add {
+            background: #6366f1 !important;
+            color: white !important;
+            padding: 0.8rem 1.75rem;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+            text-shadow: 0 1px 1px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 10;
+        }
+
+        .btn-add:hover {
+            background: #4f46e5 !important;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-add:active {
+            transform: translateY(0);
+        }
+
+        /* Employee Table Styles */
+        .employees-grid {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th {
+            text-align: left;
+            padding: 1rem;
+            background: #f8fafc;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .data-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+            color: var(--text-dark);
+        }
+
+        .data-table tr:hover {
+            background: #f1f5f9;
+        }
+
+        .emp-profile {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .emp-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--primary-light);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-active { background: #dcfce7; color: #166534; }
+        .status-passive { background: #fee2e2; color: #991b1b; }
+
+        .actions-cell {
+            text-align: right;
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+
+        /* Premium Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(12px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            animation: fadeIn 0.3s ease;
+            overflow: hidden;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 24px;
+            width: 600px;
+            max-width: 100%;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            position: relative;
+            animation: slideUpModal 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+            max-height: 90vh;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            overflow: hidden;
+        }
+
+        .modal-header {
+            padding: 2rem 2.5rem;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            flex-shrink: 0;
+        }
+
+        .modal-title-area {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+        }
+
+        .modal-title-area .icon-wrapper {
+            background: var(--primary);
+            color: white;
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .modal-title-area h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            color: var(--text-dark);
+            margin: 0;
+            font-weight: 700;
+        }
+
+        .modal-tabs {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: #fff;
+            border-bottom: 1px solid var(--border-color);
+            overflow-x: auto;
+            position: sticky;
+            top: 83px; /* Height of header */
+            z-index: 90;
+            flex-shrink: 0;
+            scrollbar-width: none; /* Hide scrollbar for Firefox */
+            -ms-overflow-style: none; /* Hide scrollbar for IE/Edge */
+        }
+
+        .modal-tabs::-webkit-scrollbar {
+            display: none; /* Hide scrollbar for Chrome/Safari */
+        }
+
+        .tab-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border-radius: 100px;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .tab-btn:hover {
+            background: var(--bg-app);
+            color: var(--primary);
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 2rem 2.5rem;
+            max-height: 55vh;
+            overflow-y: auto;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            padding-bottom: 1rem;
+        }
+
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+
+        .form-group label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.6rem;
+        }
+
+        .form-group label i {
+            color: var(--primary);
+            font-size: 1rem;
+        }
+
+        .form-group input, 
+        .form-group select {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1.5px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            background: #fff;
+        }
+
+        .form-group input:focus, 
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+            background: #fff;
+        }
+
+        .close-modal {
+            background: rgba(0, 0, 0, 0.05);
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+            position: absolute;
+            right: 1.5rem;
+            top: 2rem;
+        }
+
+        .close-modal:hover {
+            background: #fee2e2;
+            color: #ef4444;
+            transform: rotate(90deg);
+        }
+
+        .modal-footer {
+            padding: 1.5rem 2.5rem;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: center;
+            background: #fff;
+            flex-shrink: 0;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            color: white;
+            border: none;
+            padding: 1rem 3rem;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+            filter: brightness(1.1);
+        }
+
+        /* Custom style for Hijri picker display alignment */
+        datepicker-hijri {
+            --primary-color: #6366f1;
+            display: block;
+            margin-top: 5px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="erp-app">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <div class="logo-box">
+                    <i class="ri-flashlight-fill"></i>
+                </div>
+                <span>DynamicsAltx</span>
+                <button class="icon-btn" id="sidebar-toggle">
+                    <i class="ri-menu-fold-line"></i>
+                </button>
+            </div>
+
+            <nav class="sidebar-nav">
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="dashboard.html" class="nav-link">
+                            <i class="ri-dashboard-line"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+
+                    
+
+                                        
+                    <li class="nav-group">
+                        <div class="group-header">
+                            <i class="ri-team-line"></i>
+                            <span>Human Resource</span>
+                            <i class="ri-arrow-down-s-line arrow-icon"></i>
+                        </div>
+                        <ul class="submenu">
+                            <li><a href="employees.html"><i class="ri-user-settings-line"></i> Employees</a></li>
+                        </ul>
+                    </li>
+<li class="nav-group">
+                        <div class="group-header">
+                            <i class="ri-settings-4-line"></i>
+                            <span>System</span>
+                            <i class="ri-arrow-down-s-line arrow"></i>
+                        </div>
+                        <ul class="submenu">
+                            <li><a href="users.html">User Management</a></li>
+                            <li><a href="locations.html">Locations</a></li>
+                            <li><a href="nationalities.html">Nationalities</a></li>
+                                                        <li><a href="shifts.html">Shifts</a></li>
+                            <li><a href="sync.html">Data Sync (Navision)</a></li>
+
+                            <li><a href="announcements.html">Announcements</a></li>
+                            <li><a href="settings.html">Account Settings</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-block">
+                    <img src="https://ui-avatars.com/api/?name=Admin+User&background=6366f1&color=fff" alt="User">
+                    <div class="user-info">
+                        <p class="user-name">Admin User</p>
+                        <p class="user-role">System Administrator</p>
+                    </div>
+                    <button class="logout-btn icon-btn" title="Logout">
+                        <i class="ri-logout-box-r-line"></i>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content" style="display: flex; flex-direction: column; height: 100vh; overflow: hidden;">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button id="mobile-menu-btn" class="mobile-toggle">
+                        <i class="ri-menu-line"></i>
+                    </button>
+                    <div class="breadcrumb">
+                        <span>Human Resource</span>
+                        <i class="ri-arrow-right-s-line"></i>
+                        <span class="active">Employees</span>
+                    </div>
+                </div>
+                <div class="topbar-right">
+                    <div class="notifications">
+                        <i class="ri-notification-3-line"></i>
+                        <span class="badge">3</span>
+                    </div>
+                    <div class="user-status">
+                        <span class="status-dot"></span>
+                        <span>Online</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="employees-container" style="flex: 1; overflow-y: auto; padding: 2rem;">
+                <div class="page-header">
+                    <div class="header-left">
+                        <h1>Employee Directory</h1>
+                        <p>Manage personnel records and corporate structure</p>
+                    </div>
+                    <button class="btn-add" id="btn-add-employee">
+                        <i class="ri-user-add-line"></i>
+                        Add New Employee
+                    </button>
+                </div>
+
+                <div class="action-bar">
+                    <div class="search-box">
+                        <i class="ri-search-line"></i>
+                        <input type="text" id="employee-search" placeholder="Search by ID, Name, or Mobile...">
+                    </div>
+                    <div class="filters">
+                        <!-- Future: Add department or location filters here -->
+                    </div>
+                </div>
+
+                <div class="employees-grid">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Emp ID</th>
+                                <th>Name / Profession</th>
+                                <th>Nationality</th>
+                                <th>Location / Shift</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="employees-body">
+                            <!-- Data populated by JS -->
+                            <tr>
+                                <td colspan="6" style="text-align:center; padding:3rem; color:var(--text-muted);">
+                                    <div class="loading-state">
+                                        <i class="ri-loader-4-line ri-spin" style="font-size:2rem;"></i>
+                                        <p>Fetching employee records...</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- Employee Modal -->
+            <div id="employee-modal" class="modal modal-large">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <div class="modal-title-area">
+                            <div class="icon-wrapper">
+                                <i class="ri-user-settings-line"></i>
+                            </div>
+                            <h2 id="modal-title">Employee Configuration</h2>
+                        </div>
+                        <button class="close-modal"><i class="ri-close-line"></i></button>
+                    </div>
+                    
+                    <div class="modal-tabs">
+                        <button class="tab-btn active" data-tab="personal">Personal Info</button>
+                        <button class="tab-btn" data-tab="employment">Employment</button>
+                        <button class="tab-btn" data-tab="identification">ID & Documents</button>
+                        <button class="tab-btn" data-tab="health">Health & Status</button>
+                    </div>
+
+                    <form id="employee-form">
+                        <input type="hidden" id="is-edit" value="false">
+                        
+                        <!-- Tab: Personal -->
+                        <div class="tab-content active" id="tab-personal">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label><i class="ri-fingerprint-line"></i> Employee ID *</label>
+                                    <input type="number" id="emp-id" required>
+                                </div>
+                                <div class="form-group">
+                                    <label><i class="ri-user-line"></i> English Name *</label>
+                                    <input type="text" id="english-name" placeholder="John Doe" required>
+                                </div>
+                                <div class="form-group">
+                                    <label><i class="ri-text-spellcheck"></i> Arabic Name</label>
+                                    <input type="text" id="arabic-name" placeholder="الاسم بالعربي">
+                                </div>
+                                <div class="form-group">
+                                    <label><i class="ri-genderless-line"></i> Gender</label>
+                                    <select id="gender">
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label><i class="ri-flag-line"></i> Nationality</label>
+                                    <select id="nationality-dropdown">
+                                        <option value="">Select Nationality...</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label><i class="ri-calendar-line"></i> Date of Birth</label>
+                                    <input type="date" id="dob">
+                                </div>
+                                <div class="form-group">
+                                    <label><i class="ri-drop-line"></i> Blood Group</label>
+                                    <select id="blood-group">
+                                        <option value="">Select...</option>
+                                        <option value="A+">A+</option>
+                                        <option value="A-">A-</option>
+                                        <option value="B+">B+</option>
+                                        <option value="B-">B-</option>
+                                        <option value="O+">O+</option>
+                                        <option value="O-">O-</option>
+                                        <option value="AB+">AB+</option>
+                                        <option value="AB-">AB-</option>
+                                    </select>
+                                </div>
+                                <div class="form-group full-width">
+                                    <label><i class="ri-phone-line"></i> Mobile Number</label>
+                                    <input type="text" id="mobile-no" placeholder="+966 50 000 0000">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab: Employment -->
+                        <div class="tab-content" id="tab-employment">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label><i class="ri-calendar-check-line"></i> Date of Join</label>
+                                    <input type="date" id="join-date">
+                                </div>
+                                <div class="form-group">
+                                    <label><i class="ri-briefcase-line"></i> Job Title</label>
+                                    <input type="text" id="job-title" placeholder="Software Engineer">
+                                </div>
+                                <div class="form-group">
+                                    <label><i class="ri-user-star-line"></i> Profession</label>
+                                    <input type="text" id="profession" placeholder="Management">
+                                </div>
+                                <div class="form-group">
+                                    <label><i class="ri-map-pin-line"></i> Location</label>
+                                    <select id="location-dropdown">
+                                        <option value="">Select Location...</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label><i class="ri-time-line"></i> Shift Arrangement</label>
+                                    <select id="shift-dropdown">
+                                        <option value="">Select Shift...</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label><i class="ri-node-tree"></i> Section / Department</label>
+                                    <input type="text" id="section" placeholder="Operations">
+                                </div>
+                                <div class="form-group">
+                                    <label><i class="ri-user-follow-line"></i> Employment Status</label>
+                                    <select id="employment-status">
+                                        <option value="Active">Active</option>
+                                        <option value="Passive">Passive</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab: Identification -->
+                        <div class="tab-content" id="tab-identification">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label><i class="ri-bank-card-line"></i> Iqama Number</label>
+                                    <input type="text" id="iqama-no">
+                                </div>
+                                <div class="form-group">
+                                    <label><i class="ri-calendar-event-line"></i> Iqama Expiry (Gregorian)</label>
+                                    <input type="date" id="iqama-expiry-grego">
+                                </div>
+                                <div class="form-group full-width">
+                                    <label><i class="ri-calendar-2-line"></i> Iqama Expiry (Hijiri) *</label>
+                                    <input type="text" id="iqama-expiry-hijiri" placeholder="Click to select Hijri date">
+                                    <datepicker-hijri reference="iqama-expiry-hijiri" placement="bottom"></datepicker-hijri>
+                                </div>
+                                <div class="form-group">
+                                    <label><i class="ri-passport-line"></i> Passport Number</label>
+                                    <input type="text" id="passport-no">
+                                </div>
+                                <div class="form-group">
+                                    <label><i class="ri-calendar-todo-line"></i> Passport Expiry</label>
+                                    <input type="date" id="passport-expiry">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab: Health -->
+                        <div class="tab-content" id="tab-health">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label><i class="ri-heart-pulse-line"></i> Health Medical Date</label>
+                                    <input type="date" id="health-medical-date">
+                                </div>
+                                <div class="form-group">
+                                    <label><i class="ri-medicine-bottle-line"></i> Health Madrasa Date</label>
+                                    <input type="date" id="health-madrasa-date">
+                                </div>
+                                <div class="form-group full-width">
+                                    <label><i class="ri-shield-check-line"></i> Health Card Status</label>
+                                    <select id="health-status">
+                                        <option value="Active">Active</option>
+                                        <option value="Passive">Passive</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="submit" class="btn-submit">Save Employee Record</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Shared Logic -->
+    <script src="common.js"></script>
+    <script src="employees.js"></script>
+</body>
+</html>
+
+
+
+
+

@@ -4,6 +4,7 @@ using Backend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260404173320_AddNationalityTable")]
+    partial class AddNationalityTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -117,113 +120,6 @@ namespace Backend.Migrations
                     b.ToTable("BidLines");
                 });
 
-            modelBuilder.Entity("Backend.Models.Employee", b =>
-                {
-                    b.Property<string>("EmpId")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("ArabicName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("BloodGroup")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
-
-                    b.Property<DateTime?>("DOB")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DateOfJoin")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("EnglishName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("Gender")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
-
-                    b.Property<DateTime?>("HealthMadrasaDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("HealthMedicalDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("HealthStatus")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<DateTime?>("IqamaExpiryGrego")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("IqamaExpiryHijiri")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("IqamaNo")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("JobTitle")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("LocationCode")
-                        .IsRequired()
-                        .HasMaxLength(15)
-                        .HasColumnType("nvarchar(15)");
-
-                    b.Property<string>("MobileNo")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("NationalityCode")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<DateTime?>("PassportExpiry")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("PassportNo")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("Profession")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("Section")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("ShiftNo")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.HasKey("EmpId");
-
-                    b.ToTable("Employees");
-                });
-
             modelBuilder.Entity("Backend.Models.Location", b =>
                 {
                     b.Property<string>("LocationCode")
@@ -281,23 +177,6 @@ namespace Backend.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Nationalities");
-                });
-
-            modelBuilder.Entity("Backend.Models.Shift", b =>
-                {
-                    b.Property<string>("ShiftNo")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("ShiftTime")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("WorkingHours")
-                        .HasColumnType("int");
-
-                    b.HasKey("ShiftNo");
-
-                    b.ToTable("Shifts");
                 });
 
             modelBuilder.Entity("Backend.Models.User", b =>

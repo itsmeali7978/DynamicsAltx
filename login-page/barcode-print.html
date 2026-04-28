@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DynamicsAltx - Barcode Printing</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@600;700&display=swap"
+        rel="stylesheet">
+    <!-- Remix Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="dashboard.css">
+    <style>
+        .barcode-grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .price-display-card {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            color: white;
+            padding: 2.5rem;
+            border-radius: 20px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 1.5rem;
+        }
+
+        .price-item {
+            text-align: center;
+        }
+
+        .price-label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.75rem;
+        }
+
+        .price-value {
+            font-family: 'Outfit', sans-serif;
+            font-size: 3rem;
+            font-weight: 700;
+            display: block;
+        }
+
+        .price-value.offer {
+            color: #fbbf24;
+            text-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+        }
+
+        .price-value.regular {
+            color: #f8fafc;
+            text-decoration: line-through;
+            opacity: 0.6;
+            font-size: 2.25rem;
+        }
+
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            padding: 0.5rem;
+        }
+
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            transition: var(--transition);
+        }
+
+        .radio-item:hover {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .radio-item input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary);
+        }
+
+        .radio-item span {
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .action-row {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .print-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            box-shadow: 0 8px 15px -3px rgba(79, 70, 229, 0.4);
+        }
+
+        .btn-secondary {
+            background-color: var(--bg-white);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: #f1f5f9;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="erp-app">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand-logo">
+                    <i class="ri-rhythm-line"></i>
+                    <span>DynamicsAltx</span>
+                </div>
+                <button id="sidebar-toggle" class="icon-btn">
+                    <i class="ri-menu-fold-line"></i>
+                </button>
+            </div>
+
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="dashboard.html" class="nav-link">
+                            <i class="ri-dashboard-3-line"></i>
+                            <span>Overview</span>
+                        </a>
+                    </li>
+
+                    
+                    
+                    
+                    <li class="nav-group">
+                        <div class="group-header">
+                            <i class="ri-team-line"></i>
+                            <span>Human Resource</span>
+                            <i class="ri-arrow-down-s-line arrow-icon"></i>
+                        </div>
+                        <ul class="submenu">
+                            <li><a href="employees.html"><i class="ri-user-settings-line"></i> Employees</a></li>
+                        </ul>
+                    </li>
+<li class="nav-group">
+                        <div class="group-header">
+                            <i class="ri-bank-line"></i>
+                            <span>Finance</span>
+                            <i class="ri-arrow-down-s-line arrow"></i>
+                        </div>
+                        <ul class="submenu">
+                            <li><a href="voucher-history.html">Voucher History</a></li>
+                            <li><a href="#">General Ledger</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-group expanded">
+                        <div class="group-header">
+                            <i class="ri-shopping-cart-2-line"></i>
+                            <span>Supply Chain</span>
+                            <i class="ri-arrow-down-s-line arrow"></i>
+                        </div>
+                        <ul class="submenu">
+                            <li><a href="vendors.html">Create Vendor</a></li>
+                            <li><a href="bidding-create.html">Create Bid</a></li>
+                            <li><a href="bidding-list.html">Bidding List</a></li>
+                            <li><a href="barcode-print.html" class="active">Barcode Printing</a></li>
+                            <li><a href="#">Inventory Management</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-group">
+                        <div class="group-header">
+                            <i class="ri-customer-service-line"></i>
+                            <span>CRM & Sales</span>
+                            <i class="ri-arrow-down-s-line arrow"></i>
+                        </div>
+                        <ul class="submenu">
+                            <li><a href="reconciliation.html">Invoice Reconciliation</a></li>
+                            <li><a href="#">Sales Pipeline</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-group">
+                        <div class="group-header">
+                            <i class="ri-settings-4-line"></i>
+                            <span>System</span>
+                            <i class="ri-arrow-down-s-line arrow"></i>
+                        </div>
+                        <ul class="submenu">
+                            <li><a href="users.html">User Management</a></li>
+                            <li><a href="locations.html">Locations</a></li>
+                            <li><a href="nationalities.html">Nationalities</a></li>
+                                                        <li><a href="shifts.html">Shifts</a></li>
+                            <li><a href="sync.html">Data Sync (Navision)</a></li>
+
+                            <li><a href="announcements.html">Announcements</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-block">
+                    <img src="https://ui-avatars.com/api/?name=Admin+User&background=6366f1&color=fff" alt="User">
+                    <div class="user-info">
+                        <p class="user-name">Admin User</p>
+                        <p class="user-role">System Administrator</p>
+                    </div>
+                    <button class="logout-btn icon-btn">
+                        <i class="ri-logout-box-r-line"></i>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="hamburger-menu" id="mobile-menu-btn">
+                        <i class="ri-menu-line"></i>
+                    </button>
+                    <h2 class="page-title">Barcode Printing</h2>
+                </div>
+                <div class="topbar-right">
+                    <div class="search-bar">
+                        <i class="ri-search-line"></i>
+                        <input type="text" placeholder="Global search...">
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <div class="content">
+                <!-- Top Section: Inputs & Grid -->
+                <div class="barcode-grid-container">
+                    <!-- Inputs Card -->
+                    <div class="card animate-in" style="animation-delay: 0.1s;">
+                        <div class="card-header-row">
+                            <h3>Item Selection</h3>
+                        </div>
+                        <div class="form-grid">
+                            <div class="input-group full-width">
+                                <label for="sku-barcode">SKU / Barcode</label>
+                                <div style="position: relative;">
+                                    <input type="text" id="sku-barcode" placeholder="Enter barcode or SKU..." class="input-control">
+                                    <i class="ri-barcode-line" style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <label for="uom">UOM</label>
+                                <select id="uom" class="input-control">
+                                    <option value="PCS">PCS - Pieces</option>
+                                    <option value="BOX">BOX - Box</option>
+                                    <option value="CTN">CTN - Carton</option>
+                                    <option value="UNT">UNT - Unit</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label for="qty">Quantity</label>
+                                <input type="number" id="qty" placeholder="1" class="input-control" value="1">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Grid Card -->
+                    <div class="card animate-in" style="animation-delay: 0.2s;">
+                        <div class="card-header-row">
+                            <h3>Item Details</h3>
+                        </div>
+                        <div class="table-responsive" style="max-height: 200px;">
+                            <table class="erp-table">
+                                <thead>
+                                    <tr>
+                                        <th>Item No</th>
+                                        <th>Barcodes</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="item-grid-body">
+                                    <tr>
+                                        <td colspan="2" class="text-center" style="padding: 2rem; color: var(--text-muted);">
+                                            Enter SKU to see barcodes
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Middle Section: Descriptions & Radio Buttons -->
+                <div class="barcode-grid-container">
+                    <!-- Descriptions Card -->
+                    <div class="card animate-in" style="animation-delay: 0.3s;">
+                        <div class="card-header-row">
+                            <h3>Descriptions</h3>
+                        </div>
+                        <div class="form-grid">
+                            <div class="input-group full-width">
+                                <label for="desc-ar">Description - Arabic</label>
+                                <input type="text" id="desc-ar" placeholder="الوصف باللغة العربية" class="input-control" dir="rtl">
+                            </div>
+                            <div class="input-group full-width">
+                                <label for="desc-en">Description - English</label>
+                                <input type="text" id="desc-en" placeholder="Item description in English" class="input-control">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Radio Buttons Card -->
+                    <div class="card animate-in" style="animation-delay: 0.4s;">
+                        <div class="card-header-row">
+                            <h3>Label Options</h3>
+                        </div>
+                        <div class="radio-group">
+                            <label class="radio-item">
+                                <input type="radio" name="label-type" value="with-price" checked>
+                                <span>Label with Price</span>
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="label-type" value="without-price">
+                                <span>Label without Price</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom Section: Price Display -->
+                <div class="card animate-in price-display-card" style="animation-delay: 0.5s;">
+                    <div class="price-item">
+                        <span class="price-label">Regular Price</span>
+                        <span class="price-value regular" id="reg-price">SR 0.00</span>
+                    </div>
+                    <div class="price-item">
+                        <span class="price-label">Offer Price</span>
+                        <span class="price-value offer" id="offer-price">SR 0.00</span>
+                    </div>
+                </div>
+
+                <!-- Actions Row -->
+                <div class="action-row animate-in" style="animation-delay: 0.6s;">
+                    <button id="shelf-label-btn" class="print-btn btn-secondary">
+                        <i class="ri-price-tag-3-line"></i>
+                        Shelf Label
+                    </button>
+                    <button id="item-label-btn" class="print-btn btn-primary">
+                        <i class="ri-printer-line"></i>
+                        Item Label
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Custom JS -->
+    <script src="common.js?v=4"></script>
+    <script src="barcode-print.js?v=1"></script>
+</body>
+
+</html>
+
+
+
+
+
+
+

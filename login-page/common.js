@@ -108,7 +108,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const adminLinks = [
             'users.html',
             'announcements.html',
-            'locations.html'
+            'locations.html',
+            'nationalities.html',
+            'shifts.html',
+            'employees.html'
         ];
         
         console.log('[DynamicsAltx] Restricting access for non-admin role:', userRole);

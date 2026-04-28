@@ -24,3 +24,7 @@ backend/wwwroot/
 
 # Frontend dependencies
 node_modules/
+
+# Ignore temporary and log files
+tmp/
+backend_log.txt

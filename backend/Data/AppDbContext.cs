@@ -15,5 +15,8 @@ namespace Backend.Data
         public DbSet<VoucherHistory> VoucherHistories { get; set; }
         public DbSet<Announcement> Announcements { get; set; }
         public DbSet<Location> Locations { get; set; }
+        public DbSet<Nationality> Nationalities { get; set; }
+        public DbSet<Shift> Shifts { get; set; }
+        public DbSet<Employee> Employees { get; set; }
     }
 }

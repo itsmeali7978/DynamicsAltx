@@ -107,7 +107,7 @@ document.getElementById('btn-new-bid').addEventListener('click', async () => {
         const data = await response.json();
         
         if (response.ok) {
-            currentBidNo = data.bidNo;
+            currentBidNo = data.header.bidNo;
             currentBidData = data; // Initialize state
             document.getElementById('display-bid-no').innerText = currentBidNo;
             document.getElementById('bid-identifier').style.display = 'flex';

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DynamicsAltx - User Management</title>
+    <title>DynamicsAltx - Shifts Management</title>
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,81 +14,111 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="dashboard.css">
     <style>
-        .user-grid {
+        .shifts-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 1.5rem;
             margin-top: 1.5rem;
         }
 
-        .user-card {
+        .shift-card {
             background: white;
             padding: 1.5rem;
-            border-radius: 12px;
+            border-radius: 16px;
             border: 1px solid var(--border-color);
             display: flex;
             align-items: center;
-            gap: 1rem;
+            justify-content: space-between;
             transition: var(--transition);
         }
 
-        .user-card:hover {
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        .shift-card:hover {
+            box-shadow: var(--shadow-lg);
             border-color: var(--primary-light);
-            transform: translateY(-2px);
+            transform: translateY(-4px);
         }
 
-        .user-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: var(--primary-light);
+        .shift-info {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+        }
+
+        .shift-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: rgba(99, 102, 241, 0.1);
             color: var(--primary);
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .shift-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .shift-no {
             font-weight: 700;
-            font-size: 1.2rem;
-            flex-shrink: 0;
-        }
-
-        .user-details {
-            flex-grow: 1;
-        }
-
-        .user-details h4 {
-            margin: 0;
-            font-size: 1rem;
             color: var(--text-main);
+            font-size: 1.1rem;
+            font-family: 'Outfit', sans-serif;
         }
 
-        .user-details p {
-            margin: 0.2rem 0 0;
-            font-size: 0.85rem;
+        .shift-time {
             color: var(--text-muted);
+            font-size: 0.85rem;
+            font-weight: 500;
         }
 
-        .user-actions {
+        .shift-actions {
             display: flex;
             gap: 0.5rem;
         }
 
-        .btn-delete {
-            color: var(--danger);
+        .action-btn {
             background: none;
             border: none;
-            font-size: 1.2rem;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
-            padding: 0.4rem;
-            border-radius: 6px;
+            transition: var(--transition);
+            font-size: 1.1rem;
+        }
+
+        .btn-edit { color: var(--primary); }
+        .btn-edit:hover { background: rgba(99, 102, 241, 0.1); }
+        .btn-delete { color: var(--error); }
+        .btn-delete:hover { background: rgba(239, 68, 68, 0.1); }
+
+        .btn-add-shift {
+            background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
             transition: var(--transition);
         }
 
-        .btn-delete:hover {
-            background: #fee2e2;
+        .btn-add-shift:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
         }
 
-        /* Modal Styles */
+        /* Modal Overrides */
         .modal {
             display: none;
             position: fixed;
@@ -96,118 +126,109 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(4px);
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(8px);
             z-index: 2000;
             align-items: center;
             justify-content: center;
         }
 
-        .modal.active {
-            display: flex;
-        }
+        .modal.active { display: flex; }
 
         .modal-content {
             background: white;
             width: 90%;
             max-width: 450px;
-            border-radius: 16px;
-            padding: 2rem;
+            border-radius: 24px;
+            padding: 2.5rem;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            animation: modalIn 0.3s ease-out;
+            position: relative;
+            animation: modalIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         @keyframes modalIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; transform: translateY(30px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
         .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
+            margin-bottom: 2rem;
         }
 
-        .modal-header h3 {
-            margin: 0;
-            font-size: 1.25rem;
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--sidebar-bg);
+            font-family: 'Outfit', sans-serif;
         }
 
         .close-modal {
-            background: none;
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: var(--bg-app);
             border: none;
-            font-size: 1.5rem;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
             color: var(--text-muted);
+            transition: var(--transition);
         }
 
-        .form-group {
-            margin-bottom: 1.2rem;
+        .close-modal:hover {
+            background: #fee2e2;
+            color: var(--error);
         }
 
+        .form-group { margin-bottom: 1.5rem; }
         .form-group label {
             display: block;
             font-size: 0.85rem;
             font-weight: 600;
-            margin-bottom: 0.4rem;
-            color: var(--text-main);
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
         .form-group input {
             width: 100%;
-            padding: 0.7rem 1rem;
+            padding: 0.85rem 1.25rem;
             border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 0.9rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: inherit;
             transition: var(--transition);
         }
 
         .form-group input:focus {
             outline: none;
             border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
         }
 
-        .btn-save-user {
+        .btn-submit {
             width: 100%;
             background: var(--primary);
             color: white;
             border: none;
-            padding: 0.8rem;
-            border-radius: 8px;
-            font-weight: 600;
+            padding: 1rem;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 1rem;
             cursor: pointer;
-            margin-top: 1rem;
             transition: var(--transition);
+            box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.2);
         }
 
-        .btn-save-user:hover {
+        .btn-submit:hover {
             background: var(--primary-dark);
-        }
-        .btn-register-premium {
-            background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            transition: var(--transition);
-            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
-            font-size: 0.95rem;
-        }
-
-        .btn-register-premium:hover {
-            transform: translateY(-2px) scale(1.02);
-            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
-            filter: brightness(1.1);
-        }
-
-        .btn-register-premium i {
-            font-size: 1.25rem;
+            transform: translateY(-2px);
+            box-shadow: 0 15px 20px -5px rgba(99, 102, 241, 0.3);
         }
     </style>
 </head>
@@ -272,6 +293,16 @@
                             <li><a href="#">Customers</a></li>
                         </ul>
                     </li>
+                    <li class="nav-group">
+                        <div class="group-header">
+                            <i class="ri-exchange-dollar-line"></i>
+                            <span>Financials</span>
+                            <i class="ri-arrow-down-s-line arrow"></i>
+                        </div>
+                        <ul class="submenu">
+                            <li><a href="voucher-history.html">Voucher Entries</a></li>
+                        </ul>
+                    </li>
                     <li class="nav-group active">
                         <div class="group-header">
                             <i class="ri-settings-4-line"></i>
@@ -279,12 +310,10 @@
                             <i class="ri-arrow-down-s-line arrow"></i>
                         </div>
                         <ul class="submenu" style="display: block;">
-                            <li><a href="users.html" class="active">User Management</a></li>
+                            <li><a href="users.html">User Management</a></li>
                             <li><a href="locations.html">Locations</a></li>
+                            <li><a href="shifts.html" class="active">Shifts</a></li>
                             <li><a href="nationalities.html">Nationalities</a></li>
-                                                        <li><a href="shifts.html">Shifts</a></li>
-                            <li><a href="sync.html">Data Sync (Navision)</a></li>
-
                             <li><a href="announcements.html">Announcements</a></li>
                             <li><a href="settings.html">Account Settings</a></li>
                         </ul>
@@ -306,6 +335,9 @@
             </div>
         </aside>
 
+        <!-- Sidebar Overlay (Mobile) -->
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
         <!-- Main Workspace -->
         <main class="main-content">
             <header class="topbar">
@@ -313,68 +345,67 @@
                     <button class="hamburger-menu" id="mobile-menu-btn">
                         <i class="ri-menu-line"></i>
                     </button>
-                    <h2 class="page-title">User Administration</h2>
+                    <h2 class="page-title">System Administration</h2>
                 </div>
             </header>
 
             <div class="content">
-                <div class="page-header">
+                <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
                     <div>
-                        <h3>System Users</h3>
-                        <p class="text-muted">Manage corporate executive accounts and access levels.</p>
+                        <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.75rem; font-weight: 700;">Shifts Management</h3>
+                        <p class="text-muted">Configure company operational hours and shift codes.</p>
                     </div>
-                    <button class="btn-register-premium" id="btn-add-user">
-                        <i class="ri-user-add-fill"></i>
-                        <span>Register Executive</span>
+                    <button class="btn-add-shift" id="btn-add-shift">
+                        <i class="ri-add-line"></i>
+                        <span>New Shift</span>
                     </button>
                 </div>
 
-                <div id="user-list" class="user-grid animate-in">
-                    <!-- Users will be injected here -->
+                <div id="shifts-list" class="shifts-grid animate-in">
+                    <!-- Shifts injected via JS -->
+                    <div class="loading-state" style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-muted);">
+                        <i class="ri-loader-4-line ri-spin" style="font-size: 2rem; display: block; margin-bottom: 1rem;"></i>
+                        <span>Retrieving shift records...</span>
+                    </div>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- Register User Modal -->
-    <div class="modal" id="user-modal">
+    <!-- Shift Modal -->
+    <div class="modal" id="shift-modal">
         <div class="modal-content">
+            <button class="close-modal" id="close-modal">
+                <i class="ri-close-line"></i>
+            </button>
             <div class="modal-header">
-                <h3>Register New Executive</h3>
-                <button class="close-modal" id="close-modal">&times;</button>
+                <h3 class="modal-title" id="modal-title">New Shift</h3>
             </div>
-            <form id="user-form">
+            <form id="shift-form">
+                <input type="hidden" id="is-edit" value="false">
                 <div class="form-group">
-                    <label for="reg-name">Full Name</label>
-                    <input type="text" id="reg-name" placeholder="John Doe" required>
+                    <label for="shift-no">Shift Number / Code</label>
+                    <input type="text" id="shift-no" placeholder="e.g. SH-01" required>
                 </div>
                 <div class="form-group">
-                    <label for="reg-email">Work Email</label>
-                    <input type="email" id="reg-email" placeholder="john@dynamicsaltx.com" required>
+                    <label for="shift-time">Shift Time Description</label>
+                    <input type="text" id="shift-time" placeholder="e.g. 08:00 AM - 04:00 PM" required>
                 </div>
                 <div class="form-group">
-                    <label for="reg-location">Location/Branch</label>
-                    <input type="text" id="reg-location" placeholder="e.g. Main Office" required>
+                    <label for="working-hours">Working Hours</label>
+                    <input type="number" id="working-hours" placeholder="e.g. 8" min="1" max="24" required>
                 </div>
-                <div class="form-group">
-                    <label for="reg-password">Security Password</label>
-                    <input type="password" id="reg-password" placeholder="••••••••" required>
-                </div>
-                <button type="submit" class="btn-save-user">Create User Account</button>
+                <button type="submit" class="btn-submit">Save Shift Detail</button>
             </form>
         </div>
     </div>
 
-    <!-- Custom JS -->
-    <script src="common.js?v=3"></script>
-    <script src="users.js"></script>
+    <!-- Scripts -->
+    <script src="common.js?v=7"></script>
+    <script src="shifts.js"></script>
 </body>
 
 </html>
-
-
-
-
 
 
 

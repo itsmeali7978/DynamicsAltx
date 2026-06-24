@@ -14,5 +14,12 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.4" />
   </ItemGroup>
+
+  <ItemGroup>
+    <!-- Automatically copy all frontend assets from login-page to wwwroot in publish folder -->
+    <Content Include="..\login-page\**\*.*" Link="wwwroot\%(RecursiveDir)%(Filename)%(Extension)">
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
  
 </Project>

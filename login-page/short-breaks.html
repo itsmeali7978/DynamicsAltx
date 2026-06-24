@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Short Breaks - DynamicsAltx</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .short-break-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .form-group label {
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+        .form-group input {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        .form-group input[readonly] {
+            background-color: var(--bg-hover);
+            cursor: not-allowed;
+        }
+        .btn-container {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .btn-create {
+            background-color: var(--primary);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: background-color 0.2s;
+        }
+        .btn-create:hover {
+            filter: brightness(0.9);
+        }
+        .btn-close-event {
+            background-color: var(--orange);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+        .btn-close-event:hover {
+            filter: brightness(0.9);
+        }
+        .btn-close-event:disabled {
+            background-color: #fdba74;
+            cursor: not-allowed;
+        }
+        
+        .grid-container {
+            margin-top: 1.5rem;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-light);
+            overflow: hidden;
+        }
+        .grid-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-light);
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            background-color: var(--bg-body);
+        }
+        
+        .table-row {
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .table-row:hover {
+            background-color: var(--bg-hover);
+        }
+        .table-row.selected {
+            background-color: rgba(99, 102, 241, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="erp-app">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand-logo">
+                    <i class="ri-rhythm-line"></i>
+                    <span>DynamicsAltx</span>
+                </div>
+                <button id="sidebar-toggle" class="icon-btn">
+                    <i class="ri-menu-fold-line"></i>
+                </button>
+            </div>
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="dashboard.html" class="nav-link">
+                            <i class="ri-dashboard-3-line"></i>
+                            <span>Overview</span>
+                        </a>
+                    </li>
+                    <li class="nav-group">
+                        <div class="group-header">
+                            <i class="ri-team-line"></i>
+                            <span>Human Resource</span>
+                            <i class="ri-arrow-down-s-line arrow-icon"></i>
+                        </div>
+                        <ul class="submenu" style="display: block;">
+                            <li><a href="employees.html"><i class="ri-user-settings-line"></i> Employees</a></li>
+                            <li><a href="short-breaks.html" class="active"><i class="ri-time-line"></i> Short Breaks</a></li>
+                        </ul>
+                    </li>
+                    <!-- Add other sidebar items if needed for consistency -->
+                     <li class="nav-item">
+                        <a href="index.html" class="nav-link">
+                            <i class="ri-logout-box-r-line"></i>
+                            <span>Logout</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="main-content">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="hamburger-menu" id="mobile-menu-btn">
+                        <i class="ri-menu-line"></i>
+                    </button>
+                    <h2 class="page-title">Employee Short Breaks</h2>
+                </div>
+            </header>
+
+            <div class="content">
+                <div class="card animate-in">
+                    <div class="card-header-row">
+                        <h3>Record Short Break</h3>
+                    </div>
+                    
+                    <div class="short-break-container p-4">
+                        <form id="shortBreakForm">
+                            <input type="hidden" id="breakId" value="">
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="empId">Employee Number</label>
+                                    <input type="text" id="empId" name="empId" placeholder="Enter Employee Number..." required>
+                                    <small id="empIdError" class="text-error" style="color:var(--error);display:none;"></small>
+                                </div>
+                                <div class="form-group">
+                                    <label for="employeeName">Employee Name</label>
+                                    <input type="text" id="employeeName" name="employeeName" readonly placeholder="Auto-populated...">
+                                </div>
+                            </div>
+                            
+                            <div class="form-row mt-3">
+                                <div class="form-group">
+                                    <label for="breakStart">Break Start</label>
+                                    <input type="datetime-local" id="breakStart" name="breakStart" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="breakEnd">Break End (for closing)</label>
+                                    <input type="datetime-local" id="breakEnd" name="breakEnd" disabled>
+                                </div>
+                            </div>
+
+                            <div class="btn-container">
+                                <button type="button" id="btnCreate" class="btn-create">
+                                    <i class="ri-add-circle-line"></i> Create
+                                </button>
+                                <button type="button" id="btnCloseEvent" class="btn-close-event" disabled>
+                                    <i class="ri-stop-circle-line"></i> Close Event
+                                </button>
+                                <button type="button" id="btnCancel" class="btn text-btn" style="display:none;">
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Grid for Open Entries -->
+                <div class="grid-container animate-in" style="animation-delay: 0.1s;">
+                    <div class="grid-header">
+                        Open Short Breaks
+                    </div>
+                    <div class="table-responsive">
+                        <table class="erp-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Employee No</th>
+                                    <th>Employee Name</th>
+                                    <th>Break Start</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="openBreaksTableBody">
+                                <!-- Populated by JS -->
+                                <tr><td colspan="5" style="text-align:center;">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="common.js?v=4"></script>
+    <script src="short-breaks.js"></script>
+</body>
+</html>

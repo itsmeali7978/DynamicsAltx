@@ -93,6 +93,22 @@ document.getElementById('btn-mark-inactive').addEventListener('click', async () 
     }
 });
 
+// Handler: Download Excel
+const btnExcel = document.getElementById('btn-download-excel');
+if (btnExcel) {
+    btnExcel.addEventListener('click', () => {
+        exportBidToExcel();
+    });
+}
+
+// Handler: Download PDF Comparison
+const btnPdf = document.getElementById('btn-download-pdf');
+if (btnPdf) {
+    btnPdf.addEventListener('click', () => {
+        exportBidToPDF();
+    });
+}
+
 // Handler: Initialize New Bid
 document.getElementById('btn-new-bid').addEventListener('click', async () => {
     const btn = document.getElementById('btn-new-bid');
@@ -364,6 +380,24 @@ async function updateVendorPrice(lineId, vendorId, inputElement) {
     
     cell.dataset.cost = newCost;
     parent.style.borderColor = '#4f46e5';
+
+    // Sync global in-memory state for exports
+    if (currentBidData && currentBidData.lines) {
+        const line = currentBidData.lines.find(l => l.id === parseInt(lineId));
+        if (line) {
+            if (!line.prices) line.prices = [];
+            let priceObj = line.prices.find(p => p.vendorId === parseInt(vendorId));
+            if (!priceObj) {
+                line.prices.push({
+                    bidLineId: parseInt(lineId),
+                    vendorId: parseInt(vendorId),
+                    cost: newCost
+                });
+            } else {
+                priceObj.cost = newCost;
+            }
+        }
+    }
     
     try {
         const response = await fetch('/api/Bidding/UpdateVendorPrice', {
@@ -524,5 +558,256 @@ function generateVendorPDF(vendorId) {
         container.style.display = 'none';
         container.innerHTML = '';
         showToast('PDF Report generated successfully!', 'success');
+    });
+}
+
+// --- Excel Export Logic for Full Bid ---
+function exportBidToExcel() {
+    if (typeof XLSX === 'undefined') {
+        showToast('Excel export library (SheetJS) is not loaded. Please verify your internet connection.', 'error');
+        console.error('SheetJS (XLSX) library is undefined.');
+        return;
+    }
+
+    if (!currentBidData || !currentBidData.lines || currentBidData.lines.length === 0) {
+        showToast('No bid lines available to export.', 'warning');
+        return;
+    }
+
+    const { header, lines, vendors } = currentBidData;
+
+    // Build the sheet data array
+    const sheetData = [];
+
+    // Header row
+    const headers = ['SKU/Code', 'Description', 'UOM', 'Quantity'];
+    vendors.forEach(v => {
+        const name = v.displayName || v.vendorName;
+        headers.push(`${name} (Unit Cost)`);
+        headers.push(`${name} (Total Cost)`);
+    });
+    headers.push('Lowest Cost');
+    headers.push('Lowest Bidder');
+    sheetData.push(headers);
+
+    // Data rows
+    lines.forEach(line => {
+        const row = [
+            line.navSku,
+            line.description || 'N/A',
+            line.uom,
+            line.quantity
+        ];
+
+        // Find row element in DOM to read live values
+        const rowEl = document.querySelector(`#bid-lines-body tr[data-line-id="${line.id}"]`);
+
+        let minCost = Infinity;
+        let minVendor = 'N/A';
+
+        vendors.forEach(v => {
+            let cost = 0;
+            if (rowEl) {
+                const cellEl = rowEl.querySelector(`.vendor-cost-cell[data-vendor-id="${v.id}"]`);
+                if (cellEl) {
+                    const inputEl = cellEl.querySelector('input[type="number"]');
+                    if (inputEl) {
+                        cost = parseFloat(inputEl.value) || 0;
+                    }
+                }
+            } else {
+                // Fallback to memory
+                const priceObj = line.prices.find(p => p.vendorId === v.id);
+                cost = priceObj ? priceObj.cost : 0;
+            }
+
+            const total = cost * line.quantity;
+            row.push(cost);
+            row.push(total);
+
+            if (cost > 0 && cost < minCost) {
+                minCost = cost;
+                minVendor = v.displayName || v.vendorName;
+            }
+        });
+
+        if (minCost === Infinity) {
+            row.push(0);
+            row.push('N/A');
+        } else {
+            row.push(minCost);
+            row.push(minVendor);
+        }
+
+        sheetData.push(row);
+    });
+
+    // Create Excel Workbook
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(sheetData);
+
+    // Apply auto-column width
+    const colWidths = headers.map((h, i) => {
+        let maxLen = h.length;
+        sheetData.forEach(row => {
+            const val = row[i];
+            if (val !== null && val !== undefined) {
+                const len = val.toString().length;
+                if (len > maxLen) maxLen = len;
+            }
+        });
+        return { wch: maxLen + 3 };
+    });
+    ws['!cols'] = colWidths;
+
+    XLSX.utils.book_append_sheet(wb, ws, 'Bid Comparison');
+
+    // Trigger download
+    const filename = `Bid_Comparison_${header.bidNo}.xlsx`;
+    XLSX.writeFile(wb, filename);
+    showToast('Excel report downloaded successfully!', 'success');
+}
+
+// --- PDF Export Logic for Full Bid ---
+function exportBidToPDF() {
+    if (typeof html2pdf === 'undefined') {
+        showToast('PDF generation library (html2pdf) is not loaded. Please verify your internet connection.', 'error');
+        console.error('html2pdf library is undefined.');
+        return;
+    }
+
+    if (!currentBidData || !currentBidData.lines || currentBidData.lines.length === 0) {
+        showToast('No bid lines available to export.', 'warning');
+        return;
+    }
+
+    const { header, lines, vendors } = currentBidData;
+    const creationDate = new Date(header.createdDate).toLocaleDateString('en-GB', {
+        day: '2-digit', month: 'short', year: 'numeric'
+    });
+
+    // Generate table headers
+    const vendorHeadersHtml = vendors.map(v => `
+        <th style="text-align: right; width: 12%;">${v.displayName || v.vendorName}<br/><span style="font-size: 8px; font-weight: normal; color: #64748b;">Cost / Total</span></th>
+    `).join('');
+
+    // Generate table rows
+    const rowsHtml = lines.map(line => {
+        // Find row element in DOM to read live values
+        const rowEl = document.querySelector(`#bid-lines-body tr[data-line-id="${line.id}"]`);
+
+        // Find best cost for this line from DOM inputs
+        let minCost = Infinity;
+        const vendorCosts = vendors.map(v => {
+            let cost = 0;
+            if (rowEl) {
+                const cellEl = rowEl.querySelector(`.vendor-cost-cell[data-vendor-id="${v.id}"]`);
+                if (cellEl) {
+                    const inputEl = cellEl.querySelector('input[type="number"]');
+                    if (inputEl) {
+                        cost = parseFloat(inputEl.value) || 0;
+                    }
+                }
+            } else {
+                const priceObj = line.prices.find(p => p.vendorId === v.id);
+                cost = priceObj ? priceObj.cost : 0;
+            }
+
+            if (cost > 0 && cost < minCost) {
+                minCost = cost;
+            }
+            return { vendorId: v.id, cost: cost };
+        });
+
+        if (minCost === Infinity) minCost = 0;
+
+        const vendorCellsHtml = vendors.map(v => {
+            const costObj = vendorCosts.find(vc => vc.vendorId === v.id);
+            const cost = costObj ? costObj.cost : 0;
+            const total = cost * line.quantity;
+
+            const isBest = cost > 0 && cost === minCost;
+            const highlightClass = isBest ? 'class="pdf-comp-best-cost"' : '';
+
+            return `
+                <td ${highlightClass} style="text-align: right;">
+                    ${cost > 0 ? `${cost.toFixed(2)}<br/><span style="font-size: 9px; color: #64748b;">${total.toFixed(2)}</span>` : '<span style="color: #cbd5e1;">-</span>'}
+                </td>
+            `;
+        }).join('');
+
+        return `
+            <tr>
+                <td style="font-weight: 700; color: #4f46e5;">${line.navSku}</td>
+                <td>${line.description || 'N/A'}</td>
+                <td style="text-align: center;">${line.uom}</td>
+                <td style="text-align: center; font-weight: 500;">${line.quantity}</td>
+                ${vendorCellsHtml}
+            </tr>
+        `;
+    }).join('');
+
+    const template = `
+        <div class="pdf-comp-wrapper">
+            <div class="pdf-comp-header">
+                <div>
+                    <h1 class="pdf-comp-title">Bid Comparison Matrix</h1>
+                    <p class="pdf-comp-meta">Generated: ${new Date().toLocaleString()}</p>
+                </div>
+                <div style="background: #059669; color: white; padding: 6px 15px; border-radius: 6px; font-weight: 700; font-size: 14px;">
+                    Reference: ${header.bidNo}
+                </div>
+            </div>
+
+            <div class="pdf-comp-info">
+                <div>
+                    <p><b>Bid Number:</b> ${header.bidNo}</p>
+                    <p><b>Created Date:</b> ${creationDate}</p>
+                </div>
+                <div style="text-align: right;">
+                    <p><b>Source Documents:</b> ${header.navDocNo || 'N/A'}</p>
+                    <p><b>Total Items:</b> ${lines.length}</p>
+                </div>
+            </div>
+
+            <table class="pdf-comp-table">
+                <thead>
+                    <tr>
+                        <th style="width: 10%;">SKU</th>
+                        <th style="width: 30%;">Description</th>
+                        <th style="width: 8%; text-align: center;">UOM</th>
+                        <th style="width: 8%; text-align: center;">Qty</th>
+                        ${vendorHeadersHtml}
+                    </tr>
+                </thead>
+                <tbody>
+                    ${rowsHtml}
+                </tbody>
+            </table>
+
+            <div class="pdf-footer" style="margin-top: 40px;">
+                <p>Highlighted cells indicate the lowest cost option for the respective SKU.</p>
+                <p style="margin-top: 8px;">Confidential - DynamicsAltx Procurement Report</p>
+            </div>
+        </div>
+    `;
+
+    // Render using html2pdf
+    const container = document.getElementById('pdf-template-container');
+    container.innerHTML = template;
+    container.style.display = 'block';
+
+    const opt = {
+        margin: 0.25,
+        filename: `Bid_Comparison_${header.bidNo}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+        jsPDF: { unit: 'in', format: 'letter', orientation: 'landscape' }
+    };
+
+    html2pdf().set(opt).from(container).save().then(() => {
+        container.style.display = 'none';
+        container.innerHTML = '';
+        showToast('PDF Comparison Report generated successfully!', 'success');
     });
 }

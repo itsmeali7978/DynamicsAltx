@@ -1,6 +1,6 @@
 # Folders to ignore for C# ASP.NET Core
-backend/bin/
-backend/obj/
+**/bin/
+**/obj/
 
 # Local configuration
 backend/appsettings.json

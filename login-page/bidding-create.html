@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,11 +8,15 @@
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@600;700&display=swap"
+        rel="stylesheet">
     <!-- Remix Icons -->
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     <!-- PDF Generation Library (Supports Arabic/UTF-8) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- SheetJS Library for Excel Exports -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <!-- Custom CSS -->
     <link rel="stylesheet" href="dashboard.css">
     <style>
@@ -26,15 +31,18 @@
             border-radius: 12px;
             border: 1px dashed var(--primary);
         }
+
         .bid-no-badge {
             font-family: 'Outfit', sans-serif;
             font-size: 1.25rem;
             font-weight: 600;
             color: var(--primary);
         }
+
         .control-group {
             margin-bottom: 1.5rem;
         }
+
         .control-group label {
             display: block;
             font-size: 0.875rem;
@@ -42,11 +50,13 @@
             color: var(--text-muted);
             margin-bottom: 0.5rem;
         }
+
         .flex-row {
             display: flex;
             gap: 1rem;
             align-items: flex-end;
         }
+
         .input-control {
             flex: 1;
             padding: 0.75rem 1rem;
@@ -55,10 +65,12 @@
             font-size: 0.95rem;
             transition: var(--transition);
         }
+
         .input-control:focus {
             outline: none;
             border-color: var(--primary);
         }
+
         .btn {
             padding: 0.75rem 1.25rem;
             border: none;
@@ -70,40 +82,64 @@
             gap: 0.5rem;
             transition: var(--transition);
         }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-secondary { background: #f1f5f9; color: var(--text-main); }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: var(--text-main);
+        }
 
         /* Best Cost Highlighting */
-        .best-cost-row { 
-            background-color: #059669 !important; /* Solid Darker Green per request */
+        .best-cost-row {
+            background-color: #059669 !important;
+            /* Solid Darker Green per request */
             border-left: 4px solid #064e3b !important;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.1) !important;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1) !important;
         }
-        .best-cost-row td { 
+
+        .best-cost-row td {
             color: white !important;
             font-weight: 600 !important;
         }
+
         .vendor-header {
             cursor: pointer;
             transition: var(--transition);
         }
+
         .vendor-header.active-highlight {
             background-color: var(--primary) !important;
             color: white !important;
         }
 
         @media (max-width: 768px) {
-            .flex-row { flex-direction: column; align-items: stretch; }
-            .bid-status-display { flex-direction: column; align-items: flex-start; }
-            #btn-mark-inactive { width: 100%; justify-content: center; }
+            .flex-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .bid-status-display {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            #btn-mark-inactive {
+                width: 100%;
+                justify-content: center;
+            }
         }
+
         /* Vendor PDF Export Button */
         .btn-vendor-pdf {
             width: 24px;
             height: 24px;
             border-radius: 50%;
             border: none;
-            background: rgba(0,0,0,0.05);
+            background: rgba(0, 0, 0, 0.05);
             color: var(--text-muted);
             cursor: pointer;
             display: inline-flex;
@@ -114,11 +150,13 @@
             margin-left: 0.5rem;
             vertical-align: middle;
         }
+
         .btn-vendor-pdf:hover {
             background: var(--error);
             color: white;
             transform: translateY(-1px);
         }
+
         .vendor-header-content {
             display: flex;
             align-items: center;
@@ -130,6 +168,7 @@
         #pdf-template-container {
             display: none;
         }
+
         .pdf-report-wrapper {
             padding: 40px;
             font-family: 'Inter', 'Arial', sans-serif;
@@ -137,6 +176,7 @@
             background: white;
             line-height: 1.5;
         }
+
         .pdf-header {
             display: flex;
             justify-content: space-between;
@@ -144,18 +184,21 @@
             padding-bottom: 20px;
             margin-bottom: 30px;
         }
+
         .pdf-title {
             color: #4f46e5;
             font-size: 24px;
             font-weight: 700;
             margin: 0;
         }
+
         .pdf-info-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 40px;
             margin-bottom: 30px;
         }
+
         .info-col h4 {
             color: #64748b;
             font-size: 12px;
@@ -163,15 +206,18 @@
             letter-spacing: 0.05em;
             margin-bottom: 8px;
         }
+
         .info-col p {
             margin: 2px 0;
             font-weight: 600;
         }
+
         .pdf-table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 30px;
         }
+
         .pdf-table th {
             background: #f8fafc;
             color: #475569;
@@ -180,15 +226,32 @@
             font-size: 12px;
             border-bottom: 2px solid #e2e8f0;
         }
+
         .pdf-table td {
             padding: 12px;
             font-size: 13px;
             border-bottom: 1px solid #f1f5f9;
         }
-        .pdf-table .col-sku { font-weight: 700; color: #4f46e5; }
-        .pdf-table .col-desc { font-family: 'Arial', sans-serif; } /* Arial handles mixed Arabic/English well */
-        .pdf-table .col-qty { text-align: center; }
-        .pdf-table .col-cost { text-align: right; font-weight: 600; }
+
+        .pdf-table .col-sku {
+            font-weight: 700;
+            color: #4f46e5;
+        }
+
+        .pdf-table .col-desc {
+            font-family: 'Arial', sans-serif;
+        }
+
+        /* Arial handles mixed Arabic/English well */
+        .pdf-table .col-qty {
+            text-align: center;
+        }
+
+        .pdf-table .col-cost {
+            text-align: right;
+            font-weight: 600;
+        }
+
         .pdf-footer {
             margin-top: 50px;
             font-size: 10px;
@@ -197,8 +260,80 @@
             border-top: 1px solid #f1f5f9;
             padding-top: 20px;
         }
+
+        /* Full Bid PDF Comparison Styles */
+        .pdf-comp-wrapper {
+            padding: 30px;
+            font-family: 'Inter', 'Arial', sans-serif;
+            color: #1e293b;
+            background: white;
+        }
+
+        .pdf-comp-header {
+            border-bottom: 2px solid #059669;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .pdf-comp-title {
+            color: #059669;
+            font-size: 22px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .pdf-comp-meta {
+            font-size: 11px;
+            color: #64748b;
+        }
+
+        .pdf-comp-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            background: #f8fafc;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 12px;
+        }
+
+        .pdf-comp-info p {
+            margin: 3px 0;
+        }
+
+        .pdf-comp-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+            margin-top: 15px;
+        }
+
+        .pdf-comp-table th {
+            background: #f1f5f9;
+            color: #334155;
+            font-weight: 600;
+            padding: 8px 10px;
+            border: 1px solid #cbd5e1;
+            text-align: left;
+        }
+
+        .pdf-comp-table td {
+            padding: 8px 10px;
+            border: 1px solid #cbd5e1;
+            vertical-align: middle;
+        }
+
+        .pdf-comp-best-cost {
+            background-color: #d1fae5 !important;
+            color: #065f46 !important;
+            font-weight: bold;
+        }
     </style>
 </head>
+
 <body>
     <div class="erp-app">
         <!-- Sidebar Navigation -->
@@ -221,9 +356,9 @@
                             <span>Overview</span>
                         </a>
                     </li>
-                    
-                    
-                    
+
+
+
                     <li class="nav-group">
                         <div class="group-header">
                             <i class="ri-team-line"></i>
@@ -234,7 +369,7 @@
                             <li><a href="employees.html"><i class="ri-user-settings-line"></i> Employees</a></li>
                         </ul>
                     </li>
-<li class="nav-group">
+                    <li class="nav-group">
                         <div class="group-header">
                             <i class="ri-bank-line"></i>
                             <span>Finance</span>
@@ -280,7 +415,7 @@
                             <li><a href="users.html">User Management</a></li>
                             <li><a href="locations.html">Locations</a></li>
                             <li><a href="nationalities.html">Nationalities</a></li>
-                                                        <li><a href="shifts.html">Shifts</a></li>
+                            <li><a href="shifts.html">Shifts</a></li>
                             <li><a href="sync.html">Data Sync (Navision)</a></li>
 
                             <li><a href="announcements.html">Announcements</a></li>
@@ -326,15 +461,26 @@
                         <button id="btn-new-bid" class="btn btn-primary" style="margin-bottom: 1rem;">
                             <i class="ri-add-circle-line"></i> Generate New Bid
                         </button>
-                        
+
                         <div id="bid-identifier" class="bid-status-display" style="display: none;">
                             <div style="flex: 1;">
                                 <label>Active Bid Reference</label>
                                 <span id="display-bid-no" class="bid-no-badge">BDREQ-XXX</span>
                             </div>
-                            <button id="btn-mark-inactive" class="btn btn-secondary" style="color: var(--error); border-color: var(--error); background: transparent;">
-                                <i class="ri-delete-bin-line"></i> Mark Inactive
-                            </button>
+                            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                <button id="btn-download-excel" class="btn btn-secondary"
+                                    style="color: #166534; border-color: #a7f3d0; background: #f0fdf4;">
+                                    <i class="ri-file-excel-2-line"></i> Export Excel
+                                </button>
+                                <button id="btn-download-pdf" class="btn btn-secondary"
+                                    style="color: #991b1b; border-color: #fecaca; background: #fef2f2;">
+                                    <i class="ri-file-pdf-line"></i> Export PDF
+                                </button>
+                                <button id="btn-mark-inactive" class="btn btn-secondary"
+                                    style="color: var(--error); border-color: var(--error); background: transparent;">
+                                    <i class="ri-delete-bin-line"></i> Mark Inactive
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -342,7 +488,8 @@
                         <div class="control-group">
                             <label for="nav-doc-no">NavDocument No</label>
                             <div class="flex-row">
-                                <input type="text" id="nav-doc-no" class="input-control" placeholder="Enter NAV Document Number (e.g., STOCK-001)">
+                                <input type="text" id="nav-doc-no" class="input-control"
+                                    placeholder="Enter NAV Document Number (e.g., STOCK-001)">
                                 <button id="btn-fetch-data" class="btn btn-secondary">
                                     <i class="ri-download-cloud-line"></i> Fetch Data
                                 </button>
@@ -351,7 +498,8 @@
                     </div>
 
                     <div id="lines-section" class="grid-section" style="display: none;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
                             <div>
                                 <h3>Line Items Synchronized</h3>
                                 <span id="line-count" class="badge">0 Items</span>
@@ -359,12 +507,15 @@
                             <div style="flex-grow: 1; max-width: 300px;">
                                 <label>Refresh from NavDoc(s)</label>
                                 <div class="flex-row">
-                                    <input type="text" id="multi-nav-doc" class="input-control" placeholder="e.g. DOC001 | DOC002">
+                                    <input type="text" id="multi-nav-doc" class="input-control"
+                                        placeholder="e.g. DOC001 | DOC002">
                                 </div>
-                                <small class="text-muted" style="font-size: 0.7rem; display: block; margin-top: 0.25rem;">Separate multiple numbers with a pipe symbol ( | )</small>
+                                <small class="text-muted"
+                                    style="font-size: 0.7rem; display: block; margin-top: 0.25rem;">Separate multiple
+                                    numbers with a pipe symbol ( | )</small>
                             </div>
                         </div>
-                        
+
                         <div class="table-responsive data-table-wrapper">
                             <table class="erp-table data-table">
                                 <thead>
@@ -393,11 +544,5 @@
     <script src="common.js?v=4"></script>
     <script src="bidding-create.js?v=4"></script>
 </body>
+
 </html>
-
-
-
-
-
-
-

@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DynamicsAltx - Leave Types</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@600;700&display=swap" rel="stylesheet">
+    <!-- Remix Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="dashboard.css">
+    <style>
+        .leave-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.25rem;
+            margin-top: 1.5rem;
+        }
+
+        .leave-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 1rem;
+            transition: var(--transition);
+        }
+
+        .leave-card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+        }
+
+        .leave-info-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .leave-names {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .leave-name-en {
+            font-weight: 700;
+            color: var(--text-main);
+            font-size: 1.1rem;
+        }
+
+        .leave-name-ar {
+            font-weight: 500;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            text-align: left;
+        }
+        
+        html[dir="rtl"] .leave-name-ar {
+            text-align: right;
+        }
+
+        .leave-badge {
+            font-size: 0.8rem;
+            padding: 0.25rem 0.6rem;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+
+        .badge-paid {
+            background: #e0f2fe;
+            color: #0369a1;
+        }
+
+        .badge-unpaid {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .leave-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .leave-meta span strong {
+            color: var(--text-main);
+        }
+
+        .leave-actions {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 1.1rem;
+        }
+
+        .btn-edit { color: var(--primary); }
+        .btn-edit:hover { background: var(--primary-light); }
+        .btn-delete { color: var(--danger); }
+        .btn-delete:hover { background: #fee2e2; }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active { display: flex; }
+
+        .modal-content {
+            background: white;
+            width: 90%;
+            max-width: 440px;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            animation: modalIn 0.3s ease-out;
+        }
+
+        @keyframes modalIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+
+        .form-group { margin-bottom: 1.25rem; }
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-main);
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            user-select: none;
+            margin-bottom: 1.5rem;
+        }
+
+        .checkbox-group input {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .checkbox-group span {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-submit:hover {
+            background: var(--primary-dark);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="erp-app">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand-logo">
+                    <i class="ri-rhythm-line"></i>
+                    <span data-i18n="brand_name">DynamicsAltx</span>
+                </div>
+                <button id="sidebar-toggle" class="icon-btn">
+                    <i class="ri-menu-fold-line"></i>
+                </button>
+            </div>
+
+            <nav class="sidebar-nav">
+                <!-- Nav list will be dynamically handled by common.js -->
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="dashboard.html" class="nav-link">
+                            <i class="ri-dashboard-3-line"></i>
+                            <span data-i18n="nav_overview">Overview</span>
+                        </a>
+                    </li>
+                    <li class="nav-group active">
+                        <div class="group-header">
+                            <i class="ri-settings-4-line"></i>
+                            <span data-i18n="system">System</span>
+                            <i class="ri-arrow-down-s-line arrow"></i>
+                        </div>
+                        <ul class="submenu" style="display: block;">
+                            <li><a href="users.html"><span data-i18n="nav_user_management">User Management</span></a></li>
+                            <li><a href="locations.html"><span data-i18n="nav_locations">Locations</span></a></li>
+                            <li><a href="nationalities.html"><span data-i18n="nav_nationalities">Nationalities</span></a></li>
+                            <li><a href="shifts.html"><span data-i18n="nav_shifts">Shifts</span></a></li>
+                            <li><a href="sync.html"><span data-i18n="nav_data_sync">Data Sync (Navision)</span></a></li>
+                            <li><a href="announcements.html"><span data-i18n="nav_announcements">Announcements</span></a></li>
+                            <li><a href="settings.html"><span data-i18n="nav_settings">Account Settings</span></a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-block">
+                    <img src="https://ui-avatars.com/api/?name=Admin+User&background=6366f1&color=fff" alt="User">
+                    <div class="user-info">
+                        <p class="user-name">Admin User</p>
+                        <p class="user-role">System Administrator</p>
+                    </div>
+                    <button class="logout-btn icon-btn" title="Logout" data-i18n="logout">
+                        <i class="ri-logout-box-r-line"></i>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="main-content">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="hamburger-menu" id="mobile-menu-btn">
+                        <i class="ri-menu-line"></i>
+                    </button>
+                    <h2 class="page-title" data-i18n="nav_leave_types">Leave Types</h2>
+                </div>
+            </header>
+
+            <div class="content">
+                <div class="page-header">
+                    <div>
+                        <h3 data-i18n="nav_leave_types">Leave Types</h3>
+                        <p class="text-muted" data-i18n="leave_subtitle">Configure different categories of leaves applicable under Saudi Labor Law.</p>
+                    </div>
+                    <button class="btn-add-nat" id="btn-add-leave" style="background: var(--primary); color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 8px; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; transition: var(--transition);">
+                        <i class="ri-add-line"></i>
+                        <span data-i18n="new_leave_btn">New Leave Type</span>
+                    </button>
+                </div>
+
+                <div id="leave-list" class="leave-grid animate-in">
+                    <div class="loading-state">
+                        <i class="ri-loader-4-line ri-spin"></i>
+                        <span data-i18n="loading_records">Loading records...</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Leave Modal -->
+    <div class="modal" id="leave-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title" data-i18n="new_leave_title">New Leave Type</h3>
+                <button class="close-modal" id="close-modal">&times;</button>
+            </div>
+            <form id="leave-form">
+                <input type="hidden" id="leave-id">
+                
+                <div class="form-group">
+                    <label for="leave-name-en" data-i18n="leave_lbl_name_en">Leave Name (English)</label>
+                    <input type="text" id="leave-name-en" placeholder="E.G. Annual Leave" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="leave-name-ar" data-i18n="leave_lbl_name_ar">Leave Name (Arabic)</label>
+                    <input type="text" id="leave-name-ar" placeholder="مثال: الإجازة السنوية" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="leave-max-days" data-i18n="leave_lbl_max_days">Maximum Allowance (Days)</label>
+                    <input type="number" id="leave-max-days" min="1" max="365" placeholder="E.G. 30">
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="leave-is-paid" checked>
+                    <span data-i18n="leave_lbl_is_paid">Paid Leave Status</span>
+                </div>
+
+                <button type="submit" class="btn-submit" data-i18n="save_btn">Save Leave Type</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Custom JS -->
+    <script src="common.js?v=13"></script>
+    <script src="leave-types.js"></script>
+</body>
+
+</html>

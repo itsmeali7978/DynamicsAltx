@@ -1,4 +1,36 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Dynamically load translations.js
+    const loadTranslations = () => {
+        return new Promise((resolve) => {
+            if (window.i18n) {
+                resolve();
+                return;
+            }
+            const script = document.createElement('script');
+            script.src = 'translations.js';
+            script.onload = () => resolve();
+            script.onerror = () => {
+                console.error('Failed to load translations.js');
+                resolve();
+            };
+            document.head.appendChild(script);
+        });
+    };
+
+    loadTranslations().then(() => {
+        const savedLang = localStorage.getItem('lang') || 'en';
+        window.setLanguage(savedLang);
+
+        const langSelector = document.querySelector('.lang-selector');
+        if (langSelector) {
+            langSelector.addEventListener('click', () => {
+                const currentLang = localStorage.getItem('lang') || 'en';
+                const nextLang = currentLang === 'en' ? 'ar' : 'en';
+                window.setLanguage(nextLang);
+            });
+        }
+    });
+
     // Elegant Multi-state Toggle for Transparency UI
     const togglePassword = document.querySelector('.toggle-password');
     const passwordInput = document.querySelector('#password');
@@ -43,7 +75,8 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Execute Authentication State
             btn.disabled = true;
-            btnLabel.innerText = 'Synchronizing...';
+            const currentLang = localStorage.getItem('lang') || 'en';
+            btnLabel.innerText = (window.i18n && window.i18n[currentLang]) ? (window.i18n[currentLang]['login_sync'] || 'Synchronizing...') : 'Synchronizing...';
             btn.querySelector('i').className = 'ri-refresh-line ri-spin';
             btn.style.opacity = '0.7';
             btn.style.cursor = 'wait';
@@ -67,7 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
             })
             .then(data => {
                 // Success State - Visual Confirmation
-                btnLabel.innerText = 'Session Authorized';
+                btnLabel.innerText = (window.i18n && window.i18n[currentLang]) ? (window.i18n[currentLang]['login_success'] || 'Session Authorized') : 'Session Authorized';
                 btn.querySelector('i').className = 'ri-shield-check-fill';
                 btn.style.background = 'var(--success)';
                 btn.style.boxShadow = '0 0 25px rgba(52, 211, 153, 0.4)';
@@ -79,6 +112,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     localStorage.setItem('userLocation', data.user.location || 'Main Office');
                     localStorage.setItem('userEmail', data.user.email);
                     localStorage.setItem('userRole', data.user.role || 'User');
+                    localStorage.setItem('userDashboard', data.user.dashboardPage || 'dashboard.html');
+                    localStorage.setItem('allowedPages', JSON.stringify(data.user.allowedPages || []));
                     console.log("Session Role Assigned:", data.user.role);
                 }
 
@@ -90,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     document.querySelector('.glass-card').style.transition = 'all 0.8s cubic-bezier(0.16, 1, 0.3, 1)';
                     
                     setTimeout(() => {
-                        window.location.href = 'dashboard.html';
+                        window.location.href = data.user.dashboardPage || 'dashboard.html';
                     }, 500);
                 }, 1000);
             })

@@ -396,3 +396,43 @@ body {
 /* Loading Animation Overlay */
 @keyframes rot { from {transform: rotate(0deg)} to {transform: rotate(360deg)}}
 .ri-spin { animation: rot 1s infinite linear; }
+
+/* RTL Style Adjustments for Arabic */
+html[dir="rtl"] body {
+    direction: rtl;
+    text-align: right;
+}
+
+html[dir="rtl"] .card-header,
+html[dir="rtl"] .login-form {
+    text-align: right;
+}
+
+html[dir="rtl"] .input-field label {
+    padding-right: 0.25rem;
+    padding-left: 0;
+    text-align: right;
+}
+
+html[dir="rtl"] .field-icon {
+    right: 1.25rem;
+    left: auto;
+}
+
+html[dir="rtl"] .input-control input {
+    padding: 1rem 3.5rem 1rem 3.5rem; /* Symmetric padding to accommodate icons on both sides in RTL */
+    text-align: right;
+}
+
+html[dir="rtl"] .toggle-password {
+    left: 1.25rem;
+    right: auto;
+}
+
+html[dir="rtl"] .btn-executive i {
+    transform: scaleX(-1); /* Flips the arrow icon for RTL flow */
+}
+
+html[dir="rtl"] .utility-row {
+    flex-direction: row-reverse;
+}

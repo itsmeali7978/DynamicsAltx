@@ -234,9 +234,33 @@
                             <span>Overview</span>
                         </a>
                     </li>
+                    <li class="nav-group">
+                        <div class="group-header">
+                            <i class="ri-bank-line"></i>
+                            <span>Finance</span>
+                            <i class="ri-arrow-down-s-line arrow"></i>
+                        </div>
+                        <ul class="submenu">
+                            <li><a href="voucher-history.html">Voucher History</a></li>
+                            <li><a href="#">General Ledger</a></li>
+                            <li><a href="#">Accounts Payable</a></li>
+                            <li><a href="#">Accounts Receivable</a></li>
+                        </ul>
+                    </li>
                     
                     
                     
+                                        <li class="nav-group">
+                        <div class="group-header">
+                            <i class="ri-briefcase-4-line"></i>
+                            <span>Business Process</span>
+                            <i class="ri-arrow-down-s-line arrow-icon"></i>
+                        </div>
+                        <ul class="submenu">
+                            <li><a href="cashier-closing.html"><i class="ri-file-list-3-line"></i> Cashier Closing</a></li>
+                            <li><a href="closing-reports.html"><i class="ri-file-chart-line"></i> Closing Reports</a></li>
+                        </ul>
+                    </li>
                     <li class="nav-group">
                         <div class="group-header">
                             <i class="ri-team-line"></i>
@@ -281,6 +305,7 @@
                         <ul class="submenu" style="display: block;">
                             <li><a href="users.html" class="active">User Management</a></li>
                             <li><a href="locations.html">Locations</a></li>
+                            <li><a href="profiles.html">Profiles</a></li>
                             <li><a href="nationalities.html">Nationalities</a></li>
                                                         <li><a href="shifts.html">Shifts</a></li>
                             <li><a href="sync.html">Data Sync (Navision)</a></li>
@@ -360,21 +385,20 @@
                     <label for="reg-password">Security Password</label>
                     <input type="password" id="reg-password" placeholder="••••••••" required>
                 </div>
+                <div class="form-group">
+                    <label for="reg-profile">User Profile</label>
+                    <select id="reg-profile" style="width: 100%; padding: 0.7rem 1rem; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.9rem;" required>
+                        <option value="" disabled selected>Loading profiles...</option>
+                    </select>
+                </div>
                 <button type="submit" class="btn-save-user">Create User Account</button>
             </form>
         </div>
     </div>
 
     <!-- Custom JS -->
-    <script src="common.js?v=3"></script>
+    <script src="common.js?v=13"></script>
     <script src="users.js"></script>
 </body>
 
 </html>
-
-
-
-
-
-
-

@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cashier Closing - DynamicsAltx</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <style>
+        .content-wrapper {
+            overflow: hidden;
+            height: 100vh;
+            padding: 1rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+        }
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1.5px solid var(--border-color);
+        }
+        .page-title {
+            font-size: 1.35rem;
+            color: var(--text-main);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .closing-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.1fr 1.2fr;
+            gap: 1rem;
+            flex-grow: 1;
+            min-height: 0; /* Ensures inner scrollbars work */
+        }
+        .grid-col {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            min-height: 0;
+        }
+        .section-card {
+            background: white;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            box-shadow: var(--shadow-sm);
+        }
+        .section-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.25rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            color: var(--text-main);
+            font-size: 0.75rem;
+        }
+        .form-control {
+            width: 100%;
+            padding: 0.4rem 0.6rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: var(--bg-app);
+            color: var(--text-main);
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+        }
+        .form-control:read-only {
+            background-color: #f3f4f6;
+            cursor: not-allowed;
+        }
+        .btn {
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+        .btn-success:hover {
+            background-color: #059669;
+        }
+        .btn-print {
+            background-color: white;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        .btn-print:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+        .table-custom {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .table-custom th, .table-custom td {
+            border: 1px solid var(--border-color);
+            padding: 0.3rem 0.4rem;
+            font-size: 0.75rem;
+            text-align: left;
+        }
+        .table-custom th {
+            background-color: #f9fafb;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+        .table-custom td input {
+            width: 100%;
+            border: 1px solid #d1d5db;
+            background: #ffffff;
+            border-radius: 4px;
+            padding: 0.2rem 0.3rem;
+            font-size: 0.75rem;
+            outline: none;
+        }
+        .table-custom td input:focus {
+            border-color: var(--primary);
+        }
+        .text-right { text-align: right !important; }
+        .total-box {
+            background: var(--bg-app);
+            padding: 0.4rem 0.6rem;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: var(--text-main);
+        }
+        
+        #collectionSection {
+            display: none; /* JS will toggle to 'grid' */
+        }
+        
+        .alert {
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+            font-size: 0.8rem;
+            display: none;
+        }
+        .alert-error {
+            background-color: #fee2e2;
+            color: var(--error);
+            border: 1px solid #f87171;
+        }
+        .alert-success {
+            background-color: #d1fae5;
+            color: var(--success);
+            border: 1px solid #34d399;
+        }
+        .remove-btn {
+            color: var(--error);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .summary-box {
+            padding: 0.5rem;
+            border-radius: 6px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 0.5rem;
+        }
+        .summary-item {
+            text-align: center;
+        }
+        .summary-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+        .summary-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+        .val-positive { color: var(--success); }
+        .val-negative { color: var(--error); }
+    </style>
+</head>
+<body>
+    <div class="erp-app">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand-logo">
+                    <i class="ri-rhythm-line"></i>
+                    <span>DynamicsAltx</span>
+                </div>
+                <button id="sidebar-toggle" class="icon-btn">
+                    <i class="ri-menu-fold-line"></i>
+                </button>
+            </div>
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="dashboard.html" class="nav-link">
+                            <i class="ri-dashboard-3-line"></i>
+                            <span>Overview</span>
+                        </a>
+                    </li>
+                    <li class="nav-group">
+                        <div class="group-header">
+                            <i class="ri-briefcase-4-line"></i>
+                            <span>Business Process</span>
+                            <i class="ri-arrow-down-s-line arrow-icon" style="transform: rotate(180deg);"></i>
+                        </div>
+                        <ul class="submenu" style="display: block;">
+                            <li><a href="cashier-closing.html" class="active"><i class="ri-file-list-3-line"></i> Cashier Closing</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-group">
+                        <div class="group-header">
+                            <i class="ri-team-line"></i>
+                            <span>Human Resource</span>
+                            <i class="ri-arrow-down-s-line arrow-icon"></i>
+                        </div>
+                        <ul class="submenu">
+                            <li><a href="employees.html"><i class="ri-user-settings-line"></i> Employees</a></li>
+                            <li><a href="absence-marker.html"><i class="ri-calendar-event-line"></i> Absence Marker</a></li>
+                            <li><a href="absence-report.html"><i class="ri-file-chart-line"></i> Monthly Absence Report</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item" style="margin-top: auto;">
+                        <a href="index.html" class="nav-link" id="logoutBtn">
+                            <i class="ri-logout-box-r-line"></i>
+                            <span>Logout</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content" style="height: 100vh; overflow: hidden;">
+            <div class="content-wrapper">
+                <div class="page-header">
+                    <div style="display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;">
+                        <h1 class="page-title">
+                            <i class="ri-file-shield-2-line" style="color: var(--primary);"></i> 
+                            Cashier Closing 
+                            <span id="statementNoBadge" style="font-size: 0.85rem; background: var(--success); color: white; padding: 0.2rem 0.6rem; border-radius: 12px; display: none;"></span>
+                        </h1>
+                        <div style="display: flex; gap: 0.35rem; align-items: center;">
+                            <input type="number" id="loadStatementId" class="form-control" placeholder="Statement ID" style="width: 100px; padding: 0.3rem 0.5rem; font-size: 0.75rem;">
+                            <button class="btn btn-primary" onclick="loadStatement()" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;"><i class="ri-search-line"></i> Load</button>
+                            <button class="btn btn-secondary" id="resetBtn" onclick="resetForm()" style="padding: 0.3rem 0.6rem; font-size: 0.75rem; display: none; background: #e2e8f0; color: #1e293b; border: 1px solid #cbd5e1;"><i class="ri-refresh-line"></i> New</button>
+                        </div>
+                    </div>
+                    <button class="btn btn-print" onclick="window.print()">
+                        <i class="ri-printer-line"></i> Print Form
+                    </button>
+                </div>
+
+                <div id="alertBox" class="alert"></div>
+
+                <div class="closing-grid">
+                    <!-- Column 1: Cashier & Invoice Info -->
+                    <div class="grid-col">
+                        <!-- Cashier Info -->
+                        <div class="section-card">
+                            <h2 class="section-title"><i class="ri-user-star-line"></i> Cashier Info</h2>
+                            <div class="form-group" style="margin-bottom: 0.5rem;">
+                                <label>Employee No.</label>
+                                <input type="text" id="employeeNo" class="form-control" placeholder="Enter Employee ID">
+                            </div>
+                            <div class="form-group">
+                                <label>Employee Name (Arabic)</label>
+                                <input type="text" id="employeeName" class="form-control" readonly placeholder="Auto-populated..." style="font-weight: 700; font-size: 1.1rem; color: var(--primary); background: #f8fafc; border: 1.5px solid #cbd5e1;">
+                            </div>
+                        </div>
+
+                        <!-- Invoice Info -->
+                        <div class="section-card">
+                            <h2 class="section-title"><i class="ri-file-paper-2-line"></i> Invoice Info</h2>
+                            <div class="grid-2" style="margin-bottom: 0.5rem;">
+                                <div class="form-group">
+                                    <label>Location</label>
+                                    <select id="locationSelect" class="form-control"></select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Closing Date</label>
+                                    <input type="date" id="closingDate" class="form-control">
+                                </div>
+                            </div>
+                            
+                            <div class="grid-2" style="margin-bottom: 0.5rem;">
+                                <div class="form-group">
+                                    <label>Start Invoice</label>
+                                    <input type="text" id="startInvoice" class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label>End Invoice</label>
+                                    <input type="text" id="endInvoice" class="form-control">
+                                </div>
+                            </div>
+                            <div class="grid-2" style="margin-bottom: 0.75rem;">
+                                <div class="form-group">
+                                    <label>Start Cr Memo</label>
+                                    <input type="text" id="startCrMemo" class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label>End Cr Memo</label>
+                                    <input type="text" id="endCrMemo" class="form-control">
+                                </div>
+                            </div>
+                            
+                            <button class="btn btn-primary" id="verifyBtn" onclick="verifyInvoices()" style="width: 100%; justify-content: center; padding: 0.5rem;">
+                                <i class="ri-check-double-line"></i> Verify Documents
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Column 2 & 3: Revealed upon Verification -->
+                    <div id="collectionSection" style="grid-column: span 2; display: none; grid-template-columns: 1fr 1.1fr; gap: 1rem; min-height: 0;">
+                        <!-- Column 2: Cash Collection -->
+                        <div class="grid-col" style="overflow-y: auto; max-height: 100%;">
+                            <div class="section-card" style="margin-bottom: 0;">
+                                <h2 class="section-title"><i class="ri-money-dollar-circle-line"></i> Cash Collection</h2>
+                                <table class="table-custom" id="cashTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Denomination</th>
+                                            <th width="30%">Qty</th>
+                                            <th class="text-right" width="35%">Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Generated by JS -->
+                                    </tbody>
+                                </table>
+                                <div class="total-box" style="margin-top: 0.5rem;">
+                                    <span>Total Cash</span>
+                                    <span id="totalCash">0.00</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Column 3: Bank, Pending, and Summary -->
+                        <div class="grid-col">
+                            <!-- Bank Collection -->
+                            <div class="section-card">
+                                <h2 class="section-title"><i class="ri-bank-card-line"></i> Bank Collection</h2>
+                                <div class="grid-2">
+                                    <div class="form-group">
+                                        <label>Bank POS</label>
+                                        <input type="number" step="0.01" id="bankPos" class="form-control bank-input" value="0.00">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Bank Transfer</label>
+                                        <input type="number" step="0.01" id="bankTransfer" class="form-control bank-input" value="0.00">
+                                    </div>
+                                </div>
+                                <div class="total-box" style="margin-top: 0.5rem;">
+                                    <span>Total Bank</span>
+                                    <span id="totalBank">0.00</span>
+                                </div>
+                            </div>
+
+                            <!-- Pending Cash -->
+                            <div class="section-card" style="display: flex; flex-direction: column; min-height: 0; flex-grow: 1;">
+                                <h2 class="section-title" style="justify-content: space-between; margin-bottom: 0.35rem;">
+                                    <span><i class="ri-time-line"></i> Pending Cash</span>
+                                    <button class="btn btn-secondary" style="padding: 0.2rem 0.4rem; font-size: 0.7rem;" onclick="addPendingRow()">
+                                        <i class="ri-add-line"></i> Add Row
+                                    </button>
+                                </h2>
+                                <div style="flex-grow: 1; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 4px; max-height: 120px;">
+                                    <table class="table-custom" id="pendingTable">
+                                        <thead>
+                                            <tr>
+                                                <th width="20%">ID</th>
+                                                <th width="30%">Name</th>
+                                                <th width="30%">Comment</th>
+                                                <th width="20%">Amt</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Dynamic rows -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="total-box" style="margin-top: 0.4rem;">
+                                    <span>Total Pending</span>
+                                    <span id="totalPending">0.00</span>
+                                </div>
+                            </div>
+
+                            <!-- Summary & Actions -->
+                            <div class="grid-col" style="gap: 0.5rem; margin-top: auto;">
+                                <div class="summary-box">
+                                    <div class="summary-item">
+                                        <div class="summary-label">System Sales</div>
+                                        <div class="summary-value" id="sysSales">0.00</div>
+                                    </div>
+                                    <div class="summary-item">
+                                        <div class="summary-label">Total Received</div>
+                                        <div class="summary-value" id="totReceived">0.00</div>
+                                    </div>
+                                    <div class="summary-item">
+                                        <div class="summary-label">Difference</div>
+                                        <div class="summary-value" id="sysDiff">0.00</div>
+                                    </div>
+                                </div>
+                                <button class="btn btn-success" style="font-size: 0.95rem; padding: 0.6rem; width: 100%; justify-content: center;" onclick="closeSales()">
+                                    <i class="ri-secure-payment-line"></i> Close Sales
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="common.js?v=13"></script>
+    <script src="cashier-closing.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('logoutBtn').addEventListener('click', (e) => {
+                e.preventDefault();
+                localStorage.clear();
+                window.location.href = 'index.html';
+            });
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('closingDate').value = today;
+        });
+    </script>
+</body>
+</html>

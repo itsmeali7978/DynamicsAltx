@@ -22,6 +22,48 @@ namespace Backend.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("Backend.Models.AbsenceMarker", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Comments")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedUser")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("EmployeeNo")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateTime>("LeaveDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("LeaveTypeId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LeaveTypeId");
+
+                    b.ToTable("AbsenceMarkers");
+                });
+
             modelBuilder.Entity("Backend.Models.Announcement", b =>
                 {
                     b.Property<int>("Id")
@@ -72,6 +114,9 @@ namespace Backend.Migrations
                     b.Property<string>("NAVDocNo")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("SelectedVendorIds")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -80,6 +125,39 @@ namespace Backend.Migrations
                     b.HasKey("BidNo");
 
                     b.ToTable("BidHeaders");
+                });
+
+            modelBuilder.Entity("Backend.Models.BidItemDistribution", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("BidHNo")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Location")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("NAVDocNo")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("NAVSku")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Qty")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BidHNo");
+
+                    b.ToTable("BidItemDistributions");
                 });
 
             modelBuilder.Entity("Backend.Models.BidLine", b =>
@@ -115,6 +193,188 @@ namespace Backend.Migrations
                     b.HasIndex("BidHNo");
 
                     b.ToTable("BidLines");
+                });
+
+            modelBuilder.Entity("Backend.Models.CashierClosing", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ClosingCreditMemoNo")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime>("ClosingDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ClosingInvoiceNo")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<decimal>("Difference")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("EmployeeNo")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("LocationCode")
+                        .IsRequired()
+                        .HasMaxLength(15)
+                        .HasColumnType("nvarchar(15)");
+
+                    b.Property<string>("StartingCreditMemoNo")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("StartingInvoiceNo")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<decimal>("SystemReturnAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("SystemSalesAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TotalBank")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TotalBankPOS")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TotalBankTransfer")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TotalCash")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TotalPendingCash")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CashierClosings");
+                });
+
+            modelBuilder.Entity("Backend.Models.CashierClosingDenomination", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CashierClosingId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Denomination")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<decimal>("LineTotal")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CashierClosingId");
+
+                    b.ToTable("CashierClosingDenominations");
+                });
+
+            modelBuilder.Entity("Backend.Models.CashierClosingDocument", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("AmountIncVAT")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("CashierClosingId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CustomerNo")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("DocumentNo")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("DocumentType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateTime>("PostingDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CashierClosingId");
+
+                    b.ToTable("CashierClosingDocuments");
+                });
+
+            modelBuilder.Entity("Backend.Models.CashierClosingPending", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("CashierClosingId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CustomerComments")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("EmpId")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("EmpName")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CashierClosingId");
+
+                    b.ToTable("CashierClosingPendings");
                 });
 
             modelBuilder.Entity("Backend.Models.Employee", b =>
@@ -224,6 +484,35 @@ namespace Backend.Migrations
                     b.ToTable("Employees");
                 });
 
+            modelBuilder.Entity("Backend.Models.LeaveType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsPaid")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("MaxDays")
+                        .HasColumnType("int");
+
+                    b.Property<string>("NameAr")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("NameEn")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("LeaveTypes");
+                });
+
             modelBuilder.Entity("Backend.Models.Location", b =>
                 {
                     b.Property<string>("LocationCode")
@@ -281,6 +570,29 @@ namespace Backend.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Nationalities");
+                });
+
+            modelBuilder.Entity("Backend.Models.ProfilePage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("PagePath")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProfileId");
+
+                    b.ToTable("ProfilePages");
                 });
 
             modelBuilder.Entity("Backend.Models.Shift", b =>
@@ -358,6 +670,9 @@ namespace Backend.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("ProfileId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Role")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -365,7 +680,32 @@ namespace Backend.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ProfileId");
+
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("Backend.Models.UserProfile", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("DashboardPage")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("ProfileName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UserProfiles");
                 });
 
             modelBuilder.Entity("Backend.Models.VendorSub", b =>
@@ -454,6 +794,28 @@ namespace Backend.Migrations
                     b.ToTable("VoucherHistories");
                 });
 
+            modelBuilder.Entity("Backend.Models.AbsenceMarker", b =>
+                {
+                    b.HasOne("Backend.Models.LeaveType", "LeaveType")
+                        .WithMany()
+                        .HasForeignKey("LeaveTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("LeaveType");
+                });
+
+            modelBuilder.Entity("Backend.Models.BidItemDistribution", b =>
+                {
+                    b.HasOne("Backend.Models.BidHeader", "BidHeader")
+                        .WithMany()
+                        .HasForeignKey("BidHNo")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("BidHeader");
+                });
+
             modelBuilder.Entity("Backend.Models.BidLine", b =>
                 {
                     b.HasOne("Backend.Models.BidHeader", "BidHeader")
@@ -463,6 +825,59 @@ namespace Backend.Migrations
                         .IsRequired();
 
                     b.Navigation("BidHeader");
+                });
+
+            modelBuilder.Entity("Backend.Models.CashierClosingDenomination", b =>
+                {
+                    b.HasOne("Backend.Models.CashierClosing", "CashierClosing")
+                        .WithMany("Denominations")
+                        .HasForeignKey("CashierClosingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CashierClosing");
+                });
+
+            modelBuilder.Entity("Backend.Models.CashierClosingDocument", b =>
+                {
+                    b.HasOne("Backend.Models.CashierClosing", "CashierClosing")
+                        .WithMany("Documents")
+                        .HasForeignKey("CashierClosingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CashierClosing");
+                });
+
+            modelBuilder.Entity("Backend.Models.CashierClosingPending", b =>
+                {
+                    b.HasOne("Backend.Models.CashierClosing", "CashierClosing")
+                        .WithMany("PendingCash")
+                        .HasForeignKey("CashierClosingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CashierClosing");
+                });
+
+            modelBuilder.Entity("Backend.Models.ProfilePage", b =>
+                {
+                    b.HasOne("Backend.Models.UserProfile", "Profile")
+                        .WithMany("AllowedPages")
+                        .HasForeignKey("ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Profile");
+                });
+
+            modelBuilder.Entity("Backend.Models.User", b =>
+                {
+                    b.HasOne("Backend.Models.UserProfile", "Profile")
+                        .WithMany()
+                        .HasForeignKey("ProfileId");
+
+                    b.Navigation("Profile");
                 });
 
             modelBuilder.Entity("Backend.Models.VendorSubPrice", b =>
@@ -487,6 +902,20 @@ namespace Backend.Migrations
             modelBuilder.Entity("Backend.Models.BidLine", b =>
                 {
                     b.Navigation("Prices");
+                });
+
+            modelBuilder.Entity("Backend.Models.CashierClosing", b =>
+                {
+                    b.Navigation("Denominations");
+
+                    b.Navigation("Documents");
+
+                    b.Navigation("PendingCash");
+                });
+
+            modelBuilder.Entity("Backend.Models.UserProfile", b =>
+                {
+                    b.Navigation("AllowedPages");
                 });
 #pragma warning restore 612, 618
         }

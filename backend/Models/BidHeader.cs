@@ -15,5 +15,7 @@ namespace Backend.Models
         public string Status { get; set; } = "Active";
 
         public string? NAVDocNo { get; set; }
+
+        public string? SelectedVendorIds { get; set; }
     }
 }

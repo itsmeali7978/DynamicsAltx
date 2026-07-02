@@ -15,7 +15,92 @@ document.addEventListener('DOMContentLoaded', async () => {
         currentBidNo = bidNo;
         await loadExistingBid(bidNo);
     }
+
+    const btnUpdateVendors = document.getElementById('btn-update-vendors');
+    if (btnUpdateVendors) {
+        btnUpdateVendors.addEventListener('click', async () => {
+            if (!currentBidNo) {
+                showToast('No active bid references found', 'warning');
+                return;
+            }
+
+            const checkedBoxes = document.querySelectorAll('#vendor-grid input[type="checkbox"]:checked');
+            const selectedIds = Array.from(checkedBoxes).map(chk => chk.value).join(',');
+
+            btnUpdateVendors.disabled = true;
+            const originalHtml = btnUpdateVendors.innerHTML;
+            btnUpdateVendors.innerHTML = '<i class="ri-loader-4-line animate-spin"></i> Applying...';
+
+            try {
+                const response = await fetch('/api/Bidding/UpdateSelectedVendors', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        bidNo: currentBidNo,
+                        selectedVendorIds: selectedIds
+                    })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    currentBidData = data;
+                    renderBidLines(data);
+                    renderVendorSelector(data);
+                    showToast('Vendors list updated successfully', 'success');
+                } else {
+                    throw new Error(data.message || 'Failed to update vendors list');
+                }
+            } catch (error) {
+                console.error(error);
+                showToast(error.message, 'error');
+            } finally {
+                btnUpdateVendors.disabled = false;
+                btnUpdateVendors.innerHTML = originalHtml;
+            }
+        });
+    }
 });
+
+function renderVendorSelector(data) {
+    const selectorSection = document.getElementById('vendor-selection-section');
+    if (!selectorSection) return;
+
+    selectorSection.style.display = 'block';
+
+    const grid = document.getElementById('vendor-grid');
+    if (!grid) return;
+
+    grid.innerHTML = '';
+
+    const selectedIdsStr = data.header.selectedVendorIds || "";
+    const selectedIds = selectedIdsStr.split(',')
+        .map(id => parseInt(id.trim()))
+        .filter(id => !isNaN(id));
+
+    data.vendors.forEach(v => {
+        const isSelected = selectedIds.includes(v.id);
+        const badge = document.createElement('div');
+        badge.className = `vendor-badge-checkbox${isSelected ? ' selected' : ''}`;
+        badge.dataset.vendorId = v.id;
+
+        badge.innerHTML = `
+            <input type="checkbox" id="vendor-chk-${v.id}" value="${v.id}" ${isSelected ? 'checked' : ''} onchange="toggleVendorBadgeState(this)">
+            <label for="vendor-chk-${v.id}" style="cursor: pointer; margin-left: 4px;">${v.displayName || v.vendorName}</label>
+        `;
+        grid.appendChild(badge);
+    });
+}
+
+function toggleVendorBadgeState(chk) {
+    const badge = chk.closest('.vendor-badge-checkbox');
+    if (badge) {
+        if (chk.checked) {
+            badge.classList.add('selected');
+        } else {
+            badge.classList.remove('selected');
+        }
+    }
+}
 
 const riyalSvg = `
     <svg viewBox="0 0 1124.14 1256.39" style="height: 0.9em; width: auto; vertical-align: middle; fill: currentColor; margin-right: 4px;">
@@ -46,6 +131,7 @@ async function loadExistingBid(bidNo) {
         }
         
         renderBidLines(data);
+        renderVendorSelector(data);
         document.getElementById('lines-section').style.display = 'block';
     } catch (error) {
         console.error('Error loading bid:', error);
@@ -128,6 +214,7 @@ document.getElementById('btn-new-bid').addEventListener('click', async () => {
             document.getElementById('display-bid-no').innerText = currentBidNo;
             document.getElementById('bid-identifier').style.display = 'flex';
             document.getElementById('fetch-section').style.display = 'block';
+            renderVendorSelector(data);
             btn.style.display = 'none';
         } else {
             throw new Error(data.message || 'Failed to initialize bid');
@@ -211,6 +298,7 @@ document.getElementById('btn-fetch-data').addEventListener('click', async () => 
         if (response.ok) {
             currentBidData = data; // Store globally
             renderBidLines(data);
+            renderVendorSelector(data);
             document.getElementById('lines-section').style.display = 'block';
             
             // Update nav-doc-no with the saved cumulative list from the header
@@ -230,7 +318,16 @@ document.getElementById('btn-fetch-data').addEventListener('click', async () => 
 
 function renderBidLines(data) {
     const lines = data.lines;
-    const vendors = data.vendors;
+    
+    // Parse selected vendor IDs
+    const selectedVendorIds = (data.header.selectedVendorIds || "")
+        .split(',')
+        .map(id => parseInt(id.trim()))
+        .filter(id => !isNaN(id));
+
+    // Filter vendors to only selected ones
+    const vendors = data.vendors.filter(v => selectedVendorIds.includes(v.id));
+
     const headerRow = document.getElementById('bid-lines-header');
     const body = document.getElementById('bid-lines-body');
     const countBadge = document.getElementById('line-count');
@@ -574,13 +671,22 @@ function exportBidToExcel() {
         return;
     }
 
-    const { header, lines, vendors } = currentBidData;
+    const { header, lines, distributions } = currentBidData;
+    const selectedVendorIds = (header.selectedVendorIds || "")
+        .split(',')
+        .map(id => parseInt(id.trim()))
+        .filter(id => !isNaN(id));
+    const vendors = currentBidData.vendors.filter(v => selectedVendorIds.includes(v.id));
 
     // Build the sheet data array
     const sheetData = [];
 
+    // Identify unique locations in distributions
+    const dists = distributions || [];
+    const uniqueLocations = [...new Set(dists.map(d => d.location || 'N/A').filter(loc => loc))].sort();
+
     // Header row
-    const headers = ['SKU/Code', 'Description', 'UOM', 'Quantity'];
+    const headers = ['SKU/Code', 'Description', 'UOM', 'Quantity', ...uniqueLocations];
     vendors.forEach(v => {
         const name = v.displayName || v.vendorName;
         headers.push(`${name} (Unit Cost)`);
@@ -598,6 +704,13 @@ function exportBidToExcel() {
             line.uom,
             line.quantity
         ];
+
+        // Add location-wise quantities
+        const distsForLine = dists.filter(d => d.navSku === line.navSku);
+        uniqueLocations.forEach(loc => {
+            const match = distsForLine.find(d => (d.location || 'N/A') === loc);
+            row.push(match ? match.qty : 0);
+        });
 
         // Find row element in DOM to read live values
         const rowEl = document.querySelector(`#bid-lines-body tr[data-line-id="${line.id}"]`);
@@ -681,7 +794,12 @@ function exportBidToPDF() {
         return;
     }
 
-    const { header, lines, vendors } = currentBidData;
+    const { header, lines, distributions } = currentBidData;
+    const selectedVendorIds = (header.selectedVendorIds || "")
+        .split(',')
+        .map(id => parseInt(id.trim()))
+        .filter(id => !isNaN(id));
+    const vendors = currentBidData.vendors.filter(v => selectedVendorIds.includes(v.id));
     const creationDate = new Date(header.createdDate).toLocaleDateString('en-GB', {
         day: '2-digit', month: 'short', year: 'numeric'
     });
@@ -747,6 +865,53 @@ function exportBidToPDF() {
         `;
     }).join('');
 
+    // Group distributions by Location for Location-wise tables
+    const dists = distributions || [];
+    const groupedByLocation = {};
+    dists.forEach(d => {
+        const loc = d.location || 'N/A';
+        if (!groupedByLocation[loc]) {
+            groupedByLocation[loc] = [];
+        }
+        groupedByLocation[loc].push(d);
+    });
+
+    const locationsHtml = Object.keys(groupedByLocation).map(loc => {
+        const locRows = groupedByLocation[loc].map(d => {
+            const itemLine = lines.find(l => l.navSku === d.navSku);
+            const desc = itemLine ? (itemLine.description || 'N/A') : 'N/A';
+            return `
+                <tr>
+                    <td style="font-weight: 700; color: #4f46e5;">${d.navSku}</td>
+                    <td>${desc}</td>
+                    <td style="text-align: center; font-weight: 600;">${d.qty}</td>
+                    <td style="font-size: 11px; color: #64748b;">${d.navDocNo || 'N/A'}</td>
+                </tr>
+            `;
+        }).join('');
+
+        return `
+            <div style="page-break-inside: avoid; margin-top: 30px;">
+                <h3 style="font-size: 13px; font-weight: 700; color: #1e293b; margin-bottom: 8px; font-family: 'Outfit', sans-serif; display: flex; align-items: center; gap: 6px; border-bottom: 1.5px solid #cbd5e1; padding-bottom: 4px;">
+                    <i class="ri-store-2-line" style="color: #059669; margin-right: 4px;"></i> Location / Store: ${loc}
+                </h3>
+                <table class="pdf-comp-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 15%;">SKU</th>
+                            <th style="width: 50%;">Description</th>
+                            <th style="width: 15%; text-align: center;">Qty</th>
+                            <th style="width: 20%;">Source Documents</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${locRows}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    }).join('');
+
     const template = `
         <div class="pdf-comp-wrapper">
             <div class="pdf-comp-header">
@@ -784,6 +949,13 @@ function exportBidToPDF() {
                     ${rowsHtml}
                 </tbody>
             </table>
+
+            <div style="margin-top: 40px; page-break-before: auto;">
+                <h2 style="font-size: 16px; font-weight: 700; color: #0f172a; font-family: 'Outfit', sans-serif; border-bottom: 2.5px solid #4f46e5; padding-bottom: 6px; margin-bottom: 15px;">
+                    Location-wise Bid Item Distribution
+                </h2>
+                ${locationsHtml || '<p style="color: #64748b; font-style: italic;">No item distribution details available.</p>'}
+            </div>
 
             <div class="pdf-footer" style="margin-top: 40px;">
                 <p>Highlighted cells indicate the lowest cost option for the respective SKU.</p>

@@ -4,6 +4,7 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     loadUsers();
+    loadProfilesDropdown();
 
     const userModal = document.getElementById('user-modal');
     const btnAddUser = document.getElementById('btn-add-user');
@@ -27,7 +28,8 @@ document.addEventListener('DOMContentLoaded', () => {
             name: document.getElementById('reg-name').value,
             email: document.getElementById('reg-email').value,
             location: document.getElementById('reg-location').value,
-            password: document.getElementById('reg-password').value
+            password: document.getElementById('reg-password').value,
+            profileId: parseInt(document.getElementById('reg-profile').value) || null
         };
 
         try {
@@ -67,6 +69,7 @@ async function loadUsers() {
                     <h4>${user.name}</h4>
                     <p><i class="ri-mail-line"></i> ${user.email}</p>
                     <p><i class="ri-map-pin-line"></i> ${user.location}</p>
+                    <p><i class="ri-shield-user-line"></i> Profile: <strong>${user.profileName || 'Default/Admin'}</strong></p>
                 </div>
                 <div class="user-actions">
                     <button class="btn-delete" onclick="deleteUser(${user.id}, '${user.name}')" title="Delete User">
@@ -100,8 +103,29 @@ async function deleteUser(id, name) {
                 showToast(err.message || 'Deletion failed', 'error');
             }
         } catch (error) {
-            console.error('Deletion error:', error);
-            showToast('Connection error', 'error');
+            console.error('Delete error:', error);
+            showToast('Delete request failed', 'error');
         }
+    }
+}
+
+async function loadProfilesDropdown() {
+    const select = document.getElementById('reg-profile');
+    if (!select) return;
+
+    try {
+        const response = await fetch('/api/Profiles');
+        if (response.ok) {
+            const profiles = await response.json();
+            select.innerHTML = '<option value="" disabled selected>Select Profile...</option>';
+            profiles.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.id;
+                opt.textContent = p.profileName;
+                select.appendChild(opt);
+            });
+        }
+    } catch (e) {
+        console.error('Error loading profiles:', e);
     }
 }

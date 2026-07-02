@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Closing Reports - DynamicsAltx</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        .content-wrapper {
+            overflow: hidden;
+            height: 100vh;
+            padding: 1.5rem 2rem;
+            display: flex;
+            flex-direction: column;
+        }
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+        .page-title {
+            font-size: 1.5rem;
+            color: var(--text-main);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .section-card {
+            background: white;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+            box-shadow: var(--shadow-sm);
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+        .search-box {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            max-width: 400px;
+        }
+        .form-control {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: var(--bg-app);
+            color: var(--text-main);
+            font-size: 0.85rem;
+        }
+        .table-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+        }
+        .table-custom {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .table-custom th, .table-custom td {
+            border-bottom: 1px solid var(--border-color);
+            padding: 0.6rem 0.75rem;
+            font-size: 0.85rem;
+            text-align: left;
+        }
+        .table-custom th {
+            background-color: #f9fafb;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .btn {
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            text-decoration: none;
+        }
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+        .alert {
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            display: none;
+        }
+        .alert-error {
+            background-color: #fee2e2;
+            color: var(--error);
+            border: 1px solid #f87171;
+        }
+    </style>
+</head>
+<body>
+    <div class="erp-app">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand-logo">
+                    <i class="ri-rhythm-line"></i>
+                    <span>DynamicsAltx</span>
+                </div>
+                <button id="sidebar-toggle" class="icon-btn">
+                    <i class="ri-menu-fold-line"></i>
+                </button>
+            </div>
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="dashboard.html" class="nav-link">
+                            <i class="ri-dashboard-3-line"></i>
+                            <span>Overview</span>
+                        </a>
+                    </li>
+                    <li class="nav-group">
+                        <div class="group-header">
+                            <i class="ri-briefcase-4-line"></i>
+                            <span>Business Process</span>
+                            <i class="ri-arrow-down-s-line arrow-icon" style="transform: rotate(180deg);"></i>
+                        </div>
+                        <ul class="submenu" style="display: block;">
+                            <li><a href="cashier-closing.html"><i class="ri-file-list-3-line"></i> Cashier Closing</a></li>
+                            <li><a href="closing-reports.html" class="active"><i class="ri-file-chart-line"></i> Closing Reports</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-group">
+                        <div class="group-header">
+                            <i class="ri-team-line"></i>
+                            <span>Human Resource</span>
+                            <i class="ri-arrow-down-s-line arrow-icon"></i>
+                        </div>
+                        <ul class="submenu">
+                            <li><a href="employees.html"><i class="ri-user-settings-line"></i> Employees</a></li>
+                            <li><a href="absence-marker.html"><i class="ri-calendar-event-line"></i> Absence Marker</a></li>
+                            <li><a href="absence-report.html"><i class="ri-file-chart-line"></i> Monthly Absence Report</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item" style="margin-top: auto;">
+                        <a href="index.html" class="nav-link" id="logoutBtn">
+                            <i class="ri-logout-box-r-line"></i>
+                            <span>Logout</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content" style="height: 100vh; overflow: hidden;">
+            <div class="content-wrapper">
+                <div class="page-header">
+                    <h1 class="page-title"><i class="ri-file-history-line" style="color: var(--primary);"></i> Closing Reports</h1>
+                </div>
+
+                <div id="alertBox" class="alert alert-error"></div>
+
+                <div class="section-card">
+                    <div class="search-box">
+                        <i class="ri-search-line" style="align-self: center; color: var(--text-muted);"></i>
+                        <input type="text" id="searchVal" class="form-control" placeholder="Search by Employee No or Name..." oninput="filterStatements()">
+                    </div>
+
+                    <div class="table-container">
+                        <table class="table-custom" id="statementsTable">
+                            <thead>
+                                <tr>
+                                    <th width="15%">Statement ID</th>
+                                    <th width="30%">Date Closed</th>
+                                    <th width="20%">Employee No</th>
+                                    <th width="25%">Employee Name</th>
+                                    <th width="10%">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="5" style="text-align: center;">Loading statements...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="common.js?v=13"></script>
+    <script>
+        let allStatements = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check Admin Access
+            const userRole = localStorage.getItem('userRole');
+            if (userRole !== 'Admin') {
+                window.location.href = 'dashboard.html';
+                return;
+            }
+
+            document.getElementById('logoutBtn').addEventListener('click', (e) => {
+                e.preventDefault();
+                localStorage.clear();
+                window.location.href = 'index.html';
+            });
+
+            loadStatements();
+        });
+
+        function showToast(message) {
+            const box = document.getElementById('alertBox');
+            box.textContent = message;
+            box.style.display = 'block';
+            setTimeout(() => box.style.display = 'none', 5000);
+        }
+
+        async function loadStatements() {
+            try {
+                const response = await fetch('/api/CashierClosing');
+                if (response.ok) {
+                    allStatements = await response.json();
+                    renderStatements(allStatements);
+                } else {
+                    showToast('Failed to load statements from the server.');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Network error while fetching statements.');
+            }
+        }
+
+        function renderStatements(list) {
+            const tbody = document.querySelector('#statementsTable tbody');
+            tbody.innerHTML = '';
+
+            if (list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No statements found.</td></tr>`;
+                return;
+            }
+
+            list.forEach(item => {
+                const dateStr = new Date(item.createdAt).toLocaleString();
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>#${item.id}</strong></td>
+                    <td>${dateStr}</td>
+                    <td>${item.employeeNo}</td>
+                    <td>${item.employeeName || 'Unknown'}</td>
+                    <td>
+                        <a href="cashier-closing.html?id=${item.id}" class="btn btn-primary">
+                            <i class="ri-external-link-line"></i> Open
+                        </a>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function filterStatements() {
+            const query = document.getElementById('searchVal').value.trim().toLowerCase();
+            if (!query) {
+                renderStatements(allStatements);
+                return;
+            }
+
+            const filtered = allStatements.filter(item => 
+                item.employeeNo.toLowerCase().includes(query) || 
+                (item.employeeName && item.employeeName.toLowerCase().includes(query)) ||
+                item.id.toString().includes(query)
+            );
+            renderStatements(filtered);
+        }
+    </script>
+</body>
+</html>

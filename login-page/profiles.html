@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profiles Management - DynamicsAltx</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        .content-wrapper {
+            overflow-y: auto;
+            max-height: 100vh;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+        .page-title {
+            font-size: 1.5rem;
+            color: var(--text-main);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .profiles-layout {
+            display: grid;
+            grid-template-columns: 1.2fr 1.8fr;
+            gap: 1.5rem;
+        }
+        @media (max-width: 1024px) {
+            .profiles-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+        }
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+            color: var(--text-main);
+        }
+        .form-control {
+            width: 100%;
+            padding: 0.6rem 0.8rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: var(--bg-app);
+            color: var(--text-main);
+            font-size: 0.9rem;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        .pages-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+            max-height: 250px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            border-radius: 6px;
+            background-color: var(--bg-app);
+        }
+        .page-checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--text-main);
+            cursor: pointer;
+        }
+        .page-checkbox-label input {
+            cursor: pointer;
+        }
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+        .btn-secondary {
+            background-color: #cbd5e1;
+            color: #1e293b;
+        }
+        .btn-secondary:hover {
+            background-color: #94a3b8;
+        }
+        .table-custom {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .table-custom th, .table-custom td {
+            border-bottom: 1px solid var(--border-color);
+            padding: 0.75rem;
+            font-size: 0.85rem;
+            text-align: left;
+        }
+        .table-custom th {
+            background-color: #f9fafb;
+            font-weight: 600;
+        }
+        .actions-cell {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .btn-action-icon {
+            background: none;
+            border: none;
+            font-size: 1.1rem;
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 4px;
+        }
+        .btn-edit { color: var(--primary); }
+        .btn-edit:hover { background-color: #e0e7ff; }
+        .btn-delete { color: var(--danger); }
+        .btn-delete:hover { background-color: #fee2e2; }
+    </style>
+</head>
+<body>
+    <div class="erp-app">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand-logo">
+                    <i class="ri-rhythm-line"></i>
+                    <span>DynamicsAltx</span>
+                </div>
+                <button id="sidebar-toggle" class="icon-btn">
+                    <i class="ri-menu-fold-line"></i>
+                </button>
+            </div>
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="dashboard.html" class="nav-link">
+                            <i class="ri-dashboard-3-line"></i>
+                            <span>Overview</span>
+                        </a>
+                    </li>
+                    <li class="nav-group">
+                        <div class="group-header">
+                            <i class="ri-bank-line"></i>
+                            <span>Finance</span>
+                            <i class="ri-arrow-down-s-line arrow"></i>
+                        </div>
+                        <ul class="submenu">
+                            <li><a href="voucher-history.html">Voucher History</a></li>
+                            <li><a href="#">General Ledger</a></li>
+                            <li><a href="#">Accounts Payable</a></li>
+                            <li><a href="#">Accounts Receivable</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-group">
+                        <div class="group-header">
+                            <i class="ri-briefcase-4-line"></i>
+                            <span>Business Process</span>
+                            <i class="ri-arrow-down-s-line arrow-icon"></i>
+                        </div>
+                        <ul class="submenu">
+                            <li><a href="cashier-closing.html"><i class="ri-file-list-3-line"></i> Cashier Closing</a></li>
+                            <li><a href="closing-reports.html"><i class="ri-file-chart-line"></i> Closing Reports</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-group">
+                        <div class="group-header">
+                            <i class="ri-team-line"></i>
+                            <span>Human Resource</span>
+                            <i class="ri-arrow-down-s-line arrow-icon"></i>
+                        </div>
+                        <ul class="submenu">
+                            <li><a href="employees.html"><i class="ri-user-settings-line"></i> Employees</a></li>
+                            <li><a href="absence-marker.html"><i class="ri-calendar-event-line"></i> Absence Marker</a></li>
+                            <li><a href="absence-report.html"><i class="ri-file-chart-line"></i> Monthly Absence Report</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-group">
+                        <div class="group-header">
+                            <i class="ri-shopping-cart-2-line"></i>
+                            <span>Supply Chain</span>
+                            <i class="ri-arrow-down-s-line arrow"></i>
+                        </div>
+                        <ul class="submenu">
+                            <li><a href="vendors.html">Create Vendor</a></li>
+                            <li><a href="bidding-create.html">Create Bid</a></li>
+                            <li><a href="bidding-list.html">Bidding List</a></li>
+                            <li><a href="barcode-print.html">Barcode Printing</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-group">
+                        <div class="group-header">
+                            <i class="ri-customer-service-line"></i>
+                            <span>CRM &amp; Sales</span>
+                            <i class="ri-arrow-down-s-line arrow"></i>
+                        </div>
+                        <ul class="submenu">
+                            <li><a href="reconciliation.html">Invoice Reconciliation</a></li>
+                            <li><a href="#">Sales Pipeline</a></li>
+                            <li><a href="#">Customers</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-group active">
+                        <div class="group-header">
+                            <i class="ri-settings-4-line"></i>
+                            <span>System</span>
+                            <i class="ri-arrow-down-s-line arrow"></i>
+                        </div>
+                        <ul class="submenu" style="display: block;">
+                            <li><a href="users.html">User Management</a></li>
+                            <li><a href="locations.html">Locations</a></li>
+                            <li><a href="profiles.html" class="active">Profiles</a></li>
+                            <li><a href="nationalities.html">Nationalities</a></li>
+                            <li><a href="shifts.html">Shifts</a></li>
+                            <li><a href="sync.html">Data Sync (Navision)</a></li>
+                            <li><a href="announcements.html">Announcements</a></li>
+                            <li><a href="settings.html">Account Settings</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-block">
+                    <img src="https://ui-avatars.com/api/?name=Admin+User&background=6366f1&color=fff" alt="User">
+                    <div class="user-info">
+                        <p class="user-name">Admin User</p>
+                        <p class="user-role">System Administrator</p>
+                    </div>
+                    <button class="logout-btn icon-btn" title="Logout">
+                        <i class="ri-logout-box-r-line"></i>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="main-content">
+            <div class="content-wrapper">
+                <div class="page-header">
+                    <h1 class="page-title"><i class="ri-shield-user-line" style="color: var(--primary);"></i> User Profiles</h1>
+                </div>
+
+                <div class="profiles-layout">
+                    <!-- Column 1: Create/Edit Profile Form -->
+                    <div class="card">
+                        <h3 class="card-title" id="form-card-title"><i class="ri-add-box-line" style="color: var(--primary);"></i> Create Profile</h3>
+                        <form id="profile-form" onsubmit="saveProfile(event)">
+                            <input type="hidden" id="profile-id">
+                            
+                            <div class="form-group">
+                                <label for="profile-name">Profile Name</label>
+                                <input type="text" id="profile-name" class="form-control" placeholder="e.g. Cashier Profile" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="dashboard-page">Default Landing Page</label>
+                                <select id="dashboard-page" class="form-control" required>
+                                    <option value="dashboard.html">Overview (dashboard.html)</option>
+                                    <option value="employees.html">Employees (employees.html)</option>
+                                    <option value="absence-marker.html">Absence Marker (absence-marker.html)</option>
+                                    <option value="absence-report.html">Absence Report (absence-report.html)</option>
+                                    <option value="cashier-closing.html">Cashier Closing (cashier-closing.html)</option>
+                                    <option value="closing-reports.html">Closing Reports (closing-reports.html)</option>
+                                    <option value="users.html">User Management (users.html)</option>
+                                    <option value="locations.html">Locations (locations.html)</option>
+                                    <option value="nationalities.html">Nationalities (nationalities.html)</option>
+                                    <option value="shifts.html">Shifts (shifts.html)</option>
+                                    <option value="short-breaks.html">Short Breaks (short-breaks.html)</option>
+                                    <option value="leave-types.html">Leave Types (leave-types.html)</option>
+                                    <option value="sync.html">Data Sync (sync.html)</option>
+                                    <option value="reconciliation.html">Invoice Reconciliation (reconciliation.html)</option>
+                                    <option value="vendors.html">Create Vendor (vendors.html)</option>
+                                    <option value="bidding-create.html">Create Bid (bidding-create.html)</option>
+                                    <option value="bidding-list.html">Bidding List (bidding-list.html)</option>
+                                    <option value="barcode-print.html">Barcode Print (barcode-print.html)</option>
+                                    <option value="voucher-history.html">Voucher History (voucher-history.html)</option>
+                                    <option value="announcements.html">Announcements (announcements.html)</option>
+                                    <option value="settings.html">Account Settings (settings.html)</option>
+                                    <option value="profiles.html">Profiles (profiles.html)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Permitted Page Routes</label>
+                                <div class="pages-grid" id="pages-checkboxes-container">
+                                    <!-- Checkboxes generated here -->
+                                </div>
+                            </div>
+
+                            <div style="display: flex; gap: 0.5rem; margin-top: 1.5rem;">
+                                <button type="submit" class="btn btn-primary" id="btn-submit-profile">
+                                    <i class="ri-save-line"></i> Save Profile
+                                </button>
+                                <button type="button" class="btn btn-secondary" id="btn-cancel-edit" style="display: none;" onclick="cancelEdit()">
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Column 2: Profiles List -->
+                    <div class="card" style="display: flex; flex-direction: column; min-height: 0;">
+                        <h3 class="card-title"><i class="ri-list-check" style="color: var(--primary);"></i> Active Profiles</h3>
+                        <div style="overflow-x: auto; flex-grow: 1;">
+                            <table class="table-custom" id="profiles-table">
+                                <thead>
+                                    <tr>
+                                        <th>Profile ID</th>
+                                        <th>Profile Name</th>
+                                        <th>Default Page</th>
+                                        <th>Allowed Pages</th>
+                                        <th width="15%">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="5" style="text-align: center; color: var(--text-muted);">Loading active profiles...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="common.js?v=13"></script>
+    <script src="profiles.js"></script>
+</body>
+</html>

@@ -22,7 +22,14 @@ namespace Backend.Controllers
         public async Task<ActionResult<IEnumerable<object>>> GetUsers()
         {
             return await _context.Users
-                .Select(u => new { u.Id, u.Email, u.Name, u.Location })
+                .Select(u => new { 
+                    u.Id, 
+                    u.Email, 
+                    u.Name, 
+                    u.Location,
+                    ProfileId = u.ProfileId,
+                    ProfileName = u.Profile != null ? u.Profile.ProfileName : "Default/Admin"
+                })
                 .ToListAsync();
         }
 
@@ -40,7 +47,8 @@ namespace Backend.Controllers
                 Email = dto.Email,
                 PasswordHash = dto.Password,
                 Name = dto.Name,
-                Location = dto.Location
+                Location = dto.Location,
+                ProfileId = dto.ProfileId
             };
 
             _context.Users.Add(newUser);

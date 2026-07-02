@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Absence Report - DynamicsAltx</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .absence-report-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .form-group label {
+            font-weight: 600;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+        .form-group input, .form-group select {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            background-color: white;
+            color: var(--text-main);
+        }
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        .btn-create {
+            background-color: var(--primary);
+            color: white;
+            padding: 0.75rem 1.75rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: background-color 0.2s;
+            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.2);
+        }
+        .btn-create:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .filter-card {
+            background: white;
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-sm);
+        }
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr) auto;
+            gap: 1rem;
+            align-items: flex-end;
+        }
+        @media (max-width: 1024px) {
+            .filter-row {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        @media (max-width: 600px) {
+            .filter-row {
+                grid-template-columns: 1fr;
+            }
+        }
+        .grid-container {
+            background: white;
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+        .grid-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--text-main);
+            background-color: #fafafa;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+        }
+        .erp-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+        .erp-table th {
+            padding: 1rem 1.5rem;
+            background-color: #f8fafc;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .erp-table td {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+            color: var(--text-main);
+        }
+        .erp-table tr:last-child td {
+            border-bottom: none;
+        }
+        .erp-table tbody tr:hover {
+            background-color: #f1f5f9;
+        }
+        .badge-leave {
+            padding: 0.25rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            background-color: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            white-space: nowrap;
+        }
+        .btn-print {
+            background-color: #0284c7;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            transition: background-color 0.2s;
+        }
+        .btn-print:hover {
+            background-color: #0369a1;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal.active { display: flex; }
+
+        .modal-content {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 700px;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            cursor: pointer;
+            font-size: 1.5rem;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+    <div class="erp-app">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand-logo">
+                    <i class="ri-rhythm-line"></i>
+                    <span>DynamicsAltx</span>
+                </div>
+                <button id="sidebar-toggle" class="icon-btn">
+                    <i class="ri-menu-fold-line"></i>
+                </button>
+            </div>
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="dashboard.html" class="nav-link">
+                            <i class="ri-dashboard-3-line"></i>
+                            <span>Overview</span>
+                        </a>
+                    </li>
+                    <li class="nav-group">
+                        <div class="group-header">
+                            <i class="ri-bank-line"></i>
+                            <span>Finance</span>
+                            <i class="ri-arrow-down-s-line arrow"></i>
+                        </div>
+                        <ul class="submenu">
+                            <li><a href="voucher-history.html">Voucher History</a></li>
+                            <li><a href="#">General Ledger</a></li>
+                            <li><a href="#">Accounts Payable</a></li>
+                            <li><a href="#">Accounts Receivable</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-group">
+                        <div class="group-header">
+                            <i class="ri-briefcase-4-line"></i>
+                            <span>Business Process</span>
+                            <i class="ri-arrow-down-s-line arrow-icon"></i>
+                        </div>
+                        <ul class="submenu">
+                            <li><a href="cashier-closing.html"><i class="ri-file-list-3-line"></i> Cashier Closing</a></li>
+                            <li><a href="closing-reports.html"><i class="ri-file-chart-line"></i> Closing Reports</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-group">
+                        <div class="group-header">
+                            <i class="ri-team-line"></i>
+                            <span>Human Resource</span>
+                            <i class="ri-arrow-down-s-line arrow-icon"></i>
+                        </div>
+                        <ul class="submenu" style="display: block;">
+                            <li><a href="employees.html"><i class="ri-user-settings-line"></i> Employees</a></li>
+                            <li><a href="short-breaks.html"><i class="ri-time-line"></i> Short Breaks</a></li>
+                        </ul>
+                    </li>
+                     <li class="nav-item">
+                        <a href="index.html" class="nav-link">
+                            <i class="ri-logout-box-r-line"></i>
+                            <span>Logout</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="main-content">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="hamburger-menu" id="mobile-menu-btn">
+                        <i class="ri-menu-line"></i>
+                    </button>
+                    <h2 class="page-title" data-i18n="nav_reports">Reports & Analytics</h2>
+                </div>
+            </header>
+
+            <div class="content">
+                <div class="card animate-in">
+                    <div class="card-header-row" style="margin-bottom: 1.5rem;">
+                        <h3>Absence Monthly Report</h3>
+                    </div>
+
+                    <div class="filter-card">
+                        <div class="filter-row">
+                            <div class="form-group">
+                                <label for="filterMonth">Month</label>
+                                <select id="filterMonth">
+                                    <option value="1">January</option>
+                                    <option value="2">February</option>
+                                    <option value="3">March</option>
+                                    <option value="4">April</option>
+                                    <option value="5">May</option>
+                                    <option value="6">June</option>
+                                    <option value="7">July</option>
+                                    <option value="8">August</option>
+                                    <option value="9">September</option>
+                                    <option value="10">October</option>
+                                    <option value="11">November</option>
+                                    <option value="12">December</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="filterYear">Year</label>
+                                <input type="number" id="filterYear" min="2020" max="2035" value="2026">
+                            </div>
+                            <div class="form-group">
+                                <label for="filterEmpNo">Employee No.</label>
+                                <input type="text" id="filterEmpNo" placeholder="All Employees">
+                            </div>
+                            <div class="form-group">
+                                <label for="filterLocation">Location</label>
+                                <select id="filterLocation">
+                                    <option value="">All Locations</option>
+                                </select>
+                            </div>
+                            <button type="button" class="btn-create" onclick="generateReport()">
+                                <i class="ri-filter-line"></i> Search
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="grid-container">
+                        <div class="grid-header">
+                            <span>Absence Entries</span>
+                            <button type="button" class="btn-print" onclick="printReport()">
+                                <i class="ri-printer-line"></i> Print Report
+                            </button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="erp-table">
+                                <thead>
+                                    <tr>
+                                        <th>Employee No.</th>
+                                        <th>Employee Name</th>
+                                        <th>Leave Type</th>
+                                        <th>Absence Date</th>
+                                        <th>Location</th>
+                                        <th>Comments</th>
+                                        <th>Created Date</th>
+                                        <th>Created User</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="reportTableBody">
+                                    <tr>
+                                        <td colspan="9" style="text-align: center; color: var(--text-muted);">
+                                            No search executed yet. Fill filters and click search.
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="edit-modal" class="modal">
+        <div class="modal-content">
+            <i class="ri-close-line close-modal" onclick="hideEditModal()"></i>
+            <h3 style="margin-bottom: 2rem; font-family: 'Outfit';">Edit Absence Entry</h3>
+            
+            <form id="edit-absence-form" onsubmit="event.preventDefault(); submitEditAbsence();">
+                <input type="hidden" id="editEntryId">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editEmpId"><i class="ri-user-line"></i> Employee Number</label>
+                        <input type="text" id="editEmpId" readonly placeholder="Employee ID">
+                    </div>
+                    <div class="form-group">
+                        <label for="editEmpName"><i class="ri-user-line"></i> Employee Name</label>
+                        <input type="text" id="editEmpName" readonly placeholder="Employee Name">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editLeaveType"><i class="ri-list-check"></i> Leave Type *</label>
+                        <select id="editLeaveType" required>
+                            <option value="" disabled selected>Loading Leave Types...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editLeaveDate"><i class="ri-calendar-line"></i> Absence Date *</label>
+                        <input type="date" id="editLeaveDate" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editLocation"><i class="ri-map-pin-line"></i> Location</label>
+                        <select id="editLocation">
+                            <option value="" disabled selected>Loading locations...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editComments"><i class="ri-chat-4-line"></i> Comments</label>
+                        <textarea id="editComments" rows="3" placeholder="Enter reason or comments..."></textarea>
+                    </div>
+                </div>
+
+                <div class="btn-container" style="justify-content: flex-end; margin-top: 2rem;">
+                    <button type="button" class="btn-secondary" onclick="hideEditModal()">Cancel</button>
+                    <button type="submit" class="btn-create">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="common.js?v=13"></script>
+    <script src="absence-report.js"></script>
+</body>
+</html>

@@ -41,7 +41,7 @@ var wwwrootPath = Path.Combine(builder.Environment.ContentRootPath, "wwwroot");
 var loginPagePath = Path.GetFullPath(Path.Combine(builder.Environment.ContentRootPath, "..", "login-page"));
 
 string? activeStaticPath = null;
-if (Directory.Exists(wwwrootPath)) activeStaticPath = wwwrootPath;
+if (Directory.Exists(wwwrootPath) && File.Exists(Path.Combine(wwwrootPath, "index.html"))) activeStaticPath = wwwrootPath;
 else if (Directory.Exists(loginPagePath)) activeStaticPath = loginPagePath;
 
 if (activeStaticPath != null)

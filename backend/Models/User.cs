@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Backend.Models
 {
@@ -23,5 +24,10 @@ namespace Backend.Models
         [Required]
         [StringLength(20)]
         public string Role { get; set; } = "User";
+
+        public int? ProfileId { get; set; }
+
+        [ForeignKey("ProfileId")]
+        public UserProfile? Profile { get; set; }
     }
 }

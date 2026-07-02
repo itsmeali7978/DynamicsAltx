@@ -1126,3 +1126,118 @@ input[type=number] {
     transform: translateY(-2px);
     box-shadow: 0 15px 20px -5px rgba(239, 68, 68, 0.3);
 }
+
+/* RTL Styles overrides for Arabic */
+html[dir="rtl"] {
+    direction: rtl;
+}
+
+html[dir="rtl"] body {
+    text-align: right;
+}
+
+html[dir="rtl"] th,
+html[dir="rtl"] td,
+html[dir="rtl"] .card-header-row,
+html[dir="rtl"] .welcome-text,
+html[dir="rtl"] .form-group,
+html[dir="rtl"] .input-field,
+html[dir="rtl"] .toast-content,
+html[dir="rtl"] .modal-header,
+html[dir="rtl"] .modal-body {
+    text-align: right !important;
+}
+
+html[dir="rtl"] .sidebar {
+    border-left: 1px solid rgba(255, 255, 255, 0.05);
+    border-right: none !important;
+}
+
+html[dir="rtl"] .sidebar-nav .nav-link i,
+html[dir="rtl"] .sidebar-nav .group-header i:first-child,
+html[dir="rtl"] .submenu li a i {
+    margin-left: 0.75rem !important;
+    margin-right: 0 !important;
+}
+
+html[dir="rtl"] .sidebar-nav .submenu li a {
+    padding-right: 3.5rem !important;
+    padding-left: 1.5rem !important;
+}
+
+html[dir="rtl"] .group-header .arrow,
+html[dir="rtl"] .group-header .arrow-icon,
+html[dir="rtl"] .group-header .arrow-icon i {
+    margin-right: auto !important;
+    margin-left: 0 !important;
+    transform: rotate(0deg);
+}
+
+html[dir="rtl"] .nav-group.expanded .group-header .arrow,
+html[dir="rtl"] .nav-group.expanded .group-header .arrow-icon {
+    transform: rotate(-90deg) !important;
+}
+
+html[dir="rtl"] .search-bar {
+    position: relative;
+}
+
+html[dir="rtl"] .search-bar i {
+    right: 1rem !important;
+    left: auto !important;
+}
+
+html[dir="rtl"] .search-bar input {
+    padding-right: 2.5rem !important;
+    padding-left: 1rem !important;
+    text-align: right;
+}
+
+html[dir="rtl"] .user-block {
+    flex-direction: row-reverse !important;
+}
+
+html[dir="rtl"] .user-info {
+    text-align: right !important;
+    margin-right: 0.75rem !important;
+    margin-left: 0 !important;
+}
+
+html[dir="rtl"] .logout-btn {
+    margin-right: auto !important;
+    margin-left: 0 !important;
+}
+
+html[dir="rtl"] .hamburger-menu {
+    margin-left: 1rem !important;
+    margin-right: 0 !important;
+}
+
+html[dir="rtl"] .topbar-actions {
+    margin-right: auto !important;
+    margin-left: 0 !important;
+    flex-direction: row-reverse;
+}
+
+html[dir="rtl"] .toast-container {
+    left: 1.5rem !important;
+    right: auto !important;
+}
+
+html[dir="rtl"] .toast {
+    flex-direction: row-reverse !important;
+}
+
+html[dir="rtl"] .toast-title {
+    text-align: right !important;
+}
+
+html[dir="rtl"] .toast-message {
+    text-align: right !important;
+}
+
+html[dir="rtl"] .ri-arrow-right-up-line,
+html[dir="rtl"] .ri-arrow-right-line {
+    transform: scaleX(-1) !important;
+}
+

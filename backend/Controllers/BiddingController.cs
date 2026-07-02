@@ -117,7 +117,11 @@ namespace Backend.Controllers
 
             var vendors = await _context.VendorSubs.ToListAsync();
 
-            return Ok(new { header, lines, vendors });
+            var distributions = await _context.BidItemDistributions
+                .Where(d => d.BidHNo == bidNo)
+                .ToListAsync();
+
+            return Ok(new { header, lines, vendors, distributions });
         }
 
         // POST: api/Bidding/InitializeBid
@@ -136,7 +140,7 @@ namespace Backend.Controllers
             await _context.SaveChangesAsync();
             
             var vendors = await _context.VendorSubs.ToListAsync();
-            return Ok(new { header, lines = new List<BidLine>(), vendors });
+            return Ok(new { header, lines = new List<BidLine>(), vendors, distributions = new List<BidItemDistribution>() });
         }
 
         // POST: api/Bidding/FetchAndSyncLines
@@ -168,9 +172,10 @@ namespace Backend.Controllers
                         string inClause = string.Join(", ", parameterNames);
 
                         command.CommandText = $@"
-                            SELECT [Item No_], [Quantity], [Unit of Measure], [Description], [Document No_]
-                            FROM [dbo].[House Care Live$InStore Stock Req_ Line] 
-                            WHERE [Document No_] IN ({inClause})";
+                            SELECT l.[Item No_], l.[Quantity], l.[Unit of Measure], l.[Description], l.[Document No_], h.[Store No_]
+                            FROM [dbo].[House Care Live$InStore Stock Req_ Line] l
+                            LEFT JOIN [dbo].[House Care Live$InStore Stock Req_ Header] h ON h.[No_] = l.[Document No_]
+                            WHERE l.[Document No_] IN ({inClause})";
                         
                         for (int i = 0; i < docIds.Count; i++)
                         {
@@ -187,7 +192,8 @@ namespace Backend.Controllers
                                     Quantity = reader.IsDBNull(1) ? 0 : reader.GetDecimal(1),
                                     UOM = reader.IsDBNull(2) ? "" : reader.GetString(2),
                                     Description = reader.IsDBNull(3) ? "" : reader.GetString(3),
-                                    DocumentNo = reader.IsDBNull(4) ? "" : reader.GetString(4)
+                                    DocumentNo = reader.IsDBNull(4) ? "" : reader.GetString(4),
+                                    StoreNo = reader.IsDBNull(5) ? "" : reader.GetString(5)
                                 });
                             }
                         }
@@ -230,10 +236,16 @@ namespace Backend.Controllers
                     await _context.SaveChangesAsync();
                 }
 
-                // 3. Aggregate and Insert fresh records from Navision
-                var existingVendors = await _context.VendorSubs.ToListAsync();
+                // Delete existing BidItemDistribution records for this bid
+                var existingDistributions = await _context.BidItemDistributions
+                    .Where(d => d.BidHNo == dto.BidNo)
+                    .ToListAsync();
+                if (existingDistributions.Any())
+                {
+                    _context.BidItemDistributions.RemoveRange(existingDistributions);
+                }
 
-                // Update Header with cumulative NAVDocNo
+                // 3. Aggregate and Insert fresh records from Navision
                 var header = await _context.BidHeaders.FirstOrDefaultAsync(b => b.BidNo == dto.BidNo);
                 if (header != null)
                 {
@@ -244,6 +256,17 @@ namespace Backend.Controllers
                     header.NAVDocNo = string.Join(" | ", allDocs);
                     _context.BidHeaders.Update(header);
                 }
+
+                // Get only selected vendors for this bid
+                var selectedVendorIds = (header?.SelectedVendorIds ?? "")
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(id => int.TryParse(id.Trim(), out int parsed) ? parsed : -1)
+                    .Where(id => id != -1)
+                    .ToList();
+
+                var existingVendors = await _context.VendorSubs
+                    .Where(v => selectedVendorIds.Contains(v.Id))
+                    .ToListAsync();
 
                 var aggregatedLines = navLines
                     .Select(nl => {
@@ -293,6 +316,47 @@ namespace Backend.Controllers
                     }
                 }
 
+                // 4. Aggregate and Insert BidItemDistribution records
+                var aggregatedDistributions = navLines
+                    .Select(nl => {
+                        string numericPart = new string(nl.ItemNo.Where(char.IsDigit).ToArray());
+                        int skuInt = -1;
+                        if (!string.IsNullOrEmpty(numericPart) && int.TryParse(numericPart, out int parsed))
+                        {
+                            skuInt = parsed;
+                        }
+                        return new { NavLine = nl, Sku = skuInt };
+                    })
+                    .Where(x => x.Sku != -1)
+                    .GroupBy(x => new { x.Sku, Location = x.NavLine.StoreNo })
+                    .Select(g => new BidItemDistribution
+                    {
+                        BidHNo = dto.BidNo,
+                        NAVSku = g.Key.Sku,
+                        Location = g.Key.Location,
+                        Qty = g.Sum(x => x.NavLine.Quantity),
+                        NAVDocNo = string.Join(" | ", g.Select(x => x.NavLine.DocumentNo).Distinct())
+                    })
+                    .ToList();
+
+                foreach (var dist in aggregatedDistributions)
+                {
+                    var existing = await _context.BidItemDistributions
+                        .FirstOrDefaultAsync(d => d.BidHNo == dist.BidHNo && d.Location == dist.Location && d.NAVSku == dist.NAVSku);
+                    if (existing != null)
+                    {
+                        existing.Qty += dist.Qty;
+                        var existingDocs = existing.NAVDocNo?.Split('|', StringSplitOptions.RemoveEmptyEntries).Select(d => d.Trim()).ToList() ?? new List<string>();
+                        var newDocs = dist.NAVDocNo?.Split('|', StringSplitOptions.RemoveEmptyEntries).Select(d => d.Trim()).ToList() ?? new List<string>();
+                        existing.NAVDocNo = string.Join(" | ", existingDocs.Union(newDocs).Distinct());
+                        _context.BidItemDistributions.Update(existing);
+                    }
+                    else
+                    {
+                        _context.BidItemDistributions.Add(dist);
+                    }
+                }
+
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
 
@@ -302,7 +366,12 @@ namespace Backend.Controllers
                     .ToListAsync();
 
                 var allVendors = await _context.VendorSubs.ToListAsync();
-                return Ok(new { header, lines = updatedLines, vendors = allVendors });
+
+                var distributions = await _context.BidItemDistributions
+                    .Where(d => d.BidHNo == dto.BidNo)
+                    .ToListAsync();
+
+                return Ok(new { header, lines = updatedLines, vendors = allVendors, distributions });
             }
             catch (Exception ex)
             {
@@ -337,6 +406,92 @@ namespace Backend.Controllers
 
             await _context.SaveChangesAsync();
             return Ok(new { message = "Price updated successfully" });
+        }
+
+        // POST: api/Bidding/UpdateSelectedVendors
+        [HttpPost("UpdateSelectedVendors")]
+        public async Task<ActionResult> UpdateSelectedVendors([FromBody] UpdateSelectedVendorsDto dto)
+        {
+            Console.WriteLine($"[UpdateSelectedVendors] Received BidNo: '{dto.BidNo}', SelectedVendorIds: '{dto.SelectedVendorIds}'");
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                var header = await _context.BidHeaders.FirstOrDefaultAsync(b => b.BidNo == dto.BidNo);
+                if (header == null)
+                {
+                    Console.WriteLine($"[UpdateSelectedVendors] Bid '{dto.BidNo}' NOT found in database.");
+                    return NotFound(new { message = "Bid not found" });
+                }
+
+                header.SelectedVendorIds = dto.SelectedVendorIds;
+                _context.BidHeaders.Update(header);
+                await _context.SaveChangesAsync();
+
+                // Get all lines for this bid
+                var lines = await _context.BidLines.Where(l => l.BidHNo == dto.BidNo).ToListAsync();
+                var lineIds = lines.Select(l => l.Id).ToList();
+
+                // Parse selected vendor IDs
+                var selectedIds = (dto.SelectedVendorIds ?? "")
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(id => int.TryParse(id.Trim(), out int parsed) ? parsed : -1)
+                    .Where(id => id != -1)
+                    .ToList();
+
+                // Remove VendorSubPrices for vendors that are NOT selected
+                var pricesToRemove = await _context.VendorSubPrices
+                    .Where(p => lineIds.Contains(p.BidLineId) && !selectedIds.Contains(p.VendorId))
+                    .ToListAsync();
+                if (pricesToRemove.Any())
+                {
+                    _context.VendorSubPrices.RemoveRange(pricesToRemove);
+                }
+
+                // Add default VendorSubPrices for newly selected vendors
+                foreach (var line in lines)
+                {
+                    var existingPrices = await _context.VendorSubPrices
+                        .Where(p => p.BidLineId == line.Id)
+                        .ToListAsync();
+                    
+                    var existingVendorIds = existingPrices.Select(p => p.VendorId).ToList();
+
+                    foreach (var vendorId in selectedIds)
+                    {
+                        if (!existingVendorIds.Contains(vendorId))
+                        {
+                            _context.VendorSubPrices.Add(new VendorSubPrice
+                            {
+                                BidLineId = line.Id,
+                                VendorId = vendorId,
+                                Cost = 0
+                            });
+                        }
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                // Return updated data
+                var updatedLines = await _context.BidLines
+                    .Include(l => l.Prices)
+                    .Where(l => l.BidHNo == dto.BidNo)
+                    .ToListAsync();
+
+                var allVendors = await _context.VendorSubs.ToListAsync();
+
+                var distributions = await _context.BidItemDistributions
+                    .Where(d => d.BidHNo == dto.BidNo)
+                    .ToListAsync();
+
+                return Ok(new { header, lines = updatedLines, vendors = allVendors, distributions });
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         private async Task<string> GenerateBidNo()
@@ -406,5 +561,12 @@ namespace Backend.Controllers
         public string UOM { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public string DocumentNo { get; set; } = string.Empty;
+        public string StoreNo { get; set; } = string.Empty;
+    }
+
+    public class UpdateSelectedVendorsDto
+    {
+        public string BidNo { get; set; } = string.Empty;
+        public string? SelectedVendorIds { get; set; }
     }
 }

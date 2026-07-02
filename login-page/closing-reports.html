@@ -210,12 +210,7 @@
         let allStatements = [];
 
         document.addEventListener('DOMContentLoaded', () => {
-            // Check Admin Access
-            const userRole = localStorage.getItem('userRole');
-            if (userRole !== 'Admin') {
-                window.location.href = 'dashboard.html';
-                return;
-            }
+
 
             document.getElementById('logoutBtn').addEventListener('click', (e) => {
                 e.preventDefault();

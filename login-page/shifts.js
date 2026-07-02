@@ -2,11 +2,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const userEmail = localStorage.getItem('userEmail');
     const userRole = localStorage.getItem('userRole');
 
-    // Security Check: Admin Access Only
-    if (!userEmail || userRole !== 'Admin') {
-        window.location.href = 'dashboard.html';
-        return;
-    }
+
 
     const shiftsList = document.getElementById('shifts-list');
     const shiftModal = document.getElementById('shift-modal');

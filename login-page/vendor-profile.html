@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendor Profile - DynamicsAltx</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        .content-wrapper {
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 1rem;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            color: var(--text-main);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Layout Grid */
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 1024px) {
+            .grid-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Section Cards */
+        .section-card {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.6rem 0.8rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 0.7rem;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: var(--primary);
+            color: white;
+            transition: background-color 0.2s;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+        }
+
+        /* Business Card Theme (Vendor Profile) */
+        .business-card {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border-radius: 16px;
+            padding: 2rem;
+            color: white;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+            display: none;
+            /* Hidden until loaded */
+        }
+
+        .business-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.2) 0%, rgba(0, 0, 0, 0) 70%);
+            transform: translate(30%, -30%);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 1rem;
+        }
+
+        .vendor-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .vendor-name-ar {
+            font-size: 1.2rem;
+            color: #94a3b8;
+            margin-top: 0.25rem;
+        }
+
+        .vendor-id-badge {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            backdrop-filter: blur(4px);
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .card-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .card-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #94a3b8;
+        }
+
+        .card-value {
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        /* Status Dashboard */
+        .status-dashboard {
+            display: none;
+            /* Hidden until loaded */
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .status-box {
+            padding: 1.25rem;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            gap: 0.75rem;
+            transition: transform 0.2s;
+        }
+
+        .status-box:hover {
+            transform: translateY(-2px);
+        }
+
+        .status-icon {
+            font-size: 2rem;
+        }
+
+        .status-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .status-val {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        /* Themes */
+        .status-box.theme-success {
+            background-color: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #166534;
+        }
+
+        .status-box.theme-success .status-icon {
+            color: #22c55e;
+        }
+
+        .status-box.theme-warning {
+            background-color: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+        }
+
+        .status-box.theme-warning .status-icon {
+            color: #ef4444;
+        }
+
+        .status-box.theme-neutral {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            color: #334155;
+        }
+
+        .status-box.theme-neutral .status-icon {
+            color: #64748b;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 300px;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        #alertBox {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .alert-error {
+            background-color: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #f87171;
+        }
+
+        .alert-warning {
+            background-color: #fef9c3;
+            color: #a16207;
+            border: 1px solid #fde047;
+        }
+
+        .lookup-card {
+            background: linear-gradient(to bottom, #ffffff, #f8fafc);
+            border-top: 4px solid var(--primary);
+        }
+
+        .input-icon-wrapper {
+            position: relative;
+        }
+
+        .input-icon-wrapper i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .input-icon-wrapper .form-control {
+            padding-left: 2.5rem;
+            height: 48px;
+            font-size: 0.95rem;
+            background-color: #ffffff;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Payments Info Section */
+        .payments-section {
+            margin-top: 1.5rem;
+            background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+            border: 1px solid #e2e8f0;
+        }
+
+        .btn-payment {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            font-size: 1.1rem;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .btn-payment:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="erp-app">
+        <!-- Sidebar (Placeholder for dynamic injection or hardcoded if necessary) -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand-logo">
+                    <i class="ri-rhythm-line"></i>
+                    <span>DynamicsAltx</span>
+                </div>
+                <button id="sidebar-toggle" class="icon-btn">
+                    <i class="ri-menu-fold-line"></i>
+                </button>
+            </div>
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="dashboard.html" class="nav-link">
+                            <i class="ri-dashboard-3-line"></i>
+                            <span>Overview</span>
+                        </a>
+                    </li>
+                    <li class="nav-group">
+                        <div class="group-header">
+                            <i class="ri-bank-line"></i>
+                            <span>Finance</span>
+                            <i class="ri-arrow-down-s-line arrow"></i>
+                        </div>
+                        <ul class="submenu">
+                            <li><a href="voucher-history.html">Voucher History</a></li>
+                            <li><a href="#">General Ledger</a></li>
+                            <li><a href="#">Accounts Payable</a></li>
+                            <li><a href="#">Accounts Receivable</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-group">
+                        <div class="group-header">
+                            <i class="ri-briefcase-4-line"></i>
+                            <span>Business Process</span>
+                            <i class="ri-arrow-down-s-line arrow-icon"></i>
+                        </div>
+                        <ul class="submenu">
+                            <li><a href="cashier-closing.html"><i class="ri-file-list-3-line"></i> Cashier Closing</a>
+                            </li>
+                            <li><a href="closing-reports.html"><i class="ri-file-chart-line"></i> Closing Reports</a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="nav-group">
+                        <div class="group-header">
+                            <i class="ri-team-line"></i>
+                            <span>Human Resource</span>
+                            <i class="ri-arrow-down-s-line arrow-icon"></i>
+                        </div>
+                        <ul class="submenu">
+                            <li><a href="employees.html"><i class="ri-user-settings-line"></i> Employees</a></li>
+                            <li><a href="absence-marker.html"><i class="ri-calendar-event-line"></i> Absence Marker</a>
+                            </li>
+                            <li><a href="absence-report.html"><i class="ri-file-chart-line"></i> Monthly Absence
+                                    Report</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-group">
+                        <div class="group-header">
+                            <i class="ri-shopping-cart-2-line"></i>
+                            <span>Supply Chain</span>
+                            <i class="ri-arrow-down-s-line arrow"></i>
+                        </div>
+                        <ul class="submenu">
+                            <li><a href="vendor-profile.html">Vendor Profile</a></li>
+                            <li><a href="vendors.html">Create Vendor</a></li>
+                            <li><a href="bidding-create.html">Create Bid</a></li>
+                            <li><a href="bidding-list.html">Bidding List</a></li>
+                            <li><a href="barcode-print.html">Barcode Printing</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-group">
+                        <div class="group-header">
+                            <i class="ri-customer-service-line"></i>
+                            <span>CRM &amp; Sales</span>
+                            <i class="ri-arrow-down-s-line arrow"></i>
+                        </div>
+                        <ul class="submenu">
+                            <li><a href="reconciliation.html">Invoice Reconciliation</a></li>
+                            <li><a href="#">Sales Pipeline</a></li>
+                            <li><a href="#">Customers</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-group active">
+                        <div class="group-header">
+                            <i class="ri-settings-4-line"></i>
+                            <span>System</span>
+                            <i class="ri-arrow-down-s-line arrow"></i>
+                        </div>
+                        <ul class="submenu" style="display: block;">
+                            <li><a href="users.html">User Management</a></li>
+                            <li><a href="locations.html">Locations</a></li>
+                            <li><a href="profiles.html" class="active">Profiles</a></li>
+                            <li><a href="nationalities.html">Nationalities</a></li>
+                            <li><a href="shifts.html">Shifts</a></li>
+                            <li><a href="sync.html">Data Sync (Navision)</a></li>
+                            <li><a href="announcements.html">Announcements</a></li>
+                            <li><a href="settings.html">Account Settings</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="content-wrapper">
+                <div class="page-header">
+                    <h1 class="page-title">
+                        <i class="ri-store-2-line" style="color: var(--primary);"></i>
+                        Vendor Profile
+                    </h1>
+                </div>
+
+                <div id="alertBox" class="alert"></div>
+
+                <div class="grid-layout">
+                    <!-- Left: Search Form -->
+                    <div class="section-card lookup-card">
+                        <h2 class="section-title"><i class="ri-search-eye-line"
+                                style="color: var(--primary); font-size: 1.2rem;"></i> Vendor Lookup</h2>
+
+                        <div class="form-group">
+                            <label for="vendorNo">Vendor No.</label>
+                            <div class="input-icon-wrapper">
+                                <i class="ri-hashtag"></i>
+                                <input type="text" id="vendorNo" class="form-control" placeholder="e.g. V001">
+                            </div>
+                        </div>
+
+                        <div style="text-align: center; margin: 1.5rem 0; position: relative;">
+                            <hr style="border-top: 1px dashed var(--border-color); border-bottom: none;">
+                            <span
+                                style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: #f8fafc; padding: 0 10px; color: var(--text-muted); font-size: 0.8rem; font-weight: 600; border-radius: 4px;">OR</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="vatRegNo">VAT Registration No.</label>
+                            <div class="input-icon-wrapper">
+                                <i class="ri-file-paper-2-line"></i>
+                                <input type="text" id="vatRegNo" class="form-control" placeholder="Enter VAT Number">
+                            </div>
+                        </div>
+
+                        <div class="form-group" id="customerIdGroup" style="display: none;">
+                            <label for="customerId" style="color: #ea580c;">Multiple matches found. Please enter
+                                Customer ID:</label>
+                            <div class="input-icon-wrapper">
+                                <i class="ri-user-search-line" style="color: #ea580c;"></i>
+                                <input type="text" id="customerId" class="form-control" placeholder="Enter Customer ID"
+                                    style="border-color: #fdba74; background-color: #fff7ed;">
+                            </div>
+                        </div>
+
+                        <button id="btnSearch" class="btn" style="margin-top: 1.5rem; height: 48px; font-size: 1rem;">
+                            <i class="ri-search-line"></i> Search Vendor
+                        </button>
+                    </div>
+
+                    <!-- Right: Results Display -->
+                    <div>
+                        <div id="emptyState" class="section-card empty-state">
+                            <i class="ri-store-3-line"></i>
+                            <h3>No Vendor Selected</h3>
+                            <p>Use the lookup panel to search for a vendor.</p>
+                        </div>
+
+                        <div id="vendorDataArea" style="display: none;">
+                            <!-- Business Card -->
+                            <div class="business-card" id="businessCard">
+                                <div class="card-header">
+                                    <div>
+                                        <h3 class="vendor-name" id="dispEnglishName">Vendor Name</h3>
+                                        <p class="vendor-name-ar" id="dispArabicName">الاسم العربي</p>
+                                    </div>
+                                    <div class="vendor-id-badge" id="dispVendorNo">#V-0000</div>
+                                </div>
+                                <div class="card-grid">
+                                    <div class="card-item">
+                                        <span class="card-label">VAT Reg No.</span>
+                                        <span class="card-value" id="dispVatNo">-</span>
+                                    </div>
+                                    <div class="card-item">
+                                        <span class="card-label">Vendor CR No.</span>
+                                        <span class="card-value" id="dispCrNo">-</span>
+                                    </div>
+                                    <div class="card-item">
+                                        <span class="card-label"><i class="ri-user-star-line"></i> Salesman</span>
+                                        <span class="card-value" id="dispSalesmanName">-</span>
+                                    </div>
+                                    <div class="card-item">
+                                        <span class="card-label"><i class="ri-phone-line"></i> Mobile</span>
+                                        <span class="card-value" id="dispSalesmanMobile">-</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Status Dashboard -->
+                            <div class="section-card" style="margin-top: 1.5rem;">
+                                <h2 class="section-title"><i class="ri-dashboard-2-line"></i> Vendor Status</h2>
+                                <div class="status-dashboard" id="statusDashboard">
+                                    <div class="status-box" id="boxAccount">
+                                        <i class="ri-shield-user-line status-icon"></i>
+                                        <span class="status-label">Account Status</span>
+                                        <span class="status-val" id="statAccount">Active</span>
+                                    </div>
+                                    <div class="status-box" id="boxReconciliation">
+                                        <i class="ri-file-list-3-line status-icon"></i>
+                                        <span class="status-label">Reconciliation</span>
+                                        <span class="status-val" id="statReconciliation">Yes</span>
+                                    </div>
+                                    <div class="status-box" id="boxSellout">
+                                        <i class="ri-shopping-cart-line status-icon"></i>
+                                        <span class="status-label">Sellout Status</span>
+                                        <span class="status-val">Yes</span>
+                                    </div>
+                                    <div class="status-box" id="boxReturnGoods">
+                                        <i class="ri-arrow-go-back-line status-icon"></i>
+                                        <span class="status-label">Return Goods</span>
+                                        <span class="status-val">Yes</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Payments Info -->
+                            <div class="section-card payments-section">
+                                <h2 class="section-title"><i class="ri-bank-card-line" style="color: #059669;"></i>
+                                    Payments Info</h2>
+                                <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.9rem;">
+                                    Check any appointments are done or not.
+                                </p>
+                                <button class="btn btn-payment" id="btnCheckPayment">
+                                    <i class="ri-secure-payment-line" style="font-size: 1.3rem;"></i>
+                                    Check Payment
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="common.js?v=13"></script>
+    <script src="vendor-profile.js"></script>
+</body>
+
+</html>

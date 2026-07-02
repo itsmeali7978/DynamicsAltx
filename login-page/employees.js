@@ -24,18 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let allEmployees = [];
 
-    // Check Access
-    if (userRole !== 'admin') {
-        document.querySelector('.employees-container').innerHTML = `
-            <div style="text-align:center; padding: 5rem 2rem;">
-                <i class="ri-lock-2-line" style="font-size: 4rem; color: #f87171;"></i>
-                <h2 style="margin-top: 1rem;">Access Restricted</h2>
-                <p>You do not have administrative privileges to access the Employee module.</p>
-                <button onclick="location.href='dashboard.html'" class="btn-submit" style="width: auto; margin-top: 2rem;">Return to Dashboard</button>
-            </div>
-        `;
-        return;
-    }
+
 
     // 1. Initial Load
     async function init() {

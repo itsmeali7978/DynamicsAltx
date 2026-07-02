@@ -16,6 +16,7 @@ const APP_PAGES = [
     { path: 'sync.html', label: 'Data Sync (Navision)' },
     { path: 'reconciliation.html', label: 'Invoice Reconciliation' },
     { path: 'vendors.html', label: 'Create Vendor' },
+    { path: 'vendor-profile.html', label: 'Vendor Profile' },
     { path: 'bidding-create.html', label: 'Create Bid' },
     { path: 'bidding-list.html', label: 'Bidding List' },
     { path: 'barcode-print.html', label: 'Barcode Printing' },

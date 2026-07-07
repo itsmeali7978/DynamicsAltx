@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DynamicsAltx - Nationalities</title>
+    <title>DynamicsAltx - Vendor Tasks</title>
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,14 +14,14 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="dashboard.css">
     <style>
-        .nat-grid {
+        .task-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 1.25rem;
             margin-top: 1.5rem;
         }
 
-        .nat-card {
+        .task-card {
             background: white;
             padding: 1.25rem;
             border-radius: 12px;
@@ -32,19 +32,19 @@
             transition: var(--transition);
         }
 
-        .nat-card:hover {
+        .task-card:hover {
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
             border-color: var(--primary-light);
             transform: translateY(-2px);
         }
 
-        .nat-info {
+        .task-info {
             display: flex;
             align-items: center;
             gap: 1rem;
         }
 
-        .nat-icon {
+        .task-icon {
             width: 40px;
             height: 40px;
             border-radius: 10px;
@@ -56,14 +56,14 @@
             font-size: 1.25rem;
         }
 
-        .nat-name {
+        .task-name {
             font-weight: 600;
             color: var(--text-main);
             font-size: 1rem;
             text-transform: uppercase;
         }
 
-        .nat-actions {
+        .task-actions {
             display: flex;
             gap: 0.25rem;
         }
@@ -170,7 +170,7 @@
 
         .btn-submit:hover { background: var(--primary-dark); }
 
-        .btn-add-nat {
+        .btn-add-task {
             background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
             color: white;
             border: none;
@@ -185,7 +185,7 @@
             transition: var(--transition);
         }
 
-        .btn-add-nat:hover {
+        .btn-add-task:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 18px rgba(99, 102, 241, 0.35);
         }
@@ -288,7 +288,7 @@
                             <li><a href="users.html">User Management</a></li>
                             <li><a href="locations.html">Locations</a></li>
                             <li><a href="profiles.html">Profiles</a></li>
-                            <li><a href="nationalities.html" class="active">Nationalities</a></li>
+                            <li><a href="Vendor Tasks.html" class="active">Vendor Tasks</a></li>
                             <li><a href="announcements.html">Announcements</a></li>
                             <li><a href="settings.html">Account Settings</a></li>
                         </ul>
@@ -317,24 +317,24 @@
                     <button class="hamburger-menu" id="mobile-menu-btn">
                         <i class="ri-menu-line"></i>
                     </button>
-                    <h2 class="page-title">Regional Settings</h2>
+                    <h2 class="page-title">Vendor Tasks</h2>
                 </div>
             </header>
 
             <div class="content">
                 <div class="page-header">
                     <div>
-                        <h3>Nationalities</h3>
+                        <h3>Vendor Tasks</h3>
                         <p class="text-muted">Manage the list of countries used for user profiles and records.</p>
                     </div>
-                    <button class="btn-add-nat" id="btn-add-nat">
+                    <button class="btn-add-task" id="btn-add-task">
                         <i class="ri-add-line"></i>
-                        <span>New Nationality</span>
+                        <span>New vendor task</span>
                     </button>
                 </div>
 
-                <div id="nat-list" class="nat-grid animate-in">
-                    <!-- Nationalities will be injected here -->
+                <div id="task-list" class="task-grid animate-in">
+                    <!-- Vendor Tasks will be injected here -->
                     <div class="loading-state">
                         <i class="ri-loader-4-line ri-spin"></i>
                         <span>Loading records...</span>
@@ -344,27 +344,31 @@
         </main>
     </div>
 
-    <!-- Nationality Modal -->
-    <div class="modal" id="nat-modal">
+    <!-- vendor task Modal -->
+    <div class="modal" id="task-modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 id="modal-title">New Nationality</h3>
+                <h3 id="modal-title">New vendor task</h3>
                 <button class="close-modal" id="close-modal">&times;</button>
             </div>
-            <form id="nat-form">
-                <input type="hidden" id="nat-id">
+            <form id="task-form">
+                <input type="hidden" id="task-id">
                 <div class="form-group">
-                    <label for="nat-name">Nation Name</label>
-                    <input type="text" id="nat-name" placeholder="E.G. SAUDI ARABIA" required>
+                    <label for="task-name-eng">Task Name (English)</label>
+                    <input type="text" id="task-name-eng" placeholder="e.g. Paint Work" required>
                 </div>
-                <button type="submit" class="btn-submit">Save Nationality</button>
+                <div class="form-group">
+                    <label for="task-name-arb">Task Name (Arabic)</label>
+                    <input type="text" id="task-name-arb" placeholder="e.g. ط£ط¹ظ…ط§ظ„ ط§ظ„ط¯ظ‡ط§ظ†" required>
+                </div>
+                <button type="submit" class="btn-submit">Save vendor task</button>
             </form>
         </div>
     </div>
 
     <!-- Custom JS -->
     <script src="common.js?v=13"></script>
-    <script src="nationalities.js"></script>
+    <script src="vendor-tasks.js"></script>
 </body>
 
 </html>

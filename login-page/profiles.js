@@ -23,7 +23,9 @@ const APP_PAGES = [
     { path: 'voucher-history.html', label: 'Voucher History' },
     { path: 'announcements.html', label: 'Announcements' },
     { path: 'settings.html', label: 'Account Settings' },
-    { path: 'profiles.html', label: 'Profiles' }
+    { path: 'profiles.html', label: 'Profiles' },
+    { path: 'vendor-tasks.html', label: 'Vendor Tasks' },
+    { path: 'vendor-pending-tasks.html', label: 'Vendor Pending Tasks' }
 ];
 
 document.addEventListener('DOMContentLoaded', () => {

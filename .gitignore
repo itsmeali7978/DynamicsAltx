@@ -28,3 +28,6 @@ node_modules/
 # Ignore temporary and log files
 tmp/
 backend_log.txt
+
+PublishOutput/
+*.zip

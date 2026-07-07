@@ -54,7 +54,8 @@ const sidebarMappings = {
     "human resource": "hr",
     "supply chain": "supply_chain",
     "crm & sales": "crm",
-    "system": "system"
+    "system": "system",
+    "vendor tasks": "nav_vendor_tasks"
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -96,8 +97,37 @@ document.addEventListener('DOMContentLoaded', () => {
                             submenu.appendChild(li);
                         }
                     }
+
+                    if (!submenu.querySelector('a[href="vendor-tasks.html"]')) {
+                        const liTask = document.createElement('li');
+                        const aTask = document.createElement('a');
+                        aTask.href = 'vendor-tasks.html';
+                        aTask.setAttribute('data-i18n', 'nav_vendor_tasks');
+                        aTask.textContent = 'Vendor Tasks';
+                        
+                        if (window.location.pathname.endsWith('vendor-tasks.html')) {
+                            aTask.className = 'active';
+                            systemGroup.classList.add('active');
+                            submenu.style.display = 'block';
+                        }
+                        
+                        liTask.appendChild(aTask);
+                        
+                        // Insert it before settings.html or at the end
+                        const settingsLiTask = Array.from(submenu.querySelectorAll('li')).find(item => {
+                            const link = item.querySelector('a');
+                            return link && link.getAttribute('href') === 'settings.html';
+                        });
+                        if (settingsLiTask) {
+                            submenu.insertBefore(liTask, settingsLiTask);
+                        } else {
+                            submenu.appendChild(liTask);
+                        }
+                    }
                 }
             }
+
+
         }
 
         // Dynamic Menu Injection for Human Resource (only inject pages allowed by user profile)
@@ -437,7 +467,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Route Guard: Protect pages from direct URL typing
         // Skip guard for index.html, and always allow userDashboard page itself
-        if (currentPath && currentPath !== 'index.html' && allowedPagesStr) {
+        // Also skip guard for Admin users who have full access
+        if (currentPath && currentPath !== 'index.html' && allowedPagesStr && (!userRole || userRole.toLowerCase() !== 'admin')) {
             const allowedPages = JSON.parse(allowedPagesStr);
             if (!allowedPages.includes(currentPath) && currentPath !== dashboardFilename) {
                 console.log('[DynamicsAltx] Unauthorized page access, redirecting:', currentPath, '→', userDashboard);
@@ -447,7 +478,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Sidebar Filtering: run AFTER all dynamic injections above
-        if (allowedPagesStr) {
+        if (allowedPagesStr && (!userRole || userRole.toLowerCase() !== 'admin')) {
             const allowedPages = JSON.parse(allowedPagesStr);
             console.log('[DynamicsAltx] Restricting sidebar based on profile allowed pages:', allowedPages);
 

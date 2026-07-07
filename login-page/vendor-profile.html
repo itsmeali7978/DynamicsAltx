@@ -157,6 +157,65 @@
             margin: 0;
         }
 
+        .empty-icon {
+            font-size: 4rem;
+            color: #cbd5e1;
+            margin-bottom: 1rem;
+        }
+
+        /* Payments Grid */
+        .data-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.25rem;
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            transition: transform 0.2s;
+        }
+        .data-row:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .data-row.status-pending {
+            background-color: #fffbeb;
+            border-left: 4px solid #f59e0b;
+        }
+        .data-row.status-approved {
+            background-color: #f0fdf4;
+            border-left: 4px solid #10b981;
+        }
+        .badge {
+            padding: 0.35rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            min-width: 95px;
+            text-align: center;
+            display: inline-block;
+            position: static;
+            width: auto;
+            height: auto;
+            border: none;
+        }
+        .badge-pending { color: #d97706; background: rgba(245, 158, 11, 0.1); }
+        .badge-approved { color: #166534; background: rgba(16, 185, 129, 0.1); }
+        .data-row-date {
+            font-weight: 600;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+        }
+
         .vendor-name-ar {
             font-size: 1.2rem;
             color: #94a3b8;
@@ -352,6 +411,31 @@
             box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
             background: linear-gradient(135deg, #059669 0%, #047857 100%);
         }
+
+        /* Checkbox Grid for Tasks */
+        .tasks-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+            max-height: 250px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            border-radius: 6px;
+            background-color: #ffffff;
+        }
+        .task-checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-main);
+            cursor: pointer;
+        }
+        .task-checkbox-label input {
+            cursor: pointer;
+        }
     </style>
 </head>
 
@@ -423,11 +507,12 @@
                             <i class="ri-arrow-down-s-line arrow"></i>
                         </div>
                         <ul class="submenu">
-                            <li><a href="vendor-profile.html">Vendor Profile</a></li>
+                            <li><a href="vendor-profile.html" class="active">Vendor Profile</a></li>
                             <li><a href="vendors.html">Create Vendor</a></li>
                             <li><a href="bidding-create.html">Create Bid</a></li>
                             <li><a href="bidding-list.html">Bidding List</a></li>
                             <li><a href="barcode-print.html">Barcode Printing</a></li>
+                            <li><a href="vendor-pending-tasks.html">Vendor Pending Tasks</a></li>
                         </ul>
                     </li>
                     <li class="nav-group">
@@ -442,16 +527,16 @@
                             <li><a href="#">Customers</a></li>
                         </ul>
                     </li>
-                    <li class="nav-group active">
+                    <li class="nav-group">
                         <div class="group-header">
                             <i class="ri-settings-4-line"></i>
                             <span>System</span>
                             <i class="ri-arrow-down-s-line arrow"></i>
                         </div>
-                        <ul class="submenu" style="display: block;">
+                        <ul class="submenu">
                             <li><a href="users.html">User Management</a></li>
                             <li><a href="locations.html">Locations</a></li>
-                            <li><a href="profiles.html" class="active">Profiles</a></li>
+                            <li><a href="profiles.html">Profiles</a></li>
                             <li><a href="nationalities.html">Nationalities</a></li>
                             <li><a href="shifts.html">Shifts</a></li>
                             <li><a href="sync.html">Data Sync (Navision)</a></li>
@@ -461,6 +546,19 @@
                     </li>
                 </ul>
             </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-block">
+                    <img src="https://ui-avatars.com/api/?name=Admin+User&background=6366f1&color=fff" alt="User">
+                    <div class="user-info">
+                        <p class="user-name">Admin User</p>
+                        <p class="user-role">System Administrator</p>
+                    </div>
+                    <button class="logout-btn icon-btn" onclick="location.href='index.html'">
+                        <i class="ri-logout-box-r-line"></i>
+                    </button>
+                </div>
+            </div>
         </aside>
 
         <main class="main-content">
@@ -468,61 +566,101 @@
                 <div class="page-header">
                     <h1 class="page-title">
                         <i class="ri-store-2-line" style="color: var(--primary);"></i>
-                        Vendor Profile
+                        <span data-i18n="page_vendor_profile">Vendor Profile</span>
                     </h1>
                 </div>
 
                 <div id="alertBox" class="alert"></div>
 
                 <div class="grid-layout">
-                    <!-- Left: Search Form -->
-                    <div class="section-card lookup-card">
+                    <!-- Left Column -->
+                    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                        <!-- Search Form -->
+                        <div class="section-card lookup-card">
                         <h2 class="section-title"><i class="ri-search-eye-line"
-                                style="color: var(--primary); font-size: 1.2rem;"></i> Vendor Lookup</h2>
+                                style="color: var(--primary); font-size: 1.2rem;"></i> <span data-i18n="vendor_lookup">Vendor Lookup</span></h2>
 
                         <div class="form-group">
-                            <label for="vendorNo">Vendor No.</label>
+                            <label for="vendorNo" data-i18n="vendor_no_lbl">Vendor No.</label>
                             <div class="input-icon-wrapper">
                                 <i class="ri-hashtag"></i>
-                                <input type="text" id="vendorNo" class="form-control" placeholder="e.g. V001">
+                                <input type="text" id="vendorNo" class="form-control" placeholder="e.g. V001" data-i18n="vendor_no_placeholder">
                             </div>
                         </div>
 
                         <div style="text-align: center; margin: 1.5rem 0; position: relative;">
                             <hr style="border-top: 1px dashed var(--border-color); border-bottom: none;">
-                            <span
+                            <span data-i18n="vendor_or"
                                 style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: #f8fafc; padding: 0 10px; color: var(--text-muted); font-size: 0.8rem; font-weight: 600; border-radius: 4px;">OR</span>
                         </div>
 
                         <div class="form-group">
-                            <label for="vatRegNo">VAT Registration No.</label>
+                            <label for="vatRegNo" data-i18n="vendor_vat_lbl">VAT Registration No.</label>
                             <div class="input-icon-wrapper">
                                 <i class="ri-file-paper-2-line"></i>
-                                <input type="text" id="vatRegNo" class="form-control" placeholder="Enter VAT Number">
+                                <input type="text" id="vatRegNo" class="form-control" placeholder="Enter VAT Number" data-i18n="vendor_vat_placeholder">
                             </div>
                         </div>
 
                         <div class="form-group" id="customerIdGroup" style="display: none;">
-                            <label for="customerId" style="color: #ea580c;">Multiple matches found. Please enter
+                            <label for="customerId" style="color: #ea580c;" data-i18n="vendor_multiple_matches">Multiple matches found. Please enter
                                 Customer ID:</label>
                             <div class="input-icon-wrapper">
                                 <i class="ri-user-search-line" style="color: #ea580c;"></i>
-                                <input type="text" id="customerId" class="form-control" placeholder="Enter Customer ID"
+                                <input type="text" id="customerId" class="form-control" placeholder="Enter Customer ID" data-i18n="vendor_customer_id_placeholder"
                                     style="border-color: #fdba74; background-color: #fff7ed;">
                             </div>
                         </div>
 
                         <button id="btnSearch" class="btn" style="margin-top: 1.5rem; height: 48px; font-size: 1rem;">
-                            <i class="ri-search-line"></i> Search Vendor
+                            <i class="ri-search-line"></i> <span data-i18n="vendor_btn_search">Search Vendor</span>
                         </button>
                     </div>
 
-                    <!-- Right: Results Display -->
-                    <div>
+                    <!-- Tasks Section (Moved to Left Column) -->
+                    <div id="vendorTasksSection" class="section-card" style="display: none;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+                            <h2 class="section-title" style="margin-bottom: 0;"><i class="ri-task-line" style="color: var(--primary);"></i> <span data-i18n="vendor_tasks_title">Tasks</span></h2>
+                            <button class="btn" id="btnToggleTasks" style="width: auto; padding: 0.5rem 1rem;">
+                                <i class="ri-add-line"></i> <span data-i18n="vendor_btn_create_tasks">Create Tasks</span>
+                            </button>
+                        </div>
+                        
+                        <!-- Task Creation Form -->
+                        <div id="taskCreationForm" style="display: none; background: #f8fafc; padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.5rem;">
+                            <div class="form-group">
+                                <label data-i18n="vendor_lbl_select_tasks">Select Tasks (Multiple allowed)</label>
+                                <div class="tasks-grid" id="task-checkboxes-container">
+                                    <!-- Checkboxes populated via JS -->
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="taskComments" data-i18n="vendor_lbl_comments">Comments</label>
+                                <textarea id="taskComments" class="form-control" rows="3" placeholder="Enter any comments..." data-i18n="vendor_comments_placeholder"></textarea>
+                            </div>
+                            <button class="btn" id="btnCreateTask">
+                                <i class="ri-save-line"></i> <span data-i18n="vendor_btn_create_task">Create Task</span>
+                            </button>
+                        </div>
+
+                        <!-- Open Tasks List -->
+                        <div>
+                            <h3 style="font-size: 1rem; color: var(--text-primary); margin-bottom: 1rem;" data-i18n="vendor_open_tasks">Open Tasks</h3>
+                            <div id="openTasksArea">
+                                <div data-i18n="vendor_empty_tasks" style="padding: 1rem; text-align: center; color: var(--text-muted); background: #f8fafc; border-radius: 8px; border: 1px dashed var(--border-color);">
+                                    Click "Create Tasks" to load or create tasks.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Results Display -->
+                <div>
                         <div id="emptyState" class="section-card empty-state">
                             <i class="ri-store-3-line"></i>
-                            <h3>No Vendor Selected</h3>
-                            <p>Use the lookup panel to search for a vendor.</p>
+                            <h3 data-i18n="vendor_no_selected_title">No Vendor Selected</h3>
+                            <p data-i18n="vendor_no_selected_desc">Use the lookup panel to search for a vendor.</p>
                         </div>
 
                         <div id="vendorDataArea" style="display: none;">
@@ -530,26 +668,26 @@
                             <div class="business-card" id="businessCard">
                                 <div class="card-header">
                                     <div>
-                                        <h3 class="vendor-name" id="dispEnglishName">Vendor Name</h3>
-                                        <p class="vendor-name-ar" id="dispArabicName">الاسم العربي</p>
+                                        <h3 class="vendor-name" id="dispEnglishName"><span data-i18n="vendor_default_name">Vendor Name</span></h3>
+                                        <p class="vendor-name-ar" id="dispArabicName">ط§ظ„ط§ط³ظ… ط§ظ„ط¹ط±ط¨ظٹ</p>
                                     </div>
                                     <div class="vendor-id-badge" id="dispVendorNo">#V-0000</div>
                                 </div>
                                 <div class="card-grid">
                                     <div class="card-item">
-                                        <span class="card-label">VAT Reg No.</span>
+                                        <span class="card-label" data-i18n="vendor_card_vat">VAT Reg No.</span>
                                         <span class="card-value" id="dispVatNo">-</span>
                                     </div>
                                     <div class="card-item">
-                                        <span class="card-label">Vendor CR No.</span>
+                                        <span class="card-label" data-i18n="vendor_card_cr">Vendor CR No.</span>
                                         <span class="card-value" id="dispCrNo">-</span>
                                     </div>
                                     <div class="card-item">
-                                        <span class="card-label"><i class="ri-user-star-line"></i> Salesman</span>
+                                        <span class="card-label"><i class="ri-user-star-line"></i> <span data-i18n="vendor_card_salesman">Salesman</span></span>
                                         <span class="card-value" id="dispSalesmanName">-</span>
                                     </div>
                                     <div class="card-item">
-                                        <span class="card-label"><i class="ri-phone-line"></i> Mobile</span>
+                                        <span class="card-label"><i class="ri-phone-line"></i> <span data-i18n="vendor_card_mobile">Mobile</span></span>
                                         <span class="card-value" id="dispSalesmanMobile">-</span>
                                     </div>
                                 </div>
@@ -557,27 +695,27 @@
 
                             <!-- Status Dashboard -->
                             <div class="section-card" style="margin-top: 1.5rem;">
-                                <h2 class="section-title"><i class="ri-dashboard-2-line"></i> Vendor Status</h2>
+                                <h2 class="section-title"><i class="ri-dashboard-2-line"></i> <span data-i18n="vendor_status_title">Vendor Status</span></h2>
                                 <div class="status-dashboard" id="statusDashboard">
                                     <div class="status-box" id="boxAccount">
                                         <i class="ri-shield-user-line status-icon"></i>
-                                        <span class="status-label">Account Status</span>
-                                        <span class="status-val" id="statAccount">Active</span>
+                                        <span class="status-label" data-i18n="vendor_status_account">Account Status</span>
+                                        <span class="status-val" id="statAccount" data-i18n="vendor_status_active">Active</span>
                                     </div>
                                     <div class="status-box" id="boxReconciliation">
                                         <i class="ri-file-list-3-line status-icon"></i>
-                                        <span class="status-label">Reconciliation</span>
-                                        <span class="status-val" id="statReconciliation">Yes</span>
+                                        <span class="status-label" data-i18n="vendor_status_reconciliation">Reconciliation</span>
+                                        <span class="status-val" id="statReconciliation" data-i18n="vendor_status_yes">Yes</span>
                                     </div>
                                     <div class="status-box" id="boxSellout">
                                         <i class="ri-shopping-cart-line status-icon"></i>
-                                        <span class="status-label">Sellout Status</span>
-                                        <span class="status-val">Yes</span>
+                                        <span class="status-label" data-i18n="vendor_status_sellout">Sellout Status</span>
+                                        <span class="status-val" data-i18n="vendor_status_yes">Yes</span>
                                     </div>
                                     <div class="status-box" id="boxReturnGoods">
                                         <i class="ri-arrow-go-back-line status-icon"></i>
-                                        <span class="status-label">Return Goods</span>
-                                        <span class="status-val">Yes</span>
+                                        <span class="status-label" data-i18n="vendor_status_return">Return Goods</span>
+                                        <span class="status-val" data-i18n="vendor_status_yes">Yes</span>
                                     </div>
                                 </div>
                             </div>
@@ -585,14 +723,22 @@
                             <!-- Payments Info -->
                             <div class="section-card payments-section">
                                 <h2 class="section-title"><i class="ri-bank-card-line" style="color: #059669;"></i>
-                                    Payments Info</h2>
-                                <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.9rem;">
+                                    <span data-i18n="vendor_payments_title">Payments Info</span></h2>
+                                <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.9rem;" data-i18n="vendor_payments_desc">
                                     Check any appointments are done or not.
                                 </p>
                                 <button class="btn btn-payment" id="btnCheckPayment">
                                     <i class="ri-secure-payment-line" style="font-size: 1.3rem;"></i>
-                                    Check Payment
+                                    <span data-i18n="vendor_btn_check_payment">Check Payment</span>
                                 </button>
+                                <div id="paymentResultsArea" style="display: none; margin-top: 2rem;">
+                                    <h3 style="font-size: 1.1rem; color: var(--text-primary); margin-bottom: 1rem;" data-i18n="vendor_payment_records">Payment Records</h3>
+                                    <div class="data-grid" id="paymentGrid">
+                                        <!-- Data gets injected here -->
+                                    </div>
+                                </div>
+                            </div>
+
                             </div>
                         </div>
                     </div>

@@ -57,7 +57,7 @@ namespace Backend.Controllers
                     "nationalities.html", "shifts.html", "short-breaks.html", "leave-types.html",
                     "sync.html", "reconciliation.html", "vendors.html", "vendor-profile.html", "bidding-list.html",
                     "bidding-create.html", "voucher-history.html", "announcements.html",
-                    "barcode-print.html", "settings.html", "profiles.html"
+                    "barcode-print.html", "settings.html", "profiles.html", "vendor-tasks.html"
                 };
             }
  

@@ -32,6 +32,12 @@ namespace Backend.Controllers
             public bool IsReconciliationValid { get; set; }
         }
 
+        public class PaymentInfoDto
+        {
+            public string Status { get; set; } = string.Empty;
+            public System.DateTime AssignedDate { get; set; }
+        }
+
         [HttpGet("Search")]
         public async Task<ActionResult> SearchVendor([FromQuery] string? vendorNo, [FromQuery] string? vatRegNo, [FromQuery] string? customerId)
         {
@@ -175,6 +181,62 @@ namespace Backend.Controllers
             }
 
             return Ok(selectedVendor);
+        }
+
+        [HttpGet("Payments")]
+        public async Task<IActionResult> GetPayments([FromQuery] string vendorNo)
+        {
+            if (string.IsNullOrWhiteSpace(vendorNo))
+                return BadRequest(new { message = "Vendor No is required." });
+
+            var results = new List<PaymentInfoDto>();
+            var navConnectionString = _configuration.GetConnectionString("NavisionConnection");
+
+            try
+            {
+                using (var navConnection = new SqlConnection(navConnectionString))
+                {
+                    await navConnection.OpenAsync();
+                    using (var command = navConnection.CreateCommand())
+                    {
+                        command.CommandText = @"
+                            SELECT 'Pending' AS Status, [Assigned Date]
+                            FROM [dbo].[House Care Live$Shelf Information1]
+                            WHERE [Vendor No_] = @vendorNo AND [Type] = 0 AND [Document Status] = 0
+
+                            UNION ALL
+
+                            SELECT 'Approved' AS Status, [Assigned Date]
+                            FROM [dbo].[House Care Live$Shelf Information1]
+                            WHERE [Vendor No_] = @vendorNo AND [Type] = 0 AND [Payment Method] = 0 AND [Document Status] = 1
+
+                            UNION ALL
+
+                            SELECT 'Approved' AS Status, [Assigned Date]
+                            FROM [dbo].[House Care Live$Shelf Information1]
+                            WHERE [Vendor No_] = @vendorNo AND [Type] = 0 AND [Payment Method] = 1 AND [Document Status] = 3 AND [Check Collected]=0
+                        ";
+                        command.Parameters.AddWithValue("@vendorNo", vendorNo);
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                results.Add(new PaymentInfoDto
+                                {
+                                    Status = reader.GetString(0),
+                                    AssignedDate = reader.IsDBNull(1) ? System.DateTime.MinValue : reader.GetDateTime(1)
+                                });
+                            }
+                        }
+                    }
+                }
+                return Ok(results);
+            }
+            catch (System.Exception ex)
+            {
+                return StatusCode(500, new { message = "Error fetching payment info.", details = ex.Message });
+            }
         }
     }
 }

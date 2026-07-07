@@ -28,5 +28,7 @@ namespace Backend.Data
         public DbSet<AbsenceMarker> AbsenceMarkers { get; set; }
         public DbSet<UserProfile> UserProfiles { get; set; }
         public DbSet<ProfilePage> ProfilePages { get; set; }
+        public DbSet<VendorTask> VendorTasks { get; set; }
+        public DbSet<VendorProfileTask> VendorProfileTasks { get; set; }
     }
 }

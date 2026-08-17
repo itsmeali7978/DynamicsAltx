@@ -16,7 +16,7 @@
     <style>
         .user-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
             gap: 1.5rem;
             margin-top: 1.5rem;
         }
@@ -70,7 +70,23 @@
 
         .user-actions {
             display: flex;
-            gap: 0.5rem;
+            gap: 0.4rem;
+            align-items: center;
+        }
+
+        .btn-edit {
+            color: var(--primary);
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0.4rem;
+            border-radius: 6px;
+            transition: var(--transition);
+        }
+
+        .btn-edit:hover {
+            background: var(--primary-light);
         }
 
         .btn-delete {
@@ -86,6 +102,27 @@
 
         .btn-delete:hover {
             background: #fee2e2;
+        }
+
+        .card-profile-select {
+            padding: 0.35rem 0.6rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            background: #f8fafc;
+            color: var(--text-main);
+            outline: none;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 0.3rem;
+            width: 100%;
+            max-width: 180px;
+        }
+
+        .card-profile-select:focus, .card-profile-select:hover {
+            border-color: var(--primary);
+            background: #fff;
         }
 
         /* Modal Styles */
@@ -154,7 +191,7 @@
             color: var(--text-main);
         }
 
-        .form-group input {
+        .form-group input, .form-group select {
             width: 100%;
             padding: 0.7rem 1rem;
             border: 1px solid var(--border-color);
@@ -163,7 +200,7 @@
             transition: var(--transition);
         }
 
-        .form-group input:focus {
+        .form-group input:focus, .form-group select:focus {
             outline: none;
             border-color: var(--primary);
         }
@@ -184,6 +221,7 @@
         .btn-save-user:hover {
             background: var(--primary-dark);
         }
+
         .btn-register-premium {
             background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
             color: white;
@@ -248,9 +286,7 @@
                         </ul>
                     </li>
                     
-                    
-                    
-                                        <li class="nav-group">
+                    <li class="nav-group">
                         <div class="group-header">
                             <i class="ri-briefcase-4-line"></i>
                             <span>Business Process</span>
@@ -271,7 +307,7 @@
                             <li><a href="employees.html"><i class="ri-user-settings-line"></i> Employees</a></li>
                         </ul>
                     </li>
-<li class="nav-group">
+                    <li class="nav-group">
                         <div class="group-header">
                             <i class="ri-shopping-cart-2-line"></i>
                             <span>Supply Chain</span>
@@ -298,6 +334,18 @@
                             <li><a href="#">Customers</a></li>
                         </ul>
                     </li>
+                    <li class="nav-group">
+                        <div class="group-header">
+                            <i class="ri-file-chart-line"></i>
+                            <span>Reports</span>
+                            <i class="ri-arrow-down-s-line arrow"></i>
+                        </div>
+                        <ul class="submenu">
+                            <li><a href="misc-income-entries.html">Miscellaneous Income Entries</a></li>
+                            <li><a href="voucher-entries.html">Voucher Entries</a></li>
+                            <li><a href="#">General Reports</a></li>
+                        </ul>
+                    </li>
                     <li class="nav-group active">
                         <div class="group-header">
                             <i class="ri-settings-4-line"></i>
@@ -309,9 +357,8 @@
                             <li><a href="locations.html">Locations</a></li>
                             <li><a href="profiles.html">Profiles</a></li>
                             <li><a href="nationalities.html">Nationalities</a></li>
-                                                        <li><a href="shifts.html">Shifts</a></li>
+                            <li><a href="shifts.html">Shifts</a></li>
                             <li><a href="sync.html">Data Sync (Navision)</a></li>
-
                             <li><a href="announcements.html">Announcements</a></li>
                             <li><a href="settings.html">Account Settings</a></li>
                         </ul>
@@ -348,7 +395,7 @@
                 <div class="page-header">
                     <div>
                         <h3>System Users</h3>
-                        <p class="text-muted">Manage corporate executive accounts and access levels.</p>
+                        <p class="text-muted">Manage corporate executive accounts, profiles, and access levels.</p>
                     </div>
                     <button class="btn-register-premium" id="btn-add-user">
                         <i class="ri-user-add-fill"></i>
@@ -385,15 +432,51 @@
                 </div>
                 <div class="form-group">
                     <label for="reg-password">Security Password</label>
-                    <input type="password" id="reg-password" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" required>
+                    <input type="password" id="reg-password" placeholder="••••••••" required>
                 </div>
                 <div class="form-group">
                     <label for="reg-profile">User Profile</label>
-                    <select id="reg-profile" style="width: 100%; padding: 0.7rem 1rem; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.9rem;" required>
+                    <select id="reg-profile" required>
                         <option value="" disabled selected>Loading profiles...</option>
                     </select>
                 </div>
                 <button type="submit" class="btn-save-user">Create User Account</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit User & Profile Modal -->
+    <div class="modal" id="edit-user-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit User Profile</h3>
+                <button class="close-modal" id="close-edit-modal">&times;</button>
+            </div>
+            <form id="edit-user-form">
+                <input type="hidden" id="edit-user-id">
+                <div class="form-group">
+                    <label for="edit-user-name">Full Name</label>
+                    <input type="text" id="edit-user-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-user-email">Work Email</label>
+                    <input type="email" id="edit-user-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-user-location">Location/Branch</label>
+                    <input type="text" id="edit-user-location" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-user-profile">Assigned Profile</label>
+                    <select id="edit-user-profile" required>
+                        <option value="">Default/Admin (No Specific Profile)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="edit-user-password">New Password (Leave blank to keep current)</label>
+                    <input type="password" id="edit-user-password" placeholder="Optional new password">
+                </div>
+                <button type="submit" class="btn-save-user">Save Changes</button>
             </form>
         </div>
     </div>
@@ -404,3 +487,9 @@
 </body>
 
 </html>
+
+
+
+
+
+

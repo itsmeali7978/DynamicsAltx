@@ -111,6 +111,37 @@ namespace Backend.Controllers
                 return BadRequest(new { message = $"Error posting voucher: {ex.Message}" });
             }
         }
+
+        // GET: api/Voucher/list
+        [HttpGet("list")]
+        public async Task<ActionResult> ListVouchers([FromQuery] DateTime? date, [FromQuery] string? location)
+        {
+            try
+            {
+                var query = _context.VoucherHistories.AsQueryable();
+
+                if (date.HasValue)
+                {
+                    query = query.Where(v => v.TransDate.Date == date.Value.Date || v.CreatedDate.Date == date.Value.Date);
+                }
+
+                if (!string.IsNullOrEmpty(location))
+                {
+                    query = query.Where(v => v.TransLocation.Contains(location));
+                }
+
+                var vouchers = await query
+                    .OrderByDescending(v => v.CreatedDate)
+                    .Take(20)
+                    .ToListAsync();
+
+                return Ok(vouchers);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = $"Error fetching voucher list: {ex.Message}" });
+            }
+        }
     }
 
     public class VoucherPostDto

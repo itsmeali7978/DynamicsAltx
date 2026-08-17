@@ -4,102 +4,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DynamicsAltx - System Announcements</title>
+    <title>DynamicsAltx - Miscellaneous Income Entries</title>
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@600;700&display=swap"
+        rel="stylesheet">
     <!-- Remix Icons -->
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="dashboard.css">
     <style>
-        .settings-card {
+        .filter-section {
+            background: white;
+            padding: 1.5rem 2rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 1.5rem;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .input-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .input-group input, .input-group select {
+            padding: 0.7rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+        }
+
+        .btn-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.7rem 1.2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .history-section {
             background: white;
             padding: 2rem;
             border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
             border: 1px solid var(--border-color);
-            max-width: 800px;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
 
-        .settings-header {
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid var(--border-color);
+        .table-responsive {
+            margin-top: 1rem;
+            overflow-x: auto;
         }
 
-        .settings-header h3 {
-            margin: 0;
-            font-size: 1.25rem;
-            color: var(--text-main);
-        }
-
-        .settings-header p {
-            margin: 0.5rem 0 0;
-            font-size: 0.9rem;
-            color: var(--text-muted);
-        }
-
-        .form-section {
-            margin-bottom: 2rem;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-        }
-
-        .form-group {
-            margin-bottom: 0;
-        }
-        
-        .form-group.full-width {
-            grid-column: span 2;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            color: var(--text-main);
-        }
-
-        .form-group input, .form-group select {
+        table {
             width: 100%;
-            padding: 0.8rem 1rem;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 0.95rem;
-            transition: var(--transition);
-            background: white;
+            border-collapse: collapse;
+            text-align: left;
         }
 
-        .form-group input:focus, .form-group select:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px var(--primary-light);
-        }
-
-        .btn-update {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 0.8rem 2rem;
-            border-radius: 8px;
+        th {
+            background-color: #f8fafc;
+            padding: 1rem 1.5rem;
             font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+            color: var(--text-muted);
+            border-bottom: 2px solid var(--border-color);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+
+        td {
+            padding: 1.2rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-main);
             font-size: 0.95rem;
         }
 
-        .btn-update:hover {
-            background: var(--primary-dark);
-            transform: translateY(-1px);
+        tr:last-child td {
+            border-bottom: none;
         }
+
+        .type-pill {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .type-income { background: #d1fae5; color: #065f46; }
+        .type-expense { background: #fee2e2; color: #991b1b; }
+        .type-opening { background: #e0e7ff; color: #3730a3; }
+        
     </style>
 </head>
 
@@ -125,10 +138,22 @@
                             <span>Overview</span>
                         </a>
                     </li>
+                    <li class="nav-group">
+                        <div class="group-header">
+                            <i class="ri-bank-line"></i>
+                            <span>Finance</span>
+                            <i class="ri-arrow-down-s-line arrow"></i>
+                        </div>
+                        <ul class="submenu">
+                            <li><a href="voucher-history.html">Voucher History</a></li>
+                            <li><a href="misc-income.html">Miscellaneous Income</a></li>
+                            <li><a href="#">General Ledger</a></li>
+                            <li><a href="#">Accounts Payable</a></li>
+                            <li><a href="#">Accounts Receivable</a></li>
+                        </ul>
+                    </li>
                     
-                    
-                    
-                                        <li class="nav-group">
+                    <li class="nav-group">
                         <div class="group-header">
                             <i class="ri-briefcase-4-line"></i>
                             <span>Business Process</span>
@@ -149,7 +174,7 @@
                             <li><a href="employees.html"><i class="ri-user-settings-line"></i> Employees</a></li>
                         </ul>
                     </li>
-<li class="nav-group">
+                    <li class="nav-group">
                         <div class="group-header">
                             <i class="ri-shopping-cart-2-line"></i>
                             <span>Supply Chain</span>
@@ -172,50 +197,34 @@
                         </div>
                         <ul class="submenu">
                             <li><a href="reconciliation.html">Invoice Reconciliation</a></li>
-                            <li><a href="#">Sales Pipeline</a></li>
-                            <li><a href="#">Customers</a></li>
                         </ul>
                     </li>
-                    <li class="nav-group">
+                    <li class="nav-group active-group">
                         <div class="group-header">
                             <i class="ri-file-chart-line"></i>
                             <span>Reports</span>
                             <i class="ri-arrow-down-s-line arrow"></i>
                         </div>
-                        <ul class="submenu">
-                            <li><a href="misc-income-entries.html">Miscellaneous Income Entries</a></li>
+                        <ul class="submenu show">
+                            <li class="active-sub"><a href="misc-income-entries.html">Miscellaneous Income Entries</a></li>
                             <li><a href="voucher-entries.html">Voucher Entries</a></li>
                             <li><a href="#">General Reports</a></li>
                         </ul>
                     </li>
-                                        <li class="nav-group">
-                        <div class="group-header">
-                            <i class="ri-bank-line"></i>
-                            <span>Finance</span>
-                            <i class="ri-arrow-down-s-line arrow"></i>
-                        </div>
-                        <ul class="submenu">
-                            <li><a href="voucher-history.html">Voucher History</a></li>
-                            <li><a href="#">General Ledger</a></li>
-                            <li><a href="#">Accounts Payable</a></li>
-                            <li><a href="#">Accounts Receivable</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-group active">
+                    <li class="nav-group">
                         <div class="group-header">
                             <i class="ri-settings-4-line"></i>
                             <span>System</span>
                             <i class="ri-arrow-down-s-line arrow"></i>
                         </div>
-                        <ul class="submenu" style="display: block;">
+                        <ul class="submenu">
                             <li><a href="users.html">User Management</a></li>
                             <li><a href="locations.html">Locations</a></li>
                             <li><a href="profiles.html">Profiles</a></li>
                             <li><a href="nationalities.html">Nationalities</a></li>
-                                                        <li><a href="shifts.html">Shifts</a></li>
+                            <li><a href="shifts.html">Shifts</a></li>
                             <li><a href="sync.html">Data Sync (Navision)</a></li>
-
-                            <li><a href="announcements.html" class="active">Announcements</a></li>
+                            <li><a href="announcements.html">Announcements</a></li>
                             <li><a href="settings.html">Account Settings</a></li>
                         </ul>
                     </li>
@@ -224,7 +233,7 @@
 
             <div class="sidebar-footer">
                 <div class="user-block">
-                    <img src="https://ui-avatars.com/api/?name=Admin+User&background=6366f1&color=fff" alt="User" class="user-avatar">
+                    <img src="https://ui-avatars.com/api/?name=Admin+User&background=6366f1&color=fff" alt="User">
                     <div class="user-info">
                         <p class="user-name">Admin User</p>
                         <p class="user-role">System Administrator</p>
@@ -243,53 +252,49 @@
                     <button class="hamburger-menu" id="mobile-menu-btn">
                         <i class="ri-menu-line"></i>
                     </button>
-                    <h2 class="page-title">System Announcements</h2>
+                    <h2 class="page-title">Miscellaneous Income Entries</h2>
                 </div>
             </header>
 
             <div class="content">
-                <div class="settings-card animate-in">
-                    <div class="settings-header">
-                        <h3>Create New Announcement</h3>
-                        <p>Post updates, maintenance alerts, or news for all ERP users.</p>
+                <div class="filter-section">
+                    <div class="input-group">
+                        <label for="filter-date">Date</label>
+                        <input type="date" id="filter-date">
                     </div>
-
-                    <form id="announcement-form">
-                        <div class="form-section">
-                            <div class="form-group">
-                                <label for="ann-title">Title</label>
-                                <input type="text" id="ann-title" placeholder="e.g., System Maintenance" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="ann-type">Alert Type</label>
-                                <select id="ann-type">
-                                    <option value="Info">Info (Blue)</option>
-                                    <option value="Success">Success (Green)</option>
-                                    <option value="Warning">Warning (Orange)</option>
-                                </select>
-                            </div>
-                            <div class="form-group full-width">
-                                <label for="ann-content">Message / Description</label>
-                                <input type="text" id="ann-content" placeholder="e.g., Scheduled for Sunday 2-4 AM. Please save your work." required>
-                            </div>
-                        </div>
-
-                        <button type="submit" class="btn-update">
-                            <i class="ri-megaphone-line"></i>
-                            Post Announcement
-                        </button>
-                    </form>
-                </div>
-
-                <div class="settings-card animate-in" style="margin-top: 2rem;">
-                    <div class="settings-header">
-                        <h3>Active Announcements</h3>
-                        <p>Manage existing announcements currently visible on the dashboard.</p>
+                    <div class="input-group">
+                        <label for="filter-type">Type</label>
+                        <select id="filter-type">
+                            <option value="">All Types</option>
+                            <option value="Opening Balance">Opening Balance</option>
+                            <option value="Income">Income</option>
+                            <option value="Expense">Expense</option>
+                        </select>
                     </div>
                     
-                    <ul id="active-announcements-list" style="list-style: none; padding: 0;">
-                        <!-- Dynamic items populate here -->
-                    </ul>
+                    <button class="btn-action" id="clear-filters-btn" style="background-color: #e2e8f0; color: #475569; border: 1px solid #cbd5e1;">
+                        <i class="ri-filter-off-line"></i>
+                        <span>Clear Filters</span>
+                    </button>
+                </div>
+
+                <div class="history-section">
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Type</th>
+                                    <th>Amount</th>
+                                    <th>Transaction Date</th>
+                                    <th>Remarks</th>
+                                </tr>
+                            </thead>
+                            <tbody id="entries-table-body">
+                                <tr><td colspan="5" style="text-align: center;">Loading entries...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </main>
@@ -297,20 +302,10 @@
 
     <!-- Custom JS -->
     <script src="common.js?v=13"></script>
-    <script src="announcements.js"></script>
+    <script src="misc-income-entries.js"></script>
 </body>
 
 </html>
-
-
-
-
-
-
-
-
-
-
 
 
 

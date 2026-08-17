@@ -33,6 +33,44 @@ namespace Backend.Controllers
                 .ToListAsync();
         }
 
+        // PUT: api/Users/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateUser(int id, [FromBody] UpdateUserDto dto)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null) return NotFound(new { message = "User not found" });
+
+            if (await _context.Users.AnyAsync(u => u.Email == dto.Email && u.Id != id))
+            {
+                return BadRequest(new { message = "Email is already in use by another user" });
+            }
+
+            if (!string.IsNullOrWhiteSpace(dto.Name)) user.Name = dto.Name;
+            if (!string.IsNullOrWhiteSpace(dto.Email)) user.Email = dto.Email;
+            if (!string.IsNullOrWhiteSpace(dto.Location)) user.Location = dto.Location;
+            user.ProfileId = dto.ProfileId;
+
+            if (!string.IsNullOrWhiteSpace(dto.Password))
+            {
+                user.PasswordHash = dto.Password;
+            }
+
+            await _context.SaveChangesAsync();
+            return Ok(new { message = "User updated successfully" });
+        }
+
+        // PUT: api/Users/5/profile
+        [HttpPut("{id}/profile")]
+        public async Task<IActionResult> UpdateUserProfile(int id, [FromBody] int? profileId)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null) return NotFound(new { message = "User not found" });
+
+            user.ProfileId = profileId;
+            await _context.SaveChangesAsync();
+            return Ok(new { message = "User profile updated successfully" });
+        }
+
         // POST: api/Users
         [HttpPost]
         public async Task<IActionResult> CreateUser([FromBody] CreateUserDto dto)

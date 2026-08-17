@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DynamicsAltx - Account Settings</title>
+    <title>DynamicsAltx - Voucher Entries</title>
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,104 +14,142 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="dashboard.css">
     <style>
-        .settings-card {
-            background: white;
-            padding: 2rem;
+        .search-section {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            padding: 1.5rem;
             border-radius: 16px;
-            border: 1px solid var(--border-color);
-            max-width: 600px;
-            margin-top: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+            align-items: flex-end;
         }
 
-        .settings-header {
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid var(--border-color);
+        .search-section .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
         }
 
-        .settings-header h3 {
-            margin: 0;
-            font-size: 1.25rem;
-            color: var(--text-main);
-        }
-
-        .settings-header p {
-            margin: 0.5rem 0 0;
-            font-size: 0.9rem;
-            color: var(--text-muted);
-        }
-
-        .form-section {
-            margin-bottom: 2rem;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 0.85rem;
+        .search-section label {
+            font-size: 0.8rem;
             font-weight: 600;
-            margin-bottom: 0.5rem;
             color: var(--text-main);
         }
 
-        .form-group input {
-            width: 100%;
-            padding: 0.8rem 1rem;
+        .search-section input {
+            padding: 0.8rem 1.2rem;
             border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 0.95rem;
+            border-radius: 10px;
+            font-size: 1rem;
             transition: var(--transition);
         }
 
-        .form-group input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px var(--primary-light);
+        .search-section input[type="text"] {
+            min-width: 250px;
         }
 
-        .btn-update {
-            background: var(--primary);
+        .search-section input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .btn-action {
+            background-color: var(--primary);
             color: white;
             border: none;
-            padding: 0.8rem 2rem;
-            border-radius: 8px;
+            padding: 0.8rem 1.5rem;
+            border-radius: 10px;
             font-weight: 600;
             cursor: pointer;
             transition: var(--transition);
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            height: 45px;
         }
 
-        .btn-update:hover {
-            background: var(--primary-dark);
+        .btn-action:hover {
+            background-color: var(--primary-dark);
             transform: translateY(-1px);
         }
 
-        .security-info {
-            background: #fffbeb;
-            border: 1px solid #fef3c7;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1.5rem;
-            display: flex;
-            gap: 0.75rem;
-            align-items: flex-start;
+        .data-table-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            margin-top: 1.5rem;
         }
 
-        .security-info i {
-            color: #d97706;
-            font-size: 1.25rem;
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
         }
 
-        .security-info p {
-            margin: 0;
+        th {
+            background-color: #f8fafc;
+            padding: 1rem 1.5rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            border-bottom: 2px solid var(--border-color);
             font-size: 0.85rem;
-            color: #92400e;
-            line-height: 1.4;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        td {
+            padding: 1.2rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-main);
+            font-size: 0.95rem;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .info-message {
+            display: none;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            animation: fadeIn 0.3s ease-in;
+            align-items: center;
+            gap: 1rem;
+            font-weight: 500;
+        }
+
+        .info-message.error {
+            background-color: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+        }
+
+        .info-message.success {
+            background-color: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+        
+        .info-message.warning {
+            background-color: #fef08a;
+            color: #854d0e;
+            border: 1px solid #fde047;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
     </style>
 </head>
@@ -138,23 +176,21 @@
                             <span>Overview</span>
                         </a>
                     </li>
-                    <li class="nav-group">
+                    <li class="nav-group active-group">
                         <div class="group-header">
                             <i class="ri-bank-line"></i>
                             <span>Finance</span>
                             <i class="ri-arrow-down-s-line arrow"></i>
                         </div>
-                        <ul class="submenu">
+                        <ul class="submenu show">
                             <li><a href="voucher-history.html">Voucher History</a></li>
+                            <li><a href="misc-income.html">Miscellaneous Income</a></li>
                             <li><a href="#">General Ledger</a></li>
                             <li><a href="#">Accounts Payable</a></li>
                             <li><a href="#">Accounts Receivable</a></li>
                         </ul>
                     </li>
-                    
-                    
-                    
-                                        <li class="nav-group">
+                    <li class="nav-group">
                         <div class="group-header">
                             <i class="ri-briefcase-4-line"></i>
                             <span>Business Process</span>
@@ -175,7 +211,7 @@
                             <li><a href="employees.html"><i class="ri-user-settings-line"></i> Employees</a></li>
                         </ul>
                     </li>
-<li class="nav-group">
+                    <li class="nav-group">
                         <div class="group-header">
                             <i class="ri-shopping-cart-2-line"></i>
                             <span>Supply Chain</span>
@@ -210,26 +246,25 @@
                         </div>
                         <ul class="submenu">
                             <li><a href="misc-income-entries.html">Miscellaneous Income Entries</a></li>
-                            <li><a href="voucher-entries.html">Voucher Entries</a></li>
+                            <li class="active-sub"><a href="voucher-entries.html">Voucher Entries</a></li>
                             <li><a href="#">General Reports</a></li>
                         </ul>
                     </li>
-                    <li class="nav-group active">
+                    <li class="nav-group">
                         <div class="group-header">
                             <i class="ri-settings-4-line"></i>
                             <span>System</span>
                             <i class="ri-arrow-down-s-line arrow"></i>
                         </div>
-                        <ul class="submenu" style="display: block;">
+                        <ul class="submenu">
                             <li><a href="users.html">User Management</a></li>
                             <li><a href="locations.html">Locations</a></li>
                             <li><a href="profiles.html">Profiles</a></li>
                             <li><a href="nationalities.html">Nationalities</a></li>
-                                                        <li><a href="shifts.html">Shifts</a></li>
+                            <li><a href="shifts.html">Shifts</a></li>
                             <li><a href="sync.html">Data Sync (Navision)</a></li>
-
                             <li><a href="announcements.html">Announcements</a></li>
-                            <li><a href="settings.html" class="active">Account Settings</a></li>
+                            <li><a href="settings.html">Account Settings</a></li>
                         </ul>
                     </li>
                 </ul>
@@ -256,43 +291,72 @@
                     <button class="hamburger-menu" id="mobile-menu-btn">
                         <i class="ri-menu-line"></i>
                     </button>
-                    <h2 class="page-title">Personal Settings</h2>
+                    <h2 class="page-title">Voucher Entries</h2>
                 </div>
             </header>
 
             <div class="content">
-                <div class="settings-card animate-in">
-                    <div class="settings-header">
-                        <h3>Security & Authentication</h3>
-                        <p>Change your corporate security password to keep your account secure.</p>
-                    </div>
+                <div id="message-container" class="info-message"></div>
 
-                    <div class="security-info">
-                        <i class="ri-error-warning-line"></i>
-                        <p>For your security, you will be required to log in again after changing your password. Ensure you use a strong, unique secret.</p>
-                    </div>
-
-                    <form id="password-form">
-                        <div class="form-section">
-                            <div class="form-group">
-                                <label for="current-pass">Current Password</label>
-                                <input type="password" id="current-pass" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="new-pass">New Password</label>
-                                <input type="password" id="new-pass" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" required minlength="6">
-                            </div>
-                            <div class="form-group">
-                                <label for="confirm-pass">Confirm New Password</label>
-                                <input type="password" id="confirm-pass" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" required minlength="6">
-                            </div>
+                <div class="search-section">
+                    <div class="input-group">
+                        <label for="filter-date">Filter by Date</label>
+                        <div style="display:flex; gap:0.5rem;">
+                            <input type="date" id="filter-date">
+                            <button class="btn-action" id="clear-date-btn" style="background-color: #e2e8f0; color: #475569; border: 1px solid #cbd5e1;">
+                                <i class="ri-close-line"></i>
+                                <span>Clear</span>
+                            </button>
                         </div>
+                    </div>
 
-                        <button type="submit" class="btn-update">
-                            <i class="ri-lock-password-line"></i>
-                            Update Security Password
-                        </button>
-                    </form>
+                    <div class="input-group">
+                        <label for="filter-location">Filter by Location</label>
+                        <div style="display:flex; gap:0.5rem;">
+                            <input type="text" id="filter-location" placeholder="e.g. HO" style="min-width: 150px;">
+                            <button class="btn-action" id="clear-location-btn" style="background-color: #e2e8f0; color: #475569; border: 1px solid #cbd5e1;">
+                                <i class="ri-close-line"></i>
+                                <span>Clear</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div style="flex:1;"></div>
+
+                    <div class="input-group">
+                        <label for="voucher-input">Check Voucher Status</label>
+                        <div style="display:flex; gap:0.5rem;">
+                            <input type="text" id="voucher-input" placeholder="Enter Voucher Number...">
+                            <button class="btn-action" id="check-status-btn">
+                                <i class="ri-search-eye-line"></i>
+                                <span>Check Status</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="page-header">
+                    <div>
+                        <h3>Entered Vouchers</h3>
+                        <p class="text-muted">Showing the latest 20 entered records.</p>
+                    </div>
+                </div>
+
+                <div class="data-table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Voucher No</th>
+                                <th>Transaction Date</th>
+                                <th>Created Date</th>
+                                <th>User</th>
+                                <th>Location</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vouchers-table-body">
+                            <!-- Data populated via JS -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </main>
@@ -300,17 +364,10 @@
 
     <!-- Custom JS -->
     <script src="common.js?v=13"></script>
-    <script src="settings.js"></script>
+    <script src="voucher-entries.js"></script>
 </body>
 
 </html>
-
-
-
-
-
-
-
 
 
 

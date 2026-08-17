@@ -4,114 +4,205 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DynamicsAltx - Account Settings</title>
+    <title>DynamicsAltx - Miscellaneous Income</title>
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@600;700&display=swap"
+        rel="stylesheet">
     <!-- Remix Icons -->
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="dashboard.css">
     <style>
-        .settings-card {
-            background: white;
+        .balance-widget {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
             padding: 2rem;
             border-radius: 16px;
-            border: 1px solid var(--border-color);
-            max-width: 600px;
-            margin-top: 2rem;
-        }
-
-        .settings-header {
+            box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.4);
             margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
-        .settings-header h3 {
+        .balance-info h3 {
             margin: 0;
-            font-size: 1.25rem;
-            color: var(--text-main);
+            font-size: 1.1rem;
+            font-weight: 500;
+            opacity: 0.9;
         }
 
-        .settings-header p {
+        .balance-info .amount {
+            font-size: 2.5rem;
+            font-weight: 700;
             margin: 0.5rem 0 0;
-            font-size: 0.9rem;
-            color: var(--text-muted);
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .balance-icon {
+            font-size: 4rem;
+            opacity: 0.3;
         }
 
         .form-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
             margin-bottom: 2rem;
         }
 
-        .form-group {
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
             margin-bottom: 1.5rem;
         }
 
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
         .form-group label {
-            display: block;
             font-size: 0.85rem;
             font-weight: 600;
-            margin-bottom: 0.5rem;
             color: var(--text-main);
         }
 
-        .form-group input {
-            width: 100%;
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
             padding: 0.8rem 1rem;
             border: 1px solid var(--border-color);
             border-radius: 8px;
             font-size: 0.95rem;
             transition: var(--transition);
+            font-family: 'Inter', sans-serif;
         }
 
-        .form-group input:focus {
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
         }
 
-        .btn-update {
-            background: var(--primary);
+        .btn-post {
+            background-color: var(--primary);
             color: white;
             border: none;
-            padding: 0.8rem 2rem;
+            padding: 1rem 2rem;
             border-radius: 8px;
             font-weight: 600;
+            font-size: 1.05rem;
             cursor: pointer;
             transition: var(--transition);
-            display: flex;
+            display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 0.5rem;
+            width: 100%;
         }
 
-        .btn-update:hover {
-            background: var(--primary-dark);
-            transform: translateY(-1px);
+        .btn-post:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3);
         }
 
-        .security-info {
-            background: #fffbeb;
-            border: 1px solid #fef3c7;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1.5rem;
-            display: flex;
-            gap: 0.75rem;
-            align-items: flex-start;
+        .history-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
         }
 
-        .security-info i {
-            color: #d97706;
-            font-size: 1.25rem;
+        .table-responsive {
+            margin-top: 1rem;
+            overflow-x: auto;
         }
 
-        .security-info p {
-            margin: 0;
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f8fafc;
+            padding: 1rem 1.5rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            border-bottom: 2px solid var(--border-color);
             font-size: 0.85rem;
-            color: #92400e;
-            line-height: 1.4;
+            text-transform: uppercase;
+        }
+
+        td {
+            padding: 1.2rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-main);
+            font-size: 0.95rem;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .type-pill {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .type-income {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .type-expense {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .type-opening {
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+
+        .info-message {
+            display: none;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            align-items: center;
+            gap: 1rem;
+            font-weight: 500;
+        }
+
+        .info-message.error {
+            background-color: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+        }
+
+        .info-message.success {
+            background-color: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
         }
     </style>
 </head>
@@ -138,31 +229,32 @@
                             <span>Overview</span>
                         </a>
                     </li>
-                    <li class="nav-group">
+                    <li class="nav-group active-group">
                         <div class="group-header">
                             <i class="ri-bank-line"></i>
                             <span>Finance</span>
                             <i class="ri-arrow-down-s-line arrow"></i>
                         </div>
-                        <ul class="submenu">
+                        <ul class="submenu show">
                             <li><a href="voucher-history.html">Voucher History</a></li>
+                            <li class="active-sub"><a href="misc-income.html">Miscellaneous Income</a></li>
                             <li><a href="#">General Ledger</a></li>
                             <li><a href="#">Accounts Payable</a></li>
                             <li><a href="#">Accounts Receivable</a></li>
                         </ul>
                     </li>
-                    
-                    
-                    
-                                        <li class="nav-group">
+
+                    <li class="nav-group">
                         <div class="group-header">
                             <i class="ri-briefcase-4-line"></i>
                             <span>Business Process</span>
                             <i class="ri-arrow-down-s-line arrow-icon"></i>
                         </div>
                         <ul class="submenu">
-                            <li><a href="cashier-closing.html"><i class="ri-file-list-3-line"></i> Cashier Closing</a></li>
-                            <li><a href="closing-reports.html"><i class="ri-file-chart-line"></i> Closing Reports</a></li>
+                            <li><a href="cashier-closing.html"><i class="ri-file-list-3-line"></i> Cashier Closing</a>
+                            </li>
+                            <li><a href="closing-reports.html"><i class="ri-file-chart-line"></i> Closing Reports</a>
+                            </li>
                         </ul>
                     </li>
                     <li class="nav-group">
@@ -175,7 +267,7 @@
                             <li><a href="employees.html"><i class="ri-user-settings-line"></i> Employees</a></li>
                         </ul>
                     </li>
-<li class="nav-group">
+                    <li class="nav-group">
                         <div class="group-header">
                             <i class="ri-shopping-cart-2-line"></i>
                             <span>Supply Chain</span>
@@ -198,8 +290,6 @@
                         </div>
                         <ul class="submenu">
                             <li><a href="reconciliation.html">Invoice Reconciliation</a></li>
-                            <li><a href="#">Sales Pipeline</a></li>
-                            <li><a href="#">Customers</a></li>
                         </ul>
                     </li>
                     <li class="nav-group">
@@ -214,22 +304,21 @@
                             <li><a href="#">General Reports</a></li>
                         </ul>
                     </li>
-                    <li class="nav-group active">
+                    <li class="nav-group">
                         <div class="group-header">
                             <i class="ri-settings-4-line"></i>
                             <span>System</span>
                             <i class="ri-arrow-down-s-line arrow"></i>
                         </div>
-                        <ul class="submenu" style="display: block;">
+                        <ul class="submenu">
                             <li><a href="users.html">User Management</a></li>
                             <li><a href="locations.html">Locations</a></li>
                             <li><a href="profiles.html">Profiles</a></li>
                             <li><a href="nationalities.html">Nationalities</a></li>
-                                                        <li><a href="shifts.html">Shifts</a></li>
+                            <li><a href="shifts.html">Shifts</a></li>
                             <li><a href="sync.html">Data Sync (Navision)</a></li>
-
                             <li><a href="announcements.html">Announcements</a></li>
-                            <li><a href="settings.html" class="active">Account Settings</a></li>
+                            <li><a href="settings.html">Account Settings</a></li>
                         </ul>
                     </li>
                 </ul>
@@ -256,41 +345,55 @@
                     <button class="hamburger-menu" id="mobile-menu-btn">
                         <i class="ri-menu-line"></i>
                     </button>
-                    <h2 class="page-title">Personal Settings</h2>
+                    <h2 class="page-title">Miscellaneous Income</h2>
                 </div>
             </header>
 
             <div class="content">
-                <div class="settings-card animate-in">
-                    <div class="settings-header">
-                        <h3>Security & Authentication</h3>
-                        <p>Change your corporate security password to keep your account secure.</p>
-                    </div>
+                <div id="message-container" class="info-message"></div>
 
-                    <div class="security-info">
-                        <i class="ri-error-warning-line"></i>
-                        <p>For your security, you will be required to log in again after changing your password. Ensure you use a strong, unique secret.</p>
+                <div class="balance-widget">
+                    <div class="balance-info">
+                        <h3>Current Total Balance</h3>
+                        <div class="amount" id="current-balance">SAR 0.00</div>
                     </div>
+                    <i class="ri-wallet-3-line balance-icon"></i>
+                </div>
 
-                    <form id="password-form">
-                        <div class="form-section">
+                <div class="form-section">
+                    <h3 style="margin-top:0; margin-bottom: 1.5rem;">New Entry</h3>
+                    <form id="misc-income-form">
+                        <div class="form-grid">
                             <div class="form-group">
-                                <label for="current-pass">Current Password</label>
-                                <input type="password" id="current-pass" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" required>
+                                <label for="entry-type">Entry Type <span class="text-danger">*</span></label>
+                                <select id="entry-type" required>
+                                    <option value="" disabled selected>Select Type</option>
+                                    <option value="Opening Balance">Opening Balance</option>
+                                    <option value="Income">Income</option>
+                                    <option value="Expense">Expense</option>
+                                </select>
                             </div>
+
                             <div class="form-group">
-                                <label for="new-pass">New Password</label>
-                                <input type="password" id="new-pass" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" required minlength="6">
+                                <label for="amount">Amount <span class="text-danger">*</span></label>
+                                <input type="number" id="amount" step="0.01" min="0.01" placeholder="0.00" required>
                             </div>
+
                             <div class="form-group">
-                                <label for="confirm-pass">Confirm New Password</label>
-                                <input type="password" id="confirm-pass" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" required minlength="6">
+                                <label for="trans-date">Transaction Date <span class="text-danger">*</span></label>
+                                <input type="date" id="trans-date" required>
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label for="remarks">Remarks (Optional)</label>
+                                <textarea id="remarks" rows="2"
+                                    placeholder="Enter any notes or description..."></textarea>
                             </div>
                         </div>
 
-                        <button type="submit" class="btn-update">
-                            <i class="ri-lock-password-line"></i>
-                            Update Security Password
+                        <button type="submit" class="btn-post" id="btn-post">
+                            <i class="ri-save-line"></i>
+                            <span>POST ENTRY</span>
                         </button>
                     </form>
                 </div>
@@ -300,20 +403,9 @@
 
     <!-- Custom JS -->
     <script src="common.js?v=13"></script>
-    <script src="settings.js"></script>
+    <script src="misc-income.js"></script>
 </body>
 
 </html>
-
-
-
-
-
-
-
-
-
-
-
 
 

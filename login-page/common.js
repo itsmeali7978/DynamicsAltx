@@ -55,7 +55,10 @@ const sidebarMappings = {
     "supply chain": "supply_chain",
     "crm & sales": "crm",
     "system": "system",
-    "vendor tasks": "nav_vendor_tasks"
+    "vendor tasks": "nav_vendor_tasks",
+    "altx items sync": "nav_altx_items",
+    "sales analysis": "nav_sales_analysis",
+    "input daily activities": "nav_input_daily_activities"
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -71,6 +74,33 @@ document.addEventListener('DOMContentLoaded', () => {
             if (systemGroup) {
                 const submenu = systemGroup.querySelector('.submenu');
                 if (submenu) {
+                    if (!submenu.querySelector('a[href="altx-items.html"]')) {
+                        const liItem = document.createElement('li');
+                        const aItem = document.createElement('a');
+                        aItem.href = 'altx-items.html';
+                        aItem.setAttribute('data-i18n', 'nav_altx_items');
+                        aItem.textContent = 'Altx Items Sync';
+                        
+                        if (window.location.pathname.endsWith('altx-items.html')) {
+                            aItem.className = 'active';
+                            systemGroup.classList.add('active');
+                            submenu.style.display = 'block';
+                        }
+                        
+                        liItem.appendChild(aItem);
+                        
+                        // Insert it before settings.html or at the end
+                        const settingsLiItem = Array.from(submenu.querySelectorAll('li')).find(item => {
+                            const link = item.querySelector('a');
+                            return link && link.getAttribute('href') === 'settings.html';
+                        });
+                        if (settingsLiItem) {
+                            submenu.insertBefore(liItem, settingsLiItem);
+                        } else {
+                            submenu.appendChild(liItem);
+                        }
+                    }
+
                     if (!submenu.querySelector('a[href="leave-types.html"]')) {
                         const li = document.createElement('li');
                         const a = document.createElement('a');
@@ -128,6 +158,55 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
 
+        }
+
+        // Dynamic Menu Injection for Sales Analysis
+        const _salesAllowedPagesStr = localStorage.getItem('allowedPages');
+        const _salesAllowedPages = _salesAllowedPagesStr ? JSON.parse(_salesAllowedPagesStr) : null;
+        const _salesUserRole = localStorage.getItem('userRole');
+
+        if (_salesUserRole?.toLowerCase() === 'admin' || !_salesAllowedPages || _salesAllowedPages.includes('input-daily-activities.html')) {
+            let salesGroup = Array.from(document.querySelectorAll('.nav-group')).find(group => {
+                const header = group.querySelector('.group-header span');
+                return header && (header.textContent.trim().toLowerCase() === 'sales analysis' || header.getAttribute('data-i18n') === 'nav_sales_analysis');
+            });
+
+            if (!salesGroup) {
+                const navMenu = document.querySelector('.nav-menu, .nav-list');
+                if (navMenu) {
+                    salesGroup = document.createElement('li');
+                    salesGroup.className = 'nav-group';
+                    salesGroup.innerHTML = `
+                        <div class="group-header">
+                            <i class="ri-line-chart-line"></i>
+                            <span data-i18n="nav_sales_analysis">Sales Analysis</span>
+                            <i class="ri-arrow-down-s-line arrow-icon"></i>
+                        </div>
+                        <ul class="submenu">
+                            <li><a href="input-daily-activities.html" data-i18n="nav_input_daily_activities">Input Daily Activities</a></li>
+                        </ul>
+                    `;
+
+                    const systemGroup = Array.from(navMenu.querySelectorAll('.nav-group')).find(group => {
+                        const header = group.querySelector('.group-header span');
+                        return header && (header.textContent.trim().toLowerCase() === 'system' || header.getAttribute('data-i18n') === 'system');
+                    });
+
+                    if (systemGroup) {
+                        navMenu.insertBefore(salesGroup, systemGroup);
+                    } else {
+                        navMenu.appendChild(salesGroup);
+                    }
+                }
+            }
+
+            if (salesGroup && window.location.pathname.endsWith('input-daily-activities.html')) {
+                salesGroup.classList.add('expanded', 'active');
+                const submenu = salesGroup.querySelector('.submenu');
+                if (submenu) submenu.style.display = 'block';
+                const activeLink = salesGroup.querySelector('a[href="input-daily-activities.html"]');
+                if (activeLink) activeLink.classList.add('active');
+            }
         }
 
         // Dynamic Menu Injection for Human Resource (only inject pages allowed by user profile)
@@ -440,12 +519,19 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // 3. Navigation Group (Submenu) Logic
-        const groupHeaders = document.querySelectorAll('.group-header');
-        groupHeaders.forEach(header => {
-            header.addEventListener('click', () => {
+        document.addEventListener('click', (e) => {
+            const header = e.target.closest('.group-header');
+            if (header) {
                 const group = header.parentElement;
-                group.classList.toggle('expanded');
-            });
+                if (group && group.classList.contains('nav-group')) {
+                    group.classList.toggle('expanded');
+                    const submenu = group.querySelector('.submenu');
+                    if (submenu) {
+                        const isExpanded = group.classList.contains('expanded');
+                        submenu.style.display = isExpanded ? 'block' : 'none';
+                    }
+                }
+            }
         });
 
         // Auto-expand the active group

@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DynamicsAltx - Input Daily Activities</title>
+    <!-- Google Fonts: Inter & Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@600;700&display=swap" rel="stylesheet">
+    <!-- Remix Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="dashboard.css">
+    <style>
+        .module-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+        }
+
+        .module-card-header {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .module-card-header .title-area {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .module-card-header i {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .module-card-header h3 {
+            margin: 0;
+            font-size: 1.25rem;
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        /* Mode Selector Switch */
+        .mode-selector {
+            display: inline-flex;
+            background: #f1f5f9;
+            padding: 4px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .mode-btn {
+            padding: 0.6rem 1.25rem;
+            border-radius: 8px;
+            border: none;
+            background: transparent;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .mode-btn.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 992px) {
+            .form-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 576px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .input-item-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .item-input-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .item-input-row input {
+            flex: 1;
+        }
+
+        .item-desc-badge {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #4f46e5;
+            background: #eef2ff;
+            padding: 0.4rem 0.85rem;
+            border-radius: 8px;
+            border: 1px solid #c7d2fe;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            min-height: 38px;
+            word-break: break-word;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            padding: 0.75rem 1rem;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            color: white;
+            border: none;
+            padding: 0.85rem 2rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
+        }
+
+        .alert-msg {
+            margin-top: 1.25rem;
+            padding: 1rem 1.25rem;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            display: none;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .alert-msg.success {
+            background: #ecfdf5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .alert-msg.error {
+            background: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .table-card {
+            background: white;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+            overflow: hidden;
+        }
+
+        .table-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-header h4 {
+            margin: 0;
+            font-size: 1.1rem;
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        .badge-count {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .data-table-container {
+            overflow-x: auto;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        .data-table th {
+            background: #f8fafc;
+            padding: 1rem 1.25rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border-color);
+            white-space: nowrap;
+        }
+
+        .data-table td {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+            color: var(--text-main);
+            vertical-align: middle;
+        }
+
+        .data-table tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        .action-btns {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-icon {
+            border: none;
+            background: transparent;
+            padding: 0.4rem 0.6rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn-icon.edit {
+            color: #4f46e5;
+            background: #eef2ff;
+        }
+
+        .btn-icon.edit:hover {
+            background: #c7d2fe;
+        }
+
+        .btn-icon.delete {
+            color: #ef4444;
+            background: #fef2f2;
+        }
+
+        .btn-icon.delete:hover {
+            background: #fecaca;
+        }
+
+        /* Edit Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .modal-card {
+            background: white;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 650px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-header h4 {
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .close-btn {
+            background: transparent;
+            border: none;
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="erp-app">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <div class="logo-box">
+                    <i class="ri-flashlight-fill"></i>
+                </div>
+                <span>DynamicsAltx</span>
+                <button class="icon-btn" id="sidebar-toggle">
+                    <i class="ri-menu-fold-line"></i>
+                </button>
+            </div>
+
+            <nav class="sidebar-nav">
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="dashboard.html" class="nav-link">
+                            <i class="ri-dashboard-line"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-group">
+                        <div class="group-header">
+                            <i class="ri-bank-line"></i>
+                            <span>Finance</span>
+                            <i class="ri-arrow-down-s-line arrow"></i>
+                        </div>
+                        <ul class="submenu">
+                            <li><a href="voucher-history.html">Voucher History</a></li>
+                            <li><a href="voucher-entries.html">Voucher Entries</a></li>
+                            <li><a href="misc-income.html">Miscellaneous Income</a></li>
+                            <li><a href="misc-income-entries.html">Misc Income Entries</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-group">
+                        <div class="group-header">
+                            <i class="ri-briefcase-4-line"></i>
+                            <span>Business Process</span>
+                            <i class="ri-arrow-down-s-line arrow-icon"></i>
+                        </div>
+                        <ul class="submenu">
+                            <li><a href="cashier-closing.html">Cashier Closing</a></li>
+                            <li><a href="closing-reports.html">Closing Reports</a></li>
+                            <li><a href="reconciliation.html">Invoice Reconciliation</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-group">
+                        <div class="group-header">
+                            <i class="ri-team-line"></i>
+                            <span>Human Resource</span>
+                            <i class="ri-arrow-down-s-line arrow-icon"></i>
+                        </div>
+                        <ul class="submenu">
+                            <li><a href="employees.html">Employees</a></li>
+                            <li><a href="short-breaks.html">Short Breaks</a></li>
+                            <li><a href="absence-marker.html">Absence Marker</a></li>
+                            <li><a href="absence-report.html">Absence Report</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-group expanded active">
+                        <div class="group-header">
+                            <i class="ri-line-chart-line"></i>
+                            <span>Sales Analysis</span>
+                            <i class="ri-arrow-down-s-line arrow-icon"></i>
+                        </div>
+                        <ul class="submenu" style="display: block;">
+                            <li><a href="input-daily-activities.html" class="active">Input Daily Activities</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-group">
+                        <div class="group-header">
+                            <i class="ri-settings-4-line"></i>
+                            <span data-i18n="system">System</span>
+                            <i class="ri-arrow-down-s-line arrow-icon"></i>
+                        </div>
+                        <ul class="submenu">
+                            <li><a href="users.html" data-i18n="nav_user_management">User Management</a></li>
+                            <li><a href="profiles.html">Profiles</a></li>
+                            <li><a href="locations.html" data-i18n="nav_locations">Locations</a></li>
+                            <li><a href="nationalities.html" data-i18n="nav_nationalities">Nationalities</a></li>
+                            <li><a href="shifts.html" data-i18n="nav_shifts">Shifts</a></li>
+                            <li><a href="sync.html" data-i18n="nav_data_sync">Data Sync (Navision)</a></li>
+                            <li><a href="altx-items.html" data-i18n="nav_altx_items">Altx Items Sync</a></li>
+                            <li><a href="announcements.html" data-i18n="nav_announcements">Announcements</a></li>
+                            <li><a href="settings.html" data-i18n="nav_settings">Account Settings</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-block">
+                    <img src="https://ui-avatars.com/api/?name=Admin+User&background=6366f1&color=fff" alt="User">
+                    <div class="user-info">
+                        <p class="user-name" id="user-display-name">Admin User</p>
+                        <p class="user-role">System Administrator</p>
+                    </div>
+                    <button class="logout-btn icon-btn" onclick="location.href='index.html'">
+                        <i class="ri-logout-box-r-line"></i>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="hamburger-menu" id="sidebar-toggle">
+                        <i class="ri-menu-line"></i>
+                    </button>
+                    <div class="breadcrumb">
+                        <span>Sales Analysis</span>
+                        <i class="ri-arrow-right-s-line"></i>
+                        <span class="active">Input Daily Activities</span>
+                    </div>
+                </div>
+                <div class="topbar-right">
+                    <div class="user-profile-badge">
+                        <i class="ri-user-3-line"></i>
+                        <span id="top-user-name">Admin User</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content-wrapper" style="padding: 2rem;">
+                <!-- Module Card -->
+                <div class="module-card">
+                    <div class="module-card-header">
+                        <div class="title-area">
+                            <i class="ri-calendar-todo-line"></i>
+                            <h3>Input Daily Activities</h3>
+                        </div>
+                        <div class="mode-selector">
+                            <button class="mode-btn active" id="btnModeAdd" onclick="switchMode('add')">
+                                <i class="ri-add-circle-line"></i> Add
+                            </button>
+                            <button class="mode-btn" id="btnModeEditView" onclick="switchMode('editview')">
+                                <i class="ri-eye-line"></i> Edit & View
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Date & Entry Form Area -->
+                    <form id="activityForm" onsubmit="handleFormSubmit(event)">
+                        <div class="form-grid">
+                            <!-- Date Selection -->
+                            <div class="form-group">
+                                <label for="activityDate">Date *</label>
+                                <input type="date" id="activityDate" required onchange="onDateChanged()">
+                            </div>
+
+                            <!-- Item No & Live Lookup Display -->
+                            <div class="form-group input-item-wrap">
+                                <label for="itemNo">Item No *</label>
+                                <div class="item-input-row">
+                                    <input type="text" id="itemNo" placeholder="Enter Item No..." required oninput="onItemNoInput(this.value)">
+                                </div>
+                                <div>
+                                    <span id="itemDescPreview" class="item-desc-badge">
+                                        <i class="ri-information-line"></i> Item name will display here
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Produced Qty -->
+                            <div class="form-group">
+                                <label for="producedQty">Produced Qty</label>
+                                <input type="number" id="producedQty" min="0" step="any" placeholder="0" value="0">
+                            </div>
+
+                            <!-- Expired Qty -->
+                            <div class="form-group">
+                                <label for="expiredQty">Expired Qty</label>
+                                <input type="number" id="expiredQty" min="0" step="any" placeholder="0" value="0">
+                            </div>
+
+                            <!-- Expiry Reason -->
+                            <div class="form-group">
+                                <label for="expiryReason">Expiry Reason</label>
+                                <input type="text" id="expiryReason" placeholder="Enter expiry reason (if any)...">
+                            </div>
+
+                            <!-- Notes -->
+                            <div class="form-group full-width">
+                                <label for="notes">Notes</label>
+                                <textarea id="notes" rows="2" placeholder="Additional notes..."></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions (Visible in Add mode) -->
+                        <div id="addFormActions" style="display: flex; gap: 1rem; align-items: center;">
+                            <button type="submit" class="btn-submit" id="btnSubmit">
+                                <i class="ri-save-line"></i> Submit Activity
+                            </button>
+                        </div>
+                    </form>
+
+                    <div id="alertMsg" class="alert-msg"></div>
+                </div>
+
+                <!-- Table Card (Grid) -->
+                <div class="table-card">
+                    <div class="table-header">
+                        <h4 id="gridTitle">Daily Activities Grid</h4>
+                        <span class="badge-count" id="recordCount">0 Records</span>
+                    </div>
+                    <div class="data-table-container">
+                        <table class="data-table" id="activitiesTable">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Item No</th>
+                                    <th>Description Arabic</th>
+                                    <th>Description English</th>
+                                    <th>Produced Qty</th>
+                                    <th>Expired Qty</th>
+                                    <th>Expiry Reason</th>
+                                    <th>Notes</th>
+                                    <th id="thActions" style="display: none;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody">
+                                <tr>
+                                    <td colspan="9" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                                        Select a date or enter activities to display.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Edit Modal -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h4><i class="ri-edit-line" style="color: var(--primary);"></i> Edit Daily Activity</h4>
+                <button class="close-btn" onclick="closeEditModal()"><i class="ri-close-line"></i></button>
+            </div>
+            <form id="editForm" onsubmit="handleEditSubmit(event)">
+                <input type="hidden" id="editId">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="editActivityDate">Date *</label>
+                        <input type="date" id="editActivityDate" required>
+                    </div>
+
+                    <div class="form-group input-item-wrap">
+                        <label for="editItemNo">Item No *</label>
+                        <input type="text" id="editItemNo" required oninput="onEditItemNoInput(this.value)">
+                        <div>
+                            <span id="editItemDescPreview" class="item-desc-badge">
+                                <i class="ri-information-line"></i> Item name preview
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editProducedQty">Produced Qty</label>
+                        <input type="number" id="editProducedQty" min="0" step="any" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editExpiredQty">Expired Qty</label>
+                        <input type="number" id="editExpiredQty" min="0" step="any" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editExpiryReason">Expiry Reason</label>
+                        <input type="text" id="editExpiryReason">
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="editNotes">Notes</label>
+                        <textarea id="editNotes" rows="2"></textarea>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1rem;">
+                    <button type="button" class="btn" style="background: #f1f5f9; color: var(--text-dark); border: none; padding: 0.75rem 1.5rem; border-radius: 10px; font-weight: 600; cursor: pointer;" onclick="closeEditModal()">Cancel</button>
+                    <button type="submit" class="btn-submit"><i class="ri-save-line"></i> Update Record</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Core Scripts -->
+    <script src="common.js"></script>
+    <script src="input-daily-activities.js"></script>
+</body>
+
+</html>

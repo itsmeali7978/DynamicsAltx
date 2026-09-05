@@ -40,25 +40,29 @@ namespace Backend.Controllers
             var allowedPages = new List<string>();
             string dashboardPage = "dashboard.html";
 
-            if (user.Profile != null)
+            if (user.Role?.Equals("Admin", StringComparison.OrdinalIgnoreCase) == true)
             {
-                dashboardPage = user.Profile.DashboardPage;
-                allowedPages = user.Profile.AllowedPages.Select(ap => ap.PagePath).ToList();
-                // Always ensure the dashboard landing page itself is accessible
-                if (!allowedPages.Contains(dashboardPage))
-                    allowedPages.Insert(0, dashboardPage);
-            }
-            else if (user.Role == "Admin")
-            {
-                // Fallback list for Admin if no profile is assigned
                 allowedPages = new List<string> {
                     "dashboard.html", "employees.html", "absence-marker.html", "absence-report.html",
                     "cashier-closing.html", "closing-reports.html", "users.html", "locations.html",
                     "nationalities.html", "shifts.html", "short-breaks.html", "leave-types.html",
                     "sync.html", "reconciliation.html", "vendors.html", "vendor-profile.html", "bidding-list.html",
                     "bidding-create.html", "voucher-history.html", "announcements.html",
-                    "barcode-print.html", "settings.html", "profiles.html", "vendor-tasks.html"
+                    "barcode-print.html", "settings.html", "profiles.html", "vendor-tasks.html",
+                    "altx-items.html", "input-daily-activities.html", "misc-income.html", "misc-income-entries.html"
                 };
+                if (user.Profile != null && !string.IsNullOrEmpty(user.Profile.DashboardPage))
+                {
+                    dashboardPage = user.Profile.DashboardPage;
+                }
+            }
+            else if (user.Profile != null)
+            {
+                dashboardPage = user.Profile.DashboardPage;
+                allowedPages = user.Profile.AllowedPages.Select(ap => ap.PagePath).ToList();
+                // Always ensure the dashboard landing page itself is accessible
+                if (!allowedPages.Contains(dashboardPage))
+                    allowedPages.Insert(0, dashboardPage);
             }
  
             return Ok(new { 

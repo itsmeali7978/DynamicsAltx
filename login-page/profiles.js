@@ -28,7 +28,9 @@ const APP_PAGES = [
     { path: 'settings.html', label: 'Account Settings' },
     { path: 'profiles.html', label: 'Profiles' },
     { path: 'vendor-tasks.html', label: 'Vendor Tasks' },
-    { path: 'vendor-pending-tasks.html', label: 'Vendor Pending Tasks' }
+    { path: 'vendor-pending-tasks.html', label: 'Vendor Pending Tasks' },
+    { path: 'altx-items.html', label: 'Altx Items Sync' },
+    { path: 'input-daily-activities.html', label: 'Input Daily Activities' }
 ];
 
 document.addEventListener('DOMContentLoaded', () => {

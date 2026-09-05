@@ -388,6 +388,45 @@ input[type=number] {
     font-weight: 700;
 }
 
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    color: var(--text-muted, #64748b);
+}
+
+.breadcrumb span {
+    font-weight: 500;
+}
+
+.breadcrumb span.active {
+    color: var(--text-dark, #0f172a);
+    font-weight: 700;
+}
+
+.breadcrumb i {
+    font-size: 1.1rem;
+    color: #94a3b8;
+}
+
+.user-profile-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #f8fafc;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #334155;
+}
+
+.user-profile-badge i {
+    color: var(--primary, #6366f1);
+}
+
 .topbar-right {
     display: flex;
     align-items: center;

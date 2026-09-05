@@ -31,5 +31,7 @@ namespace Backend.Data
         public DbSet<VendorTask> VendorTasks { get; set; }
         public DbSet<VendorProfileTask> VendorProfileTasks { get; set; }
         public DbSet<MiscellaneousIncome> MiscellaneousIncomes { get; set; }
+        public DbSet<AltxItem> AltxItems { get; set; }
+        public DbSet<DailyActivity> DailyActivities { get; set; }
     }
 }

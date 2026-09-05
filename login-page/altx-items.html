@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DynamicsAltx - Altx Items Sync</title>
+    <!-- Google Fonts: Inter & Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@600;700&display=swap" rel="stylesheet">
+    <!-- Remix Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="dashboard.css">
+    <style>
+        .module-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+        }
+
+        .module-card-header {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .module-card-header i {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .module-card-header h3 {
+            margin: 0;
+            font-size: 1.25rem;
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 992px) {
+            .filter-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 576px) {
+            .filter-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .form-group input {
+            padding: 0.75rem 1rem;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .form-group input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+        }
+
+        .btn-process {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            color: white;
+            border: none;
+            padding: 0.85rem 2rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+        }
+
+        .btn-process:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
+        }
+
+        .btn-process i {
+            font-size: 1.2rem;
+            transition: transform 0.4s ease;
+        }
+
+        .btn-process.loading i {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .result-bar {
+            margin-top: 1.25rem;
+            padding: 1rem 1.25rem;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            display: none;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .result-bar.success {
+            background: #ecfdf5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .result-bar.error {
+            background: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .table-card {
+            background: white;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+            overflow: hidden;
+        }
+
+        .table-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-header h4 {
+            margin: 0;
+            font-size: 1.1rem;
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        .badge-count {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .data-table-container {
+            overflow-x: auto;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        .data-table th {
+            background: #f8fafc;
+            padding: 1rem 1.5rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .data-table td {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+            color: var(--text-main);
+            vertical-align: middle;
+        }
+
+        .data-table tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-pill.active {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-pill.inactive {
+            background: #f3f4f6;
+            color: #4b5563;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="erp-app">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <div class="logo-box">
+                    <i class="ri-flashlight-fill"></i>
+                </div>
+                <span>DynamicsAltx</span>
+                <button class="icon-btn" id="sidebar-toggle">
+                    <i class="ri-menu-fold-line"></i>
+                </button>
+            </div>
+
+            <nav class="sidebar-nav">
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="dashboard.html" class="nav-link">
+                            <i class="ri-dashboard-line"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-group">
+                        <div class="group-header">
+                            <i class="ri-bank-line"></i>
+                            <span>Finance</span>
+                            <i class="ri-arrow-down-s-line arrow"></i>
+                        </div>
+                        <ul class="submenu">
+                            <li><a href="voucher-history.html">Voucher History</a></li>
+                            <li><a href="voucher-entries.html">Voucher Entries</a></li>
+                            <li><a href="misc-income.html">Miscellaneous Income</a></li>
+                            <li><a href="misc-income-entries.html">Misc Income Entries</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-group">
+                        <div class="group-header">
+                            <i class="ri-briefcase-4-line"></i>
+                            <span>Business Process</span>
+                            <i class="ri-arrow-down-s-line arrow-icon"></i>
+                        </div>
+                        <ul class="submenu">
+                            <li><a href="cashier-closing.html">Cashier Closing</a></li>
+                            <li><a href="closing-reports.html">Closing Reports</a></li>
+                            <li><a href="reconciliation.html">Invoice Reconciliation</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-group">
+                        <div class="group-header">
+                            <i class="ri-team-line"></i>
+                            <span>Human Resource</span>
+                            <i class="ri-arrow-down-s-line arrow-icon"></i>
+                        </div>
+                        <ul class="submenu">
+                            <li><a href="employees.html">Employees</a></li>
+                            <li><a href="short-breaks.html">Short Breaks</a></li>
+                            <li><a href="absence-marker.html">Absence Marker</a></li>
+                            <li><a href="absence-report.html">Absence Report</a></li>
+                        </ul>
+                    <li class="nav-group">
+                        <div class="group-header">
+                            <i class="ri-line-chart-line"></i>
+                            <span>Sales Analysis</span>
+                            <i class="ri-arrow-down-s-line arrow-icon"></i>
+                        </div>
+                        <ul class="submenu">
+                            <li><a href="input-daily-activities.html">Input Daily Activities</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-group expanded active">
+                        <div class="group-header">
+                            <i class="ri-settings-4-line"></i>
+                            <span>System</span>
+                            <i class="ri-arrow-down-s-line arrow"></i>
+                        </div>
+                        <ul class="submenu" style="display: block;">
+                            <li><a href="users.html">User Management</a></li>
+                            <li><a href="locations.html">Locations</a></li>
+                            <li><a href="profiles.html">Profiles</a></li>
+                            <li><a href="nationalities.html">Nationalities</a></li>
+                            <li><a href="shifts.html">Shifts</a></li>
+                            <li><a href="leave-types.html">Leave Types</a></li>
+                            <li><a href="sync.html">Data Sync (Navision)</a></li>
+                            <li><a href="altx-items.html" class="active">Altx Items Sync</a></li>
+                            <li><a href="settings.html">Account Settings</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-block">
+                    <img src="https://ui-avatars.com/api/?name=Admin+User&background=6366f1&color=fff" alt="User">
+                    <div class="user-info">
+                        <p class="user-name" id="user-display-name">Admin User</p>
+                        <p class="user-role">System Administrator</p>
+                    </div>
+                    <button class="logout-btn icon-btn" onclick="location.href='index.html'">
+                        <i class="ri-logout-box-r-line"></i>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="hamburger-menu" id="sidebar-toggle">
+                        <i class="ri-menu-line"></i>
+                    </button>
+                    <div class="breadcrumb">
+                        <span>System</span>
+                        <i class="ri-arrow-right-s-line"></i>
+                        <span class="active">Altx Items Sync</span>
+                    </div>
+                </div>
+                <div class="topbar-right">
+                    <div class="user-profile-badge">
+                        <i class="ri-user-3-line"></i>
+                        <span id="top-user-name">Admin User</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content-wrapper" style="padding: 2rem;">
+                <!-- Filter Criteria Card -->
+                <div class="module-card">
+                    <div class="module-card-header">
+                        <i class="ri-filter-3-line"></i>
+                        <h3>Navision Item Sync Criteria</h3>
+                    </div>
+
+                    <form id="item-sync-form">
+                        <div class="filter-grid">
+                            <div class="form-group">
+                                <label for="input-brand">Brand</label>
+                                <input type="text" id="input-brand" placeholder="Enter Brand (e.g. Samsung)">
+                            </div>
+                            <div class="form-group">
+                                <label for="input-vendor-no">Vendor No</label>
+                                <input type="text" id="input-vendor-no" placeholder="Enter Vendor No (e.g. V1001)">
+                            </div>
+                            <div class="form-group">
+                                <label for="input-prod-posting-group">Product Posting Group</label>
+                                <input type="text" id="input-prod-posting-group" placeholder="Enter Posting Group">
+                            </div>
+                            <div class="form-group">
+                                <label for="input-shelf-class">Shelf Class</label>
+                                <input type="text" id="input-shelf-class" placeholder="Enter Shelf Class">
+                            </div>
+                        </div>
+
+                        <div style="display: flex; align-items: center; justify-content: flex-end; gap: 1rem;">
+                            <button type="button" class="btn-secondary" style="padding: 0.85rem 1.5rem; border-radius: 12px; border: 1px solid var(--border-color); background: white; cursor: pointer;" onclick="resetForm()">Clear</button>
+                            <button type="submit" id="btn-process" class="btn-process">
+                                <i class="ri-refresh-line"></i>
+                                <span>Process Sync</span>
+                            </button>
+                        </div>
+                    </form>
+
+                    <div id="result-message" class="result-bar"></div>
+                </div>
+
+                <!-- Local AltxItems Table Card -->
+                <div class="table-card">
+                    <div class="table-header">
+                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                            <i class="ri-database-2-line" style="font-size: 1.25rem; color: var(--primary);"></i>
+                            <h4>Local AltxItems Table</h4>
+                        </div>
+                        <span id="items-count-badge" class="badge-count">0 Items</span>
+                    </div>
+
+                    <div class="data-table-container">
+                        <table class="data-table" id="altx-items-table">
+                            <thead>
+                                <tr>
+                                    <th>Item No</th>
+                                    <th>English Description</th>
+                                    <th>Arabic Description</th>
+                                    <th>Brand</th>
+                                    <th>Vendor No</th>
+                                    <th>Shelf Class</th>
+                                    <th>Division</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 2rem;">Loading items...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="common.js"></script>
+    <script src="altx-items.js"></script>
+</body>
+
+</html>

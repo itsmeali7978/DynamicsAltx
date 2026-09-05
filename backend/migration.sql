@@ -200,3 +200,49 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF OBJECT_ID(N'[AltxItems]') IS NULL
+BEGIN
+    CREATE TABLE [AltxItems] (
+        [ItemNo] int NOT NULL,
+        [DescEng] nvarchar(max) NULL,
+        [DescAra] nvarchar(max) NULL,
+        [Brand] nvarchar(max) NULL,
+        [VendorNo] nvarchar(max) NULL,
+        [ShelfClass] nvarchar(max) NULL,
+        [ALtxDivision] nvarchar(max) NULL,
+        [Status] bit NOT NULL DEFAULT CAST(1 AS bit),
+        CONSTRAINT [PK_AltxItems] PRIMARY KEY ([ItemNo])
+    );
+END;
+GO
+
+BEGIN TRANSACTION;
+GO
+
+IF OBJECT_ID(N'[DailyActivities]') IS NULL
+BEGIN
+    CREATE TABLE [DailyActivities] (
+        [Id] int NOT NULL IDENTITY(1,1),
+        [ActivityDate] datetime2 NOT NULL,
+        [ItemNo] int NOT NULL,
+        [DescEng] nvarchar(max) NULL,
+        [DescAra] nvarchar(max) NULL,
+        [ProducedQty] decimal(18,2) NOT NULL,
+        [ExpiredQty] decimal(18,2) NOT NULL,
+        [ExpiryReason] nvarchar(max) NULL,
+        [Notes] nvarchar(max) NULL,
+        [CreatedBy] nvarchar(max) NULL,
+        [CreatedAt] datetime2 NOT NULL,
+        CONSTRAINT [PK_DailyActivities] PRIMARY KEY ([Id])
+    );
+END;
+GO
+
+COMMIT;
+GO
+
+
+

@@ -20,6 +20,7 @@ function onDateFilterChanged() {
 
 async function handleFetchSalesData() {
     const fetchDateVal = document.getElementById('fetchDate').value;
+    const fetchItemNoVal = document.getElementById('fetchItemNo') ? document.getElementById('fetchItemNo').value.trim() : '';
     const btnFetchSales = document.getElementById('btnFetchSales');
     const alertMsg = document.getElementById('alertMsg');
 
@@ -39,7 +40,11 @@ async function handleFetchSalesData() {
         const res = await fetch('/api/FetchSalesData/fetch', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ date: fetchDateVal, fetchedBy: currentUser })
+            body: JSON.stringify({
+                date: fetchDateVal,
+                itemNo: fetchItemNoVal || null,
+                fetchedBy: currentUser
+            })
         });
 
         const data = await res.json();
@@ -61,26 +66,45 @@ async function handleFetchSalesData() {
 
 async function loadSalesData() {
     const fetchDateVal = document.getElementById('fetchDate').value;
+    const fetchItemNoVal = document.getElementById('fetchItemNo') ? document.getElementById('fetchItemNo').value.trim() : '';
     const tableBody = document.getElementById('tableBody');
     const recordCount = document.getElementById('recordCount');
+    const sumTotalQty = document.getElementById('sumTotalQty');
+    const sumTotalNet = document.getElementById('sumTotalNet');
 
     if (!fetchDateVal) {
         tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 2rem;">Please select a date.</td></tr>`;
-        recordCount.textContent = '0 Records';
+        if (recordCount) recordCount.textContent = '0 Records';
+        if (sumTotalQty) sumTotalQty.textContent = '0';
+        if (sumTotalNet) sumTotalNet.textContent = '0.00';
         return;
     }
 
     tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 2rem;"><i class="ri-loader-4-line spin"></i> Loading sales data...</td></tr>`;
 
     try {
-        const res = await fetch(`/api/FetchSalesData?date=${encodeURIComponent(fetchDateVal)}`);
+        let url = `/api/FetchSalesData?date=${encodeURIComponent(fetchDateVal)}`;
+        if (fetchItemNoVal) {
+            url += `&itemNo=${encodeURIComponent(fetchItemNoVal)}`;
+        }
+
+        const res = await fetch(url);
         if (!res.ok) throw new Error('Failed to load sales data');
 
         allFetchedRecords = await res.json();
-        renderGrid(allFetchedRecords);
+
+        const filterInput = document.getElementById('filterItemNo');
+        if (filterInput && filterInput.value.trim()) {
+            onFilterInput(filterInput.value);
+        } else {
+            renderGrid(allFetchedRecords);
+        }
     } catch (err) {
         console.error(err);
         tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #ef4444; padding: 2rem;">Failed to load data. ${err.message}</td></tr>`;
+        if (recordCount) recordCount.textContent = '0 Records';
+        if (sumTotalQty) sumTotalQty.textContent = '0';
+        if (sumTotalNet) sumTotalNet.textContent = '0.00';
     }
 }
 
@@ -106,11 +130,24 @@ function onFilterInput(filterVal) {
 function renderGrid(records) {
     const tableBody = document.getElementById('tableBody');
     const recordCount = document.getElementById('recordCount');
+    const sumTotalQty = document.getElementById('sumTotalQty');
+    const sumTotalNet = document.getElementById('sumTotalNet');
 
     recordCount.textContent = `${records.length} Record${records.length === 1 ? '' : 's'}`;
 
+    let totalQty = 0;
+    let totalNet = 0;
+
+    records.forEach(r => {
+        totalQty += (r.qty || 0);
+        totalNet += (r.netAmount || 0);
+    });
+
+    if (sumTotalQty) sumTotalQty.textContent = totalQty.toLocaleString();
+    if (sumTotalNet) sumTotalNet.textContent = totalNet.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
     if (records.length === 0) {
-        tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">No sales data available.</td></tr>`;
+        tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">No sales data available for the specified criteria.</td></tr>`;
         return;
     }
 

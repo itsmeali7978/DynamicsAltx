@@ -28,6 +28,7 @@ namespace Backend.Controllers
         public class FetchRequestDto
         {
             public string Date { get; set; } = string.Empty;
+            public string? ItemNo { get; set; }
             public string? FetchedBy { get; set; }
         }
 
@@ -40,22 +41,31 @@ namespace Backend.Controllers
                 return BadRequest(new { message = "Invalid date specified." });
             }
 
-            targetDate = targetDate.Date;
+            int specificItemNo = 0;
+            bool hasSpecificItem = !string.IsNullOrWhiteSpace(req.ItemNo) && int.TryParse(req.ItemNo.Trim(), out specificItemNo);
 
-            // Step 1: Fetch all items present in local AltxItems table
-            var altxItemsMap = await _db.AltxItems
-                .AsNoTracking()
-                .ToDictionaryAsync(x => x.ItemNo);
+            // Step 1: Fetch items present in local AltxItems table
+            var altxItemsQuery = _db.AltxItems.AsNoTracking();
+            if (hasSpecificItem)
+            {
+                altxItemsQuery = altxItemsQuery.Where(x => x.ItemNo == specificItemNo);
+            }
+
+            var altxItemsMap = await altxItemsQuery.ToDictionaryAsync(x => x.ItemNo);
 
             if (!altxItemsMap.Any())
             {
-                return BadRequest(new { message = "No items found in local AltxItems table. Please sync items first under System -> Altx Items Sync." });
+                return BadRequest(new { message = hasSpecificItem ? $"Item No {req.ItemNo} not found in local AltxItems table. Please sync items first." : "No items found in local AltxItems table. Please sync items first." });
             }
 
-            // Step 2: Delete existing local sales data for the selected date (overwrite rule)
-            var existingForDate = await _db.FetchedSalesData
-                .Where(x => x.SalesDate.Date == targetDate)
-                .ToListAsync();
+            // Step 2: Delete existing local sales data for the selected date and item (overwrite rule)
+            var existingQuery = _db.FetchedSalesData.Where(x => x.SalesDate.Date == targetDate);
+            if (hasSpecificItem)
+            {
+                existingQuery = existingQuery.Where(x => x.ItemNo == specificItemNo);
+            }
+
+            var existingForDate = await existingQuery.ToListAsync();
 
             if (existingForDate.Any())
             {
@@ -63,7 +73,7 @@ namespace Backend.Controllers
                 await _db.SaveChangesAsync();
             }
 
-            // Step 3: Query Navision table Trans. Sales Entry for Store No_ = 'S0001' and targetDate
+            // Step 3: Query Navision table Trans. Sales Entry for Store No_ = 'S0001', targetDate, and optional ItemNo
             var navConnStr = _config.GetConnectionString("NavisionConnection");
             if (string.IsNullOrWhiteSpace(navConnStr))
             {
@@ -85,11 +95,21 @@ namespace Backend.Controllers
                         AVG([Price]) AS AvgPrice
                     FROM [dbo].[House Care Live$Trans_ Sales Entry]
                     WHERE [Store No_] = 'S0001'
-                      AND CAST([Date] AS DATE) = @TargetDate
-                    GROUP BY [Item No_]";
+                      AND CAST([Date] AS DATE) = @TargetDate";
+
+                if (hasSpecificItem)
+                {
+                    sql += " AND [Item No_] = @SpecificItemNo";
+                }
+
+                sql += " GROUP BY [Item No_]";
 
                 using var cmd = new SqlCommand(sql, conn);
                 cmd.Parameters.Add("@TargetDate", SqlDbType.Date).Value = targetDate;
+                if (hasSpecificItem)
+                {
+                    cmd.Parameters.AddWithValue("@SpecificItemNo", specificItemNo.ToString());
+                }
 
                 using var reader = await cmd.ExecuteReaderAsync();
 
@@ -137,9 +157,10 @@ namespace Backend.Controllers
                 await _db.SaveChangesAsync();
             }
 
+            string itemFilterText = hasSpecificItem ? $" for Item No {specificItemNo}" : "";
             return Ok(new
             {
-                message = $"Successfully fetched and merged {newSalesList.Count} sales records for {targetDate:yyyy-MM-dd}.",
+                message = $"Successfully fetched and merged {newSalesList.Count} sales records for {targetDate:yyyy-MM-dd}{itemFilterText}.",
                 count = newSalesList.Count,
                 records = newSalesList
             });

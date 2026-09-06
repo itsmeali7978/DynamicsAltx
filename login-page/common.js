@@ -58,7 +58,8 @@ const sidebarMappings = {
     "vendor tasks": "nav_vendor_tasks",
     "altx items sync": "nav_altx_items",
     "sales analysis": "nav_sales_analysis",
-    "input daily activities": "nav_input_daily_activities"
+    "input daily activities": "nav_input_daily_activities",
+    "fetch sales data": "nav_fetch_sales_data"
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -157,7 +158,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-
         }
 
         // Dynamic Menu Injection for Sales Analysis
@@ -165,7 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const _salesAllowedPages = _salesAllowedPagesStr ? JSON.parse(_salesAllowedPagesStr) : null;
         const _salesUserRole = localStorage.getItem('userRole');
 
-        if (_salesUserRole?.toLowerCase() === 'admin' || !_salesAllowedPages || _salesAllowedPages.includes('input-daily-activities.html')) {
+        if (_salesUserRole?.toLowerCase() === 'admin' || !_salesAllowedPages || _salesAllowedPages.includes('input-daily-activities.html') || _salesAllowedPages.includes('fetch-sales-data.html')) {
             let salesGroup = Array.from(document.querySelectorAll('.nav-group')).find(group => {
                 const header = group.querySelector('.group-header span');
                 return header && (header.textContent.trim().toLowerCase() === 'sales analysis' || header.getAttribute('data-i18n') === 'nav_sales_analysis');
@@ -184,6 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                         <ul class="submenu">
                             <li><a href="input-daily-activities.html" data-i18n="nav_input_daily_activities">Input Daily Activities</a></li>
+                            <li><a href="fetch-sales-data.html" data-i18n="nav_fetch_sales_data">Fetch Sales Data</a></li>
                         </ul>
                     `;
 
@@ -198,13 +199,28 @@ document.addEventListener('DOMContentLoaded', () => {
                         navMenu.appendChild(salesGroup);
                     }
                 }
+            } else {
+                const submenu = salesGroup.querySelector('.submenu');
+                if (submenu && !submenu.querySelector('a[href="fetch-sales-data.html"]')) {
+                    const li = document.createElement('li');
+                    const a = document.createElement('a');
+                    a.href = 'fetch-sales-data.html';
+                    a.setAttribute('data-i18n', 'nav_fetch_sales_data');
+                    a.textContent = 'Fetch Sales Data';
+                    if (window.location.pathname.endsWith('fetch-sales-data.html')) {
+                        a.className = 'active';
+                    }
+                    li.appendChild(a);
+                    submenu.appendChild(li);
+                }
             }
 
-            if (salesGroup && window.location.pathname.endsWith('input-daily-activities.html')) {
+            if (salesGroup && (window.location.pathname.endsWith('input-daily-activities.html') || window.location.pathname.endsWith('fetch-sales-data.html'))) {
                 salesGroup.classList.add('expanded', 'active');
                 const submenu = salesGroup.querySelector('.submenu');
                 if (submenu) submenu.style.display = 'block';
-                const activeLink = salesGroup.querySelector('a[href="input-daily-activities.html"]');
+                const currentFileName = window.location.pathname.split('/').pop();
+                const activeLink = salesGroup.querySelector(`a[href="${currentFileName}"]`);
                 if (activeLink) activeLink.classList.add('active');
             }
         }

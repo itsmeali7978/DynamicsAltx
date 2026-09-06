@@ -33,5 +33,6 @@ namespace Backend.Data
         public DbSet<MiscellaneousIncome> MiscellaneousIncomes { get; set; }
         public DbSet<AltxItem> AltxItems { get; set; }
         public DbSet<DailyActivity> DailyActivities { get; set; }
+        public DbSet<FetchedSalesData> FetchedSalesData { get; set; }
     }
 }

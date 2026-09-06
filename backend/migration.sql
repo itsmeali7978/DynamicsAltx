@@ -241,6 +241,24 @@ BEGIN
 END;
 GO
 
+IF OBJECT_ID(N'[FetchedSalesData]') IS NULL
+BEGIN
+    CREATE TABLE [FetchedSalesData] (
+        [Id] int NOT NULL IDENTITY(1,1),
+        [SalesDate] datetime2 NOT NULL,
+        [ItemNo] int NOT NULL,
+        [DescEng] nvarchar(max) NULL,
+        [DescAra] nvarchar(max) NULL,
+        [Qty] decimal(18,2) NOT NULL,
+        [Price] decimal(18,2) NOT NULL,
+        [NetAmount] decimal(18,2) NOT NULL,
+        [FetchedBy] nvarchar(max) NULL,
+        [FetchedAt] datetime2 NOT NULL,
+        CONSTRAINT [PK_FetchedSalesData] PRIMARY KEY ([Id])
+    );
+END;
+GO
+
 COMMIT;
 GO
 

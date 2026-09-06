@@ -49,7 +49,7 @@ namespace Backend.Controllers
                     "sync.html", "reconciliation.html", "vendors.html", "vendor-profile.html", "bidding-list.html",
                     "bidding-create.html", "voucher-history.html", "announcements.html",
                     "barcode-print.html", "settings.html", "profiles.html", "vendor-tasks.html",
-                    "altx-items.html", "input-daily-activities.html", "misc-income.html", "misc-income-entries.html"
+                    "altx-items.html", "input-daily-activities.html", "fetch-sales-data.html", "misc-income.html", "misc-income-entries.html"
                 };
                 if (user.Profile != null && !string.IsNullOrEmpty(user.Profile.DashboardPage))
                 {

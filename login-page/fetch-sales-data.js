@@ -1,0 +1,145 @@
+// Fetch Sales Data Module Logic
+
+let allFetchedRecords = [];
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Set default date to today
+    const today = new Date().toISOString().split('T')[0];
+    const fetchDateInput = document.getElementById('fetchDate');
+    if (fetchDateInput) {
+        fetchDateInput.value = today;
+    }
+
+    // Load initial sales data for today
+    loadSalesData();
+});
+
+function onDateFilterChanged() {
+    loadSalesData();
+}
+
+async function handleFetchSalesData() {
+    const fetchDateVal = document.getElementById('fetchDate').value;
+    const btnFetchSales = document.getElementById('btnFetchSales');
+    const alertMsg = document.getElementById('alertMsg');
+
+    alertMsg.style.display = 'none';
+
+    if (!fetchDateVal) {
+        showAlert('Please select a valid date.', 'error');
+        return;
+    }
+
+    const currentUser = localStorage.getItem('username') || 'Admin User';
+
+    try {
+        btnFetchSales.disabled = true;
+        btnFetchSales.innerHTML = '<i class="ri-loader-4-line spin"></i> Fetching...';
+
+        const res = await fetch('/api/FetchSalesData/fetch', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ date: fetchDateVal, fetchedBy: currentUser })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            throw new Error(data.message || 'Failed to fetch sales data from Navision.');
+        }
+
+        showAlert(data.message || `Successfully fetched sales data for ${fetchDateVal}!`, 'success');
+        await loadSalesData();
+    } catch (err) {
+        console.error(err);
+        showAlert(err.message, 'error');
+    } finally {
+        btnFetchSales.disabled = false;
+        btnFetchSales.innerHTML = '<i class="ri-refresh-line"></i> Fetch Sales';
+    }
+}
+
+async function loadSalesData() {
+    const fetchDateVal = document.getElementById('fetchDate').value;
+    const tableBody = document.getElementById('tableBody');
+    const recordCount = document.getElementById('recordCount');
+
+    if (!fetchDateVal) {
+        tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 2rem;">Please select a date.</td></tr>`;
+        recordCount.textContent = '0 Records';
+        return;
+    }
+
+    tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 2rem;"><i class="ri-loader-4-line spin"></i> Loading sales data...</td></tr>`;
+
+    try {
+        const res = await fetch(`/api/FetchSalesData?date=${encodeURIComponent(fetchDateVal)}`);
+        if (!res.ok) throw new Error('Failed to load sales data');
+
+        allFetchedRecords = await res.json();
+        renderGrid(allFetchedRecords);
+    } catch (err) {
+        console.error(err);
+        tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #ef4444; padding: 2rem;">Failed to load data. ${err.message}</td></tr>`;
+    }
+}
+
+function onFilterInput(filterVal) {
+    const cleanFilter = filterVal.trim().toLowerCase();
+
+    if (!cleanFilter) {
+        renderGrid(allFetchedRecords);
+        return;
+    }
+
+    const filtered = allFetchedRecords.filter(item => {
+        const itemNoStr = item.itemNo ? item.itemNo.toString() : '';
+        const descEng = (item.descEng || '').toLowerCase();
+        const descAra = (item.descAra || '').toLowerCase();
+
+        return itemNoStr.includes(cleanFilter) || descEng.includes(cleanFilter) || descAra.includes(cleanFilter);
+    });
+
+    renderGrid(filtered);
+}
+
+function renderGrid(records) {
+    const tableBody = document.getElementById('tableBody');
+    const recordCount = document.getElementById('recordCount');
+
+    recordCount.textContent = `${records.length} Record${records.length === 1 ? '' : 's'}`;
+
+    if (records.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">No sales data available.</td></tr>`;
+        return;
+    }
+
+    tableBody.innerHTML = records.map(item => {
+        const formattedDate = new Date(item.salesDate).toLocaleDateString('en-GB'); // DD/MM/YYYY
+        const qtyColor = item.qty < 0 ? '#dc2626' : '#059669';
+        const netAmtColor = item.netAmount < 0 ? '#dc2626' : '#059669';
+
+        return `
+            <tr>
+                <td class="col-date"><strong>${formattedDate}</strong></td>
+                <td class="col-itemno"><code>${item.itemNo}</code></td>
+                <td class="col-desc-ara">${item.descAra || '-'}</td>
+                <td class="col-desc-eng">${item.descEng || '-'}</td>
+                <td class="col-qty"><span style="font-weight: 600; color: ${qtyColor};">${item.qty}</span></td>
+                <td class="col-price">${item.price.toFixed(2)}</td>
+                <td class="col-netamt"><span style="font-weight: 600; color: ${netAmtColor};">${item.netAmount.toFixed(2)}</span></td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function showAlert(message, type) {
+    const alertMsg = document.getElementById('alertMsg');
+    alertMsg.className = `alert-msg ${type}`;
+    alertMsg.innerHTML = `<i class="${type === 'success' ? 'ri-checkbox-circle-fill' : 'ri-error-warning-fill'}"></i> ${message}`;
+    alertMsg.style.display = 'flex';
+
+    setTimeout(() => {
+        alertMsg.style.display = 'none';
+    }, 4000);
+}

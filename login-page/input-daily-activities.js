@@ -16,7 +16,76 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Load initial records for today
     loadActivitiesForSelectedDate();
+
+    // Setup Enter key field focus navigation
+    setupEnterKeyNavigation();
 });
+
+// Enter Key Sequential Field Focus Navigation
+function setupEnterKeyNavigation() {
+    const fields = [
+        'activityDate',
+        'itemNo',
+        'producedQty',
+        'expiredQty',
+        'expiryReason',
+        'notes'
+    ];
+
+    fields.forEach((fieldId, index) => {
+        const el = document.getElementById(fieldId);
+        if (!el) return;
+
+        el.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                if (index < fields.length - 1) {
+                    const nextEl = document.getElementById(fields[index + 1]);
+                    if (nextEl) {
+                        nextEl.focus();
+                        if (typeof nextEl.select === 'function' && (nextEl.type === 'number' || nextEl.type === 'text')) {
+                            nextEl.select();
+                        }
+                    }
+                } else {
+                    // Final field: submit activity form
+                    handleFormSubmit(e);
+                }
+            }
+        });
+    });
+
+    const editFields = [
+        'editActivityDate',
+        'editItemNo',
+        'editProducedQty',
+        'editExpiredQty',
+        'editExpiryReason',
+        'editNotes'
+    ];
+
+    editFields.forEach((fieldId, index) => {
+        const el = document.getElementById(fieldId);
+        if (!el) return;
+
+        el.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                if (index < editFields.length - 1) {
+                    const nextEl = document.getElementById(editFields[index + 1]);
+                    if (nextEl) {
+                        nextEl.focus();
+                        if (typeof nextEl.select === 'function' && (nextEl.type === 'number' || nextEl.type === 'text')) {
+                            nextEl.select();
+                        }
+                    }
+                } else {
+                    handleEditSubmit(e);
+                }
+            }
+        });
+    });
+}
 
 // Mode Switching
 function switchMode(mode) {
@@ -152,7 +221,7 @@ async function loadActivitiesForSelectedDate() {
         tableBody.innerHTML = records.map(item => {
             const formattedDate = new Date(item.activityDate).toLocaleDateString('en-GB'); // DD/MM/YYYY
             const actionsCell = currentMode === 'editview' ? `
-                <td>
+                <td class="col-actions">
                     <div class="action-btns">
                         <button class="btn-icon edit" onclick="openEditModal(${item.id})" title="Edit Row"><i class="ri-edit-line"></i></button>
                         <button class="btn-icon delete" onclick="deleteActivityRecord(${item.id})" title="Delete Row"><i class="ri-delete-bin-line"></i></button>
@@ -163,14 +232,14 @@ async function loadActivitiesForSelectedDate() {
             // Order: Date | Item No | Description Arabic | Description English | Produced Qty | Expired Qty | Expiry Reason | Notes
             return `
                 <tr>
-                    <td><strong>${formattedDate}</strong></td>
-                    <td>${item.itemNo}</td>
-                    <td>${item.descAra || '-'}</td>
-                    <td>${item.descEng || '-'}</td>
-                    <td><span style="font-weight: 600; color: #059669;">${item.producedQty}</span></td>
-                    <td><span style="font-weight: 600; color: #dc2626;">${item.expiredQty}</span></td>
-                    <td>${item.expiryReason || '-'}</td>
-                    <td>${item.notes || '-'}</td>
+                    <td class="col-date"><strong>${formattedDate}</strong></td>
+                    <td class="col-itemno"><code>${item.itemNo}</code></td>
+                    <td class="col-desc-ara">${item.descAra || '-'}</td>
+                    <td class="col-desc-eng">${item.descEng || '-'}</td>
+                    <td class="col-produced"><span style="font-weight: 600; color: #059669;">${item.producedQty}</span></td>
+                    <td class="col-expired"><span style="font-weight: 600; color: #dc2626;">${item.expiredQty}</span></td>
+                    <td class="col-reason">${item.expiryReason || '-'}</td>
+                    <td class="col-notes">${item.notes || '-'}</td>
                     ${actionsCell}
                 </tr>
             `;
@@ -245,6 +314,12 @@ async function handleFormSubmit(e) {
         document.getElementById('notes').value = '';
         document.getElementById('itemDescPreview').innerHTML = '<i class="ri-information-line"></i> Item name will display here';
         currentItemData = { descEng: '', descAra: '' };
+
+        // Return focus to Item No for rapid continuous entry
+        const itemNoInput = document.getElementById('itemNo');
+        if (itemNoInput) {
+            itemNoInput.focus();
+        }
 
         // Refresh Grid
         loadActivitiesForSelectedDate();

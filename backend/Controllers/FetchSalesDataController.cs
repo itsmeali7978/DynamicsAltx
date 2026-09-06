@@ -120,14 +120,18 @@ namespace Backend.Controllers
                     {
                         if (altxItemsMap.TryGetValue(itemNo, out var altxItem))
                         {
-                            decimal qty = reader["TotalQty"] != DBNull.Value ? Convert.ToDecimal(reader["TotalQty"]) : 0m;
-                            decimal netAmt = reader["TotalNetAmount"] != DBNull.Value ? Convert.ToDecimal(reader["TotalNetAmount"]) : 0m;
+                            decimal rawQty = reader["TotalQty"] != DBNull.Value ? Convert.ToDecimal(reader["TotalQty"]) : 0m;
+                            decimal rawNetAmt = reader["TotalNetAmount"] != DBNull.Value ? Convert.ToDecimal(reader["TotalNetAmount"]) : 0m;
                             decimal avgPrice = reader["AvgPrice"] != DBNull.Value ? Convert.ToDecimal(reader["AvgPrice"]) : 0m;
 
+                            // Invert signs as required: -(-qty) = qty, -(qty) = -qty
+                            decimal qty = -rawQty;
+                            decimal netAmt = -rawNetAmt;
+
                             decimal unitPrice = avgPrice;
-                            if (qty != 0)
+                            if (rawQty != 0)
                             {
-                                unitPrice = Math.Round(Math.Abs(netAmt / qty), 2);
+                                unitPrice = Math.Round(Math.Abs(rawNetAmt / rawQty), 2);
                             }
 
                             newSalesList.Add(new FetchedSalesData

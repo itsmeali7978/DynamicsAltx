@@ -43,10 +43,10 @@ namespace Backend.Controllers
             {
                 if (!int.TryParse(itemNoStr, out int itemNo))
                 {
-                    return Ok(new { itemNo = itemNoStr, descEng = "", descAra = "", found = false });
+                    return Ok(new { itemNo = itemNoStr, descEng = "", descAra = "", found = false, message = "Item No wrong" });
                 }
 
-                // 1. Try local AltxItems table
+                // Look up strictly in local AltxItems table
                 var localItem = await _context.AltxItems.FirstOrDefaultAsync(x => x.ItemNo == itemNo);
                 if (localItem != null)
                 {
@@ -59,45 +59,7 @@ namespace Backend.Controllers
                     });
                 }
 
-                // 2. Fallback to Navision Item table
-                var connectionString = _configuration.GetConnectionString("NavisionConnection") 
-                                     ?? _configuration.GetConnectionString("DefaultConnection");
-
-                if (!string.IsNullOrEmpty(connectionString))
-                {
-                    using (var conn = new SqlConnection(connectionString))
-                    {
-                        await conn.OpenAsync();
-                        string sql = @"
-                            SELECT TOP 1 [No_], [Description 2], [Description]
-                            FROM [dbo].[House Care Live$Item]
-                            WHERE [No_] = @ItemNoStr";
-
-                        using (var cmd = new SqlCommand(sql, conn))
-                        {
-                            cmd.Parameters.AddWithValue("@ItemNoStr", itemNoStr);
-
-                            using (var reader = await cmd.ExecuteReaderAsync())
-                            {
-                                if (await reader.ReadAsync())
-                                {
-                                    string descEng = reader["Description 2"] != DBNull.Value ? reader["Description 2"].ToString() ?? "" : "";
-                                    string descAra = reader["Description"] != DBNull.Value ? reader["Description"].ToString() ?? "" : "";
-
-                                    return Ok(new
-                                    {
-                                        itemNo = itemNo,
-                                        descEng = descEng,
-                                        descAra = descAra,
-                                        found = true
-                                    });
-                                }
-                            }
-                        }
-                    }
-                }
-
-                return Ok(new { itemNo = itemNo, descEng = "", descAra = "", found = false });
+                return Ok(new { itemNo = itemNo, descEng = "", descAra = "", found = false, message = "Item No wrong" });
             }
             catch (Exception ex)
             {
@@ -140,19 +102,15 @@ namespace Backend.Controllers
                 if (dto == null)
                     return BadRequest("Invalid payload.");
 
-                // If description is not supplied, auto fetch
-                string descEng = dto.DescEng ?? "";
-                string descAra = dto.DescAra ?? "";
-
-                if (string.IsNullOrWhiteSpace(descEng) && string.IsNullOrWhiteSpace(descAra))
+                // Verify item exists in AltxItems table
+                var localItem = await _context.AltxItems.FirstOrDefaultAsync(x => x.ItemNo == dto.ItemNo);
+                if (localItem == null)
                 {
-                    var localItem = await _context.AltxItems.FirstOrDefaultAsync(x => x.ItemNo == dto.ItemNo);
-                    if (localItem != null)
-                    {
-                        descEng = localItem.DescEng ?? "";
-                        descAra = localItem.DescAra ?? "";
-                    }
+                    return BadRequest(new { message = "Item No wrong. Item does not exist in AltxItems table." });
                 }
+
+                string descEng = localItem.DescEng ?? "";
+                string descAra = localItem.DescAra ?? "";
 
                 var entity = new DailyActivity
                 {
@@ -191,10 +149,17 @@ namespace Backend.Controllers
                     return NotFound(new { message = "Activity record not found" });
                 }
 
+                // Verify item exists in AltxItems table
+                var localItem = await _context.AltxItems.FirstOrDefaultAsync(x => x.ItemNo == dto.ItemNo);
+                if (localItem == null)
+                {
+                    return BadRequest(new { message = "Item No wrong. Item does not exist in AltxItems table." });
+                }
+
                 entity.ActivityDate = dto.ActivityDate.Date;
                 entity.ItemNo = dto.ItemNo;
-                entity.DescEng = dto.DescEng;
-                entity.DescAra = dto.DescAra;
+                entity.DescEng = localItem.DescEng ?? "";
+                entity.DescAra = localItem.DescAra ?? "";
                 entity.ProducedQty = dto.ProducedQty;
                 entity.ExpiredQty = dto.ExpiredQty;
                 entity.ExpiryReason = dto.ExpiryReason;

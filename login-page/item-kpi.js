@@ -17,9 +17,6 @@ function setPreset(type) {
     } else if (type === 'lastMonth') {
         start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
         end = new Date(now.getFullYear(), now.getMonth(), 0);
-    } else if (type === 'thisYear') {
-        start = new Date(now.getFullYear(), 0, 1);
-        end = new Date(now.getFullYear(), 11, 31);
     }
 
     if (start && end) {
@@ -44,7 +41,27 @@ async function loadItemKpi() {
     const recordCount = document.getElementById('recordCount');
 
     if (!fromDateVal || !toDateVal) {
+        alert('Please select both From Date and To Date.');
         tableBody.innerHTML = `<tr><td colspan="11" style="text-align: center; padding: 2rem;">Please select both From Date and To Date.</td></tr>`;
+        return;
+    }
+
+    const start = new Date(fromDateVal + 'T00:00:00');
+    const end = new Date(toDateVal + 'T00:00:00');
+
+    if (end < start) {
+        alert('To Date cannot be earlier than From Date.');
+        tableBody.innerHTML = `<tr><td colspan="11" style="text-align: center; color: #ef4444; padding: 2rem;">To Date cannot be earlier than From Date.</td></tr>`;
+        return;
+    }
+
+    // Restrict date range to maximum 2 months
+    const maxAllowedEnd = new Date(start);
+    maxAllowedEnd.setMonth(maxAllowedEnd.getMonth() + 2);
+
+    if (end > maxAllowedEnd) {
+        alert('Date range cannot exceed 2 months. Please select a date period within 2 months.');
+        tableBody.innerHTML = `<tr><td colspan="11" style="text-align: center; color: #ef4444; padding: 2rem;">Date range cannot exceed 2 months. Please select a date period within 2 months.</td></tr>`;
         return;
     }
 
@@ -95,21 +112,25 @@ async function loadItemKpi() {
 }
 
 function onFilterInput(filterVal) {
-    const cleanFilter = filterVal.trim().toLowerCase();
+    const cleanFilter = (filterVal || '').trim().toLowerCase();
+    const hideZeros = document.getElementById('hideZerosCheckbox') ? document.getElementById('hideZerosCheckbox').checked : false;
 
-    if (!cleanFilter) {
-        renderGrid(allItemKpiRecords);
-        return;
+    let filtered = allItemKpiRecords;
+
+    if (hideZeros) {
+        filtered = filtered.filter(item => item.salesQty !== 0 || item.netSales !== 0 || item.producedQty !== 0 || item.expiredQty !== 0);
     }
 
-    const filtered = allItemKpiRecords.filter(item => {
-        const itemNoStr = item.itemNo ? item.itemNo.toString() : '';
-        const descEng = (item.descEng || '').toLowerCase();
-        const descAra = (item.descAra || '').toLowerCase();
-        const dateStr = (item.date || '').toLowerCase();
+    if (cleanFilter) {
+        filtered = filtered.filter(item => {
+            const itemNoStr = item.itemNo ? item.itemNo.toString() : '';
+            const descEng = (item.descEng || '').toLowerCase();
+            const descAra = (item.descAra || '').toLowerCase();
+            const dateStr = (item.date || '').toLowerCase();
 
-        return itemNoStr.includes(cleanFilter) || descEng.includes(cleanFilter) || descAra.includes(cleanFilter) || dateStr.includes(cleanFilter);
-    });
+            return itemNoStr.includes(cleanFilter) || descEng.includes(cleanFilter) || descAra.includes(cleanFilter) || dateStr.includes(cleanFilter);
+        });
+    }
 
     renderGrid(filtered);
 }

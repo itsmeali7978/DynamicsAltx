@@ -59,7 +59,9 @@ const sidebarMappings = {
     "altx items sync": "nav_altx_items",
     "sales analysis": "nav_sales_analysis",
     "input daily activities": "nav_input_daily_activities",
-    "fetch sales data": "nav_fetch_sales_data"
+    "fetch sales data": "nav_fetch_sales_data",
+    "daily kpi": "nav_daily_kpi",
+    "item kpi": "nav_item_kpi"
 };
 
 document.addEventListener('DOMContentLoaded', () => {

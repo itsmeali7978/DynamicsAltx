@@ -403,7 +403,6 @@
                         <div class="quick-presets">
                             <button class="btn-preset" onclick="setPreset('thisMonth')">This Month</button>
                             <button class="btn-preset" onclick="setPreset('lastMonth')">Last Month</button>
-                            <button class="btn-preset" onclick="setPreset('thisYear')">This Year</button>
                         </div>
                     </div>
 
@@ -411,13 +410,13 @@
                         <!-- From Date -->
                         <div class="form-group">
                             <label for="fromDate">From Date *</label>
-                            <input type="date" id="fromDate" onchange="loadDailyKpi()">
+                            <input type="date" id="fromDate">
                         </div>
 
                         <!-- To Date -->
                         <div class="form-group">
                             <label for="toDate">To Date *</label>
-                            <input type="date" id="toDate" onchange="loadDailyKpi()">
+                            <input type="date" id="toDate">
                         </div>
 
                         <!-- Filter Button -->
@@ -484,8 +483,12 @@
                                     <th class="col-num">Net Sales</th>
                                     <th class="col-num">Produced Qty</th>
                                     <th class="col-num">Expired Qty</th>
-                                    <th class="col-pct">Waste %</th>
-                                    <th class="col-pct">Sell-Through %</th>
+                                    <th class="col-pct sortable-header" id="thWaste" onclick="toggleSort('wastePercent')" style="cursor: pointer; user-select: none;" title="Click to sort by Waste %">
+                                        Waste % <i id="sortIconWaste" class="ri-arrow-up-down-line" style="font-size: 0.8rem; opacity: 0.6;"></i>
+                                    </th>
+                                    <th class="col-pct sortable-header" id="thSellThrough" onclick="toggleSort('sellThroughPercent')" style="cursor: pointer; user-select: none;" title="Click to sort by Sell-Through %">
+                                        Sell-Through % <i id="sortIconSellThrough" class="ri-arrow-up-down-line" style="font-size: 0.8rem; opacity: 0.6;"></i>
+                                    </th>
                                     <th class="col-num">Prod. Balance</th>
                                 </tr>
                             </thead>

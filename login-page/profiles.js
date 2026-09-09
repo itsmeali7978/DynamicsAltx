@@ -31,7 +31,9 @@ const APP_PAGES = [
     { path: 'vendor-pending-tasks.html', label: 'Vendor Pending Tasks' },
     { path: 'altx-items.html', label: 'Altx Items Sync' },
     { path: 'input-daily-activities.html', label: 'Input Daily Activities' },
-    { path: 'fetch-sales-data.html', label: 'Fetch Sales Data' }
+    { path: 'fetch-sales-data.html', label: 'Fetch Sales Data' },
+    { path: 'daily-kpi.html', label: 'Daily KPI' },
+    { path: 'item-kpi.html', label: 'Item KPI' }
 ];
 
 document.addEventListener('DOMContentLoaded', () => {

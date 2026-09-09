@@ -406,7 +406,6 @@
                         <div class="quick-presets">
                             <button class="btn-preset" onclick="setPreset('thisMonth')">This Month</button>
                             <button class="btn-preset" onclick="setPreset('lastMonth')">Last Month</button>
-                            <button class="btn-preset" onclick="setPreset('thisYear')">This Year</button>
                         </div>
                     </div>
 
@@ -414,19 +413,19 @@
                         <!-- From Date -->
                         <div class="form-group">
                             <label for="fromDate">From Date *</label>
-                            <input type="date" id="fromDate" onchange="loadItemKpi()">
+                            <input type="date" id="fromDate">
                         </div>
 
                         <!-- To Date -->
                         <div class="form-group">
                             <label for="toDate">To Date *</label>
-                            <input type="date" id="toDate" onchange="loadItemKpi()">
+                            <input type="date" id="toDate">
                         </div>
 
                         <!-- Item No Filter -->
                         <div class="form-group">
                             <label for="itemNoFilter">Item No (Optional)</label>
-                            <input type="text" id="itemNoFilter" placeholder="All items or e.g. 64435" onchange="loadItemKpi()" onkeyup="if(event.key==='Enter') loadItemKpi()">
+                            <input type="text" id="itemNoFilter" placeholder="All items or e.g. 64435">
                         </div>
 
                         <!-- Filter Button -->
@@ -439,8 +438,13 @@
                         <!-- Quick Grid Search -->
                         <div class="form-group">
                             <label for="filterQuery">Filter Grid Results</label>
-                            <input type="text" id="filterQuery" placeholder="Search Item No, Desc, Date..." oninput="onFilterInput(this.value)">
+                            <input type="text" id="filterQuery" placeholder="Search Item No, Desc, Date..." oninput="onFilterInput(document.getElementById('filterQuery').value)">
                         </div>
+                    </div>
+
+                    <div style="margin-top: 0.75rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.825rem; font-weight: 500; color: var(--text-dark);">
+                        <input type="checkbox" id="hideZerosCheckbox" onchange="onFilterInput(document.getElementById('filterQuery').value)" style="cursor: pointer; width: 16px; height: 16px;">
+                        <label for="hideZerosCheckbox" style="cursor: pointer; user-select: none;">Hide Zero-Activity Rows (Show only items with Sales or Production)</label>
                     </div>
                 </div>
 

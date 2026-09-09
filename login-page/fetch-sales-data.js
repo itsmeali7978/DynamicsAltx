@@ -5,29 +5,42 @@ let allFetchedRecords = [];
 document.addEventListener('DOMContentLoaded', () => {
     // Set default date to today
     const today = new Date().toISOString().split('T')[0];
-    const fetchDateInput = document.getElementById('fetchDate');
-    if (fetchDateInput) {
-        fetchDateInput.value = today;
-    }
+    const fromDateInput = document.getElementById('fromDate');
+    const toDateInput = document.getElementById('toDate');
+    if (fromDateInput) fromDateInput.value = today;
+    if (toDateInput) toDateInput.value = today;
 
     // Load initial sales data for today
     loadSalesData();
 });
 
-function onDateFilterChanged() {
-    loadSalesData();
-}
-
 async function handleFetchSalesData() {
-    const fetchDateVal = document.getElementById('fetchDate').value;
+    const fromDateVal = document.getElementById('fromDate') ? document.getElementById('fromDate').value : '';
+    const toDateVal = document.getElementById('toDate') ? document.getElementById('toDate').value : '';
     const fetchItemNoVal = document.getElementById('fetchItemNo') ? document.getElementById('fetchItemNo').value.trim() : '';
     const btnFetchSales = document.getElementById('btnFetchSales');
     const alertMsg = document.getElementById('alertMsg');
 
-    alertMsg.style.display = 'none';
+    if (alertMsg) alertMsg.style.display = 'none';
 
-    if (!fetchDateVal) {
-        showAlert('Please select a valid date.', 'error');
+    if (!fromDateVal || !toDateVal) {
+        showAlert('Please select both From Date and To Date.', 'error');
+        return;
+    }
+
+    const start = new Date(fromDateVal + 'T00:00:00');
+    const end = new Date(toDateVal + 'T00:00:00');
+
+    if (end < start) {
+        showAlert('To Date cannot be earlier than From Date.', 'error');
+        return;
+    }
+
+    // Restrict fetching period to maximum 4 days
+    const diffDays = Math.round((end.getTime() - start.getTime()) / (1000 * 3600 * 24));
+    if (diffDays > 3) {
+        alert('Date period cannot exceed 4 days. Please select a period of 4 days or less.');
+        showAlert('Date period cannot exceed 4 days. Please select a period of 4 days or less.', 'error');
         return;
     }
 
@@ -41,7 +54,8 @@ async function handleFetchSalesData() {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                date: fetchDateVal,
+                fromDate: fromDateVal,
+                toDate: toDateVal,
                 itemNo: fetchItemNoVal || null,
                 fetchedBy: currentUser
             })
@@ -53,7 +67,7 @@ async function handleFetchSalesData() {
             throw new Error(data.message || 'Failed to fetch sales data from Navision.');
         }
 
-        showAlert(data.message || `Successfully fetched sales data for ${fetchDateVal}!`, 'success');
+        showAlert(data.message || `Successfully fetched sales data!`, 'success');
         await loadSalesData();
     } catch (err) {
         console.error(err);
@@ -65,25 +79,40 @@ async function handleFetchSalesData() {
 }
 
 async function loadSalesData() {
-    const fetchDateVal = document.getElementById('fetchDate').value;
+    const fromDateVal = document.getElementById('fromDate') ? document.getElementById('fromDate').value : '';
+    const toDateVal = document.getElementById('toDate') ? document.getElementById('toDate').value : '';
     const fetchItemNoVal = document.getElementById('fetchItemNo') ? document.getElementById('fetchItemNo').value.trim() : '';
     const tableBody = document.getElementById('tableBody');
     const recordCount = document.getElementById('recordCount');
     const sumTotalQty = document.getElementById('sumTotalQty');
     const sumTotalNet = document.getElementById('sumTotalNet');
 
-    if (!fetchDateVal) {
-        tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 2rem;">Please select a date.</td></tr>`;
+    if (!fromDateVal || !toDateVal) {
+        tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 2rem;">Please select both From Date and To Date.</td></tr>`;
         if (recordCount) recordCount.textContent = '0 Records';
         if (sumTotalQty) sumTotalQty.textContent = '0';
         if (sumTotalNet) sumTotalNet.textContent = '0.00';
         return;
     }
 
+    const start = new Date(fromDateVal + 'T00:00:00');
+    const end = new Date(toDateVal + 'T00:00:00');
+
+    if (end < start) {
+        tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #ef4444; padding: 2rem;">To Date cannot be earlier than From Date.</td></tr>`;
+        return;
+    }
+
+    const diffDays = Math.round((end.getTime() - start.getTime()) / (1000 * 3600 * 24));
+    if (diffDays > 3) {
+        tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #ef4444; padding: 2rem;">Date period cannot exceed 4 days. Please select a period of 4 days or less.</td></tr>`;
+        return;
+    }
+
     tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 2rem;"><i class="ri-loader-4-line spin"></i> Loading sales data...</td></tr>`;
 
     try {
-        let url = `/api/FetchSalesData?date=${encodeURIComponent(fetchDateVal)}`;
+        let url = `/api/FetchSalesData?fromDate=${encodeURIComponent(fromDateVal)}&toDate=${encodeURIComponent(toDateVal)}`;
         if (fetchItemNoVal) {
             url += `&itemNo=${encodeURIComponent(fetchItemNoVal)}`;
         }

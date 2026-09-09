@@ -380,17 +380,23 @@
                         </div>
                     </div>
 
-                    <div class="controls-grid">
-                        <!-- Date Selection -->
+                    <div class="controls-grid" style="grid-template-columns: 160px 160px 160px auto 1fr;">
+                        <!-- From Date -->
                         <div class="form-group">
-                            <label for="fetchDate">Select Date *</label>
-                            <input type="date" id="fetchDate" required onchange="onDateFilterChanged()">
+                            <label for="fromDate">From Date *</label>
+                            <input type="date" id="fromDate" required>
+                        </div>
+
+                        <!-- To Date -->
+                        <div class="form-group">
+                            <label for="toDate">To Date *</label>
+                            <input type="date" id="toDate" required>
                         </div>
 
                         <!-- Specified Item No -->
                         <div class="form-group">
                             <label for="fetchItemNo">Item No (Optional)</label>
-                            <input type="text" id="fetchItemNo" placeholder="All items or e.g. 64435" onchange="onDateFilterChanged()" onkeyup="if(event.key==='Enter') handleFetchSalesData()">
+                            <input type="text" id="fetchItemNo" placeholder="All items or e.g. 64435">
                         </div>
 
                         <!-- Fetch Process Button -->

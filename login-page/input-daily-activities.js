@@ -120,7 +120,7 @@ function onItemNoInput(val) {
 
     if (!cleanVal) {
         previewEl.innerHTML = '<i class="ri-information-line"></i> Item name will display here';
-        currentItemData = { descEng: '', descAra: '' };
+        currentItemData = { descEng: '', descAra: '', found: false };
         return;
     }
 
@@ -136,18 +136,20 @@ function onItemNoInput(val) {
                 if (data.found && (data.descEng || data.descAra)) {
                     currentItemData.descEng = data.descEng || '';
                     currentItemData.descAra = data.descAra || '';
+                    currentItemData.found = true;
                     previewEl.innerHTML = `<i class="ri-checkbox-circle-fill" style="color: #10b981;"></i> <strong>${data.descEng || data.descAra}</strong>`;
                 } else {
-                    currentItemData = { descEng: '', descAra: '' };
-                    previewEl.innerHTML = `<i class="ri-error-warning-line" style="color: #f59e0b;"></i> Item No not found`;
+                    currentItemData = { descEng: '', descAra: '', found: false };
+                    previewEl.innerHTML = `<i class="ri-close-circle-fill" style="color: #ef4444;"></i> <span style="color: #ef4444; font-weight: 600;">Item No wrong</span>`;
                 }
             } else {
-                currentItemData = { descEng: '', descAra: '' };
-                previewEl.innerHTML = `<i class="ri-error-warning-line"></i> Error looking up item`;
+                currentItemData = { descEng: '', descAra: '', found: false };
+                previewEl.innerHTML = `<i class="ri-close-circle-fill" style="color: #ef4444;"></i> <span style="color: #ef4444; font-weight: 600;">Item No wrong</span>`;
             }
         } catch (err) {
             console.error(err);
-            previewEl.innerHTML = `<i class="ri-error-warning-line"></i> Lookup error`;
+            currentItemData = { descEng: '', descAra: '', found: false };
+            previewEl.innerHTML = `<i class="ri-close-circle-fill" style="color: #ef4444;"></i> <span style="color: #ef4444; font-weight: 600;">Item No wrong</span>`;
         }
     }, 300);
 }
@@ -159,7 +161,7 @@ function onEditItemNoInput(val) {
 
     if (!cleanVal) {
         previewEl.innerHTML = '<i class="ri-information-line"></i> Item name preview';
-        editItemData = { descEng: '', descAra: '' };
+        editItemData = { descEng: '', descAra: '', found: false };
         return;
     }
 
@@ -175,14 +177,20 @@ function onEditItemNoInput(val) {
                 if (data.found && (data.descEng || data.descAra)) {
                     editItemData.descEng = data.descEng || '';
                     editItemData.descAra = data.descAra || '';
+                    editItemData.found = true;
                     previewEl.innerHTML = `<i class="ri-checkbox-circle-fill" style="color: #10b981;"></i> <strong>${data.descEng || data.descAra}</strong>`;
                 } else {
-                    editItemData = { descEng: '', descAra: '' };
-                    previewEl.innerHTML = `<i class="ri-error-warning-line" style="color: #f59e0b;"></i> Item No not found`;
+                    editItemData = { descEng: '', descAra: '', found: false };
+                    previewEl.innerHTML = `<i class="ri-close-circle-fill" style="color: #ef4444;"></i> <span style="color: #ef4444; font-weight: 600;">Item No wrong</span>`;
                 }
+            } else {
+                editItemData = { descEng: '', descAra: '', found: false };
+                previewEl.innerHTML = `<i class="ri-close-circle-fill" style="color: #ef4444;"></i> <span style="color: #ef4444; font-weight: 600;">Item No wrong</span>`;
             }
         } catch (err) {
             console.error(err);
+            editItemData = { descEng: '', descAra: '', found: false };
+            previewEl.innerHTML = `<i class="ri-close-circle-fill" style="color: #ef4444;"></i> <span style="color: #ef4444; font-weight: 600;">Item No wrong</span>`;
         }
     }, 300);
 }
@@ -271,6 +279,11 @@ async function handleFormSubmit(e) {
 
     if (!itemNoVal || isNaN(parseInt(itemNoVal))) {
         showAlert('Please enter a valid numeric Item No.', 'error');
+        return;
+    }
+
+    if (currentItemData.found === false) {
+        showAlert('Item No wrong. Typed item does not exist in AltxItems.', 'error');
         return;
     }
 
@@ -364,7 +377,7 @@ async function openEditModal(id) {
         document.getElementById('editExpiryReason').value = item.expiryReason || '';
         document.getElementById('editNotes').value = item.notes || '';
 
-        editItemData = { descEng: item.descEng || '', descAra: item.descAra || '' };
+        editItemData = { descEng: item.descEng || '', descAra: item.descAra || '', found: true };
         document.getElementById('editItemDescPreview').innerHTML = `<i class="ri-checkbox-circle-fill" style="color: #10b981;"></i> <strong>${item.descEng || item.descAra || 'No Description'}</strong>`;
 
         document.getElementById('editModal').style.display = 'flex';
@@ -387,6 +400,11 @@ async function handleEditSubmit(e) {
     const expiredQty = parseFloat(document.getElementById('editExpiredQty').value) || 0;
     const expiryReason = document.getElementById('editExpiryReason').value.trim();
     const notes = document.getElementById('editNotes').value.trim();
+
+    if (editItemData.found === false) {
+        alert('Item No wrong. Typed item does not exist in AltxItems.');
+        return;
+    }
 
     const payload = {
         activityDate: activityDate,

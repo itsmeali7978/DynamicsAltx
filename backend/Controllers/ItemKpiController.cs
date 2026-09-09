@@ -89,8 +89,14 @@ namespace Backend.Controllers
                 specificItemNo = parsedItemNo;
             }
 
-            // Step 1: Map items from AltxItems table
-            var altxItemsMap = await _db.AltxItems.AsNoTracking().ToDictionaryAsync(x => x.ItemNo);
+            // Step 1: Fetch items from AltxItems table
+            var altxItemsQuery = _db.AltxItems.AsNoTracking();
+            if (specificItemNo.HasValue)
+            {
+                altxItemsQuery = altxItemsQuery.Where(x => x.ItemNo == specificItemNo.Value);
+            }
+            var altxItems = await altxItemsQuery.OrderBy(x => x.ItemNo).ToListAsync();
+            var altxItemsMap = altxItems.ToDictionary(x => x.ItemNo);
 
             // Step 2: Fetch sales data grouped by (Date, ItemNo)
             var salesQuery = _db.FetchedSalesData
@@ -138,24 +144,24 @@ namespace Backend.Controllers
 
             var actMap = actList.ToDictionary(x => (x.Date, x.ItemNo));
 
-            // Step 4: Union all (Date, ItemNo) keys
-            HashSet<(DateTime Date, int ItemNo)> allKeys;
+            // Step 4: Build keys against AltxItems table for every date in [startDate .. endDate]
+            var allKeys = new List<(DateTime Date, int ItemNo)>();
 
-            if (specificItemNo.HasValue)
+            if (altxItems.Any())
             {
-                allKeys = new HashSet<(DateTime Date, int ItemNo)>();
                 for (DateTime dt = startDate; dt <= endDate; dt = dt.AddDays(1))
                 {
-                    allKeys.Add((dt, specificItemNo.Value));
+                    foreach (var item in altxItems)
+                    {
+                        allKeys.Add((dt, item.ItemNo));
+                    }
                 }
             }
             else
             {
-                allKeys = new HashSet<(DateTime Date, int ItemNo)>(salesMap.Keys);
-                foreach (var k in actMap.Keys)
-                {
-                    allKeys.Add(k);
-                }
+                var keySet = new HashSet<(DateTime Date, int ItemNo)>(salesMap.Keys);
+                foreach (var k in actMap.Keys) keySet.Add(k);
+                allKeys = keySet.OrderByDescending(k => k.Date).ThenBy(k => k.ItemNo).ToList();
             }
 
             // Step 5: Build result items

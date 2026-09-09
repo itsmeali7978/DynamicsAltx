@@ -17,9 +17,6 @@ function setPreset(type) {
     } else if (type === 'lastMonth') {
         start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
         end = new Date(now.getFullYear(), now.getMonth(), 0);
-    } else if (type === 'thisYear') {
-        start = new Date(now.getFullYear(), 0, 1);
-        end = new Date(now.getFullYear(), 11, 31);
     }
 
     if (start && end) {
@@ -43,7 +40,27 @@ async function loadDailyKpi() {
     const recordCount = document.getElementById('recordCount');
 
     if (!fromDateVal || !toDateVal) {
+        alert('Please select both From Date and To Date.');
         tableBody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 2rem;">Please select both From Date and To Date.</td></tr>`;
+        return;
+    }
+
+    const start = new Date(fromDateVal + 'T00:00:00');
+    const end = new Date(toDateVal + 'T00:00:00');
+
+    if (end < start) {
+        alert('To Date cannot be earlier than From Date.');
+        tableBody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: #ef4444; padding: 2rem;">To Date cannot be earlier than From Date.</td></tr>`;
+        return;
+    }
+
+    // Restrict date range to maximum 3 months
+    const maxAllowedEnd = new Date(start);
+    maxAllowedEnd.setMonth(maxAllowedEnd.getMonth() + 3);
+
+    if (end > maxAllowedEnd) {
+        alert('Date range cannot exceed 3 months. Please select a date period within 3 months.');
+        tableBody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: #ef4444; padding: 2rem;">Date range cannot exceed 3 months. Please select a date period within 3 months.</td></tr>`;
         return;
     }
 
@@ -89,8 +106,52 @@ async function loadDailyKpi() {
     }
 }
 
+let currentSortColumn = null; // 'wastePercent' or 'sellThroughPercent'
+let currentSortDirection = 'asc';
+
+function toggleSort(column) {
+    if (currentSortColumn === column) {
+        currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+        currentSortColumn = column;
+        currentSortDirection = 'asc';
+    }
+    updateSortIcons();
+    const filterInput = document.getElementById('filterDateStr');
+    onFilterInput(filterInput ? filterInput.value : '');
+}
+
+function updateSortIcons() {
+    const iconWaste = document.getElementById('sortIconWaste');
+    const iconSellThrough = document.getElementById('sortIconSellThrough');
+
+    if (iconWaste) {
+        if (currentSortColumn === 'wastePercent') {
+            iconWaste.className = currentSortDirection === 'asc' ? 'ri-arrow-up-line' : 'ri-arrow-down-line';
+            iconWaste.style.color = '#4f46e5';
+            iconWaste.style.opacity = '1';
+        } else {
+            iconWaste.className = 'ri-arrow-up-down-line';
+            iconWaste.style.color = 'inherit';
+            iconWaste.style.opacity = '0.6';
+        }
+    }
+
+    if (iconSellThrough) {
+        if (currentSortColumn === 'sellThroughPercent') {
+            iconSellThrough.className = currentSortDirection === 'asc' ? 'ri-arrow-up-line' : 'ri-arrow-down-line';
+            iconSellThrough.style.color = '#4f46e5';
+            iconSellThrough.style.opacity = '1';
+        } else {
+            iconSellThrough.className = 'ri-arrow-up-down-line';
+            iconSellThrough.style.color = 'inherit';
+            iconSellThrough.style.opacity = '0.6';
+        }
+    }
+}
+
 function onFilterInput(filterVal) {
-    const cleanFilter = filterVal.trim().toLowerCase();
+    const cleanFilter = (filterVal || '').trim().toLowerCase();
 
     if (!cleanFilter) {
         renderGrid(allKpiRecords);
@@ -115,7 +176,16 @@ function renderGrid(records) {
         return;
     }
 
-    tableBody.innerHTML = records.map(item => {
+    let sortedRecords = [...records];
+    if (currentSortColumn) {
+        sortedRecords.sort((a, b) => {
+            const valA = a[currentSortColumn] ?? 0;
+            const valB = b[currentSortColumn] ?? 0;
+            return currentSortDirection === 'asc' ? (valA - valB) : (valB - valA);
+        });
+    }
+
+    tableBody.innerHTML = sortedRecords.map(item => {
         const formattedDate = new Date(item.date).toLocaleDateString('en-GB'); // DD/MM/YYYY
         const wasteColor = item.wastePercent > 10 ? '#dc2626' : (item.wastePercent > 5 ? '#d97706' : '#059669');
         const sellThroughColor = item.sellThroughPercent >= 80 ? '#059669' : (item.sellThroughPercent >= 50 ? '#d97706' : '#dc2626');

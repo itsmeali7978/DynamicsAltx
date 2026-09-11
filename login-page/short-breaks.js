@@ -1,5 +1,5 @@
 // API Base URL - update if needed, but relative should work since frontend and backend are served together
-const API_BASE_URL = 'http://localhost:5047/api'; 
+const API_BASE_URL = '/api'; 
 // Wait, actually, since frontend is served from the backend, we can just use '/api'. 
 // But let's use the full URL if we are testing locally or just '/api'.
 const BASE_URL = '/api';

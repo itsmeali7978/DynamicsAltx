@@ -23,6 +23,12 @@ const loadTranslations = () => {
 const sidebarMappings = {
     "overview": "nav_overview",
     "voucher history": "nav_voucher_history",
+    "voucher entries": "nav_voucher_entries",
+    "miscellaneous income": "nav_misc_income",
+    "miscellaneous income entries": "nav_misc_income_entries",
+    "business process": "business_process",
+    "cashier closing": "nav_cashier_closing",
+    "closing reports": "nav_closing_reports",
     "general ledger": "nav_general_ledger",
     "accounts payable": "nav_accounts_payable",
     "accounts receivable": "nav_accounts_receivable",
@@ -51,6 +57,7 @@ const sidebarMappings = {
     "absence marker": "nav_absence_marker",
     "monthly absence report": "nav_monthly_absence_report",
     "finance": "finance",
+    "reports": "nav_reports",
     "human resource": "hr",
     "supply chain": "supply_chain",
     "crm & sales": "crm",
@@ -61,276 +68,162 @@ const sidebarMappings = {
     "input daily activities": "nav_input_daily_activities",
     "fetch sales data": "nav_fetch_sales_data",
     "daily kpi": "nav_daily_kpi",
-    "item kpi": "nav_item_kpi"
+    "item kpi": "nav_item_kpi",
+    "profiles": "nav_profiles"
 };
 
 document.addEventListener('DOMContentLoaded', () => {
     loadTranslations().then(() => {
-        // Dynamic Menu Injection for Admin
-        const userRole = localStorage.getItem('userRole');
-        if (userRole && userRole.toLowerCase() === 'admin') {
-            const systemGroup = Array.from(document.querySelectorAll('.nav-group')).find(group => {
-                const header = group.querySelector('.group-header span');
-                return header && (header.textContent.trim().toLowerCase() === 'system' || header.getAttribute('data-i18n') === 'system');
-            });
-            
-            if (systemGroup) {
-                const submenu = systemGroup.querySelector('.submenu');
-                if (submenu) {
-                    if (!submenu.querySelector('a[href="altx-items.html"]')) {
-                        const liItem = document.createElement('li');
-                        const aItem = document.createElement('a');
-                        aItem.href = 'altx-items.html';
-                        aItem.setAttribute('data-i18n', 'nav_altx_items');
-                        aItem.textContent = 'Altx Items Sync';
-                        
-                        if (window.location.pathname.endsWith('altx-items.html')) {
-                            aItem.className = 'active';
-                            systemGroup.classList.add('active');
-                            submenu.style.display = 'block';
-                        }
-                        
-                        liItem.appendChild(aItem);
-                        
-                        // Insert it before settings.html or at the end
-                        const settingsLiItem = Array.from(submenu.querySelectorAll('li')).find(item => {
-                            const link = item.querySelector('a');
-                            return link && link.getAttribute('href') === 'settings.html';
-                        });
-                        if (settingsLiItem) {
-                            submenu.insertBefore(liItem, settingsLiItem);
-                        } else {
-                            submenu.appendChild(liItem);
-                        }
-                    }
+        // Universal Dynamic Menu Injector
+        // Dynamically ensures all standard nav groups (Finance, Reports, Business Process, HR, Sales Analysis, System, etc.)
+        // and permitted links exist in the sidebar DOM across ALL pages before profile filtering runs.
+        const userRole = localStorage.getItem('userRole') || '';
+        const isAdmin = userRole && userRole.toLowerCase() === 'admin';
+        const allowedPagesStr = localStorage.getItem('allowedPages');
+        const allowedPages = allowedPagesStr ? JSON.parse(allowedPagesStr) : null;
+        const currentFileName = window.location.pathname.split('/').pop().split('?')[0];
 
-                    if (!submenu.querySelector('a[href="leave-types.html"]')) {
-                        const li = document.createElement('li');
-                        const a = document.createElement('a');
-                        a.href = 'leave-types.html';
-                        a.setAttribute('data-i18n', 'nav_leave_types');
-                        a.textContent = 'Leave Types';
-                        
-                        if (window.location.pathname.endsWith('leave-types.html')) {
-                            a.className = 'active';
-                            systemGroup.classList.add('active');
-                            submenu.style.display = 'block';
-                        }
-                        
-                        li.appendChild(a);
-                        
-                        // Insert it before settings.html or at the end
-                        const settingsLi = Array.from(submenu.querySelectorAll('li')).find(item => {
-                            const link = item.querySelector('a');
-                            return link && link.getAttribute('href') === 'settings.html';
-                        });
-                        if (settingsLi) {
-                            submenu.insertBefore(li, settingsLi);
-                        } else {
-                            submenu.appendChild(li);
-                        }
-                    }
+        const isPagePermitted = (pagePath) => {
+            if (isAdmin || !allowedPages) return true;
+            return allowedPages.includes(pagePath);
+        };
 
-                    if (!submenu.querySelector('a[href="vendor-tasks.html"]')) {
-                        const liTask = document.createElement('li');
-                        const aTask = document.createElement('a');
-                        aTask.href = 'vendor-tasks.html';
-                        aTask.setAttribute('data-i18n', 'nav_vendor_tasks');
-                        aTask.textContent = 'Vendor Tasks';
-                        
-                        if (window.location.pathname.endsWith('vendor-tasks.html')) {
-                            aTask.className = 'active';
-                            systemGroup.classList.add('active');
-                            submenu.style.display = 'block';
-                        }
-                        
-                        liTask.appendChild(aTask);
-                        
-                        // Insert it before settings.html or at the end
-                        const settingsLiTask = Array.from(submenu.querySelectorAll('li')).find(item => {
-                            const link = item.querySelector('a');
-                            return link && link.getAttribute('href') === 'settings.html';
-                        });
-                        if (settingsLiTask) {
-                            submenu.insertBefore(liTask, settingsLiTask);
-                        } else {
-                            submenu.appendChild(liTask);
-                        }
-                    }
-                }
+        const navModules = [
+            {
+                groupName: "Finance",
+                groupIcon: "ri-bank-line",
+                groupI18n: "finance",
+                items: [
+                    { path: "voucher-history.html", label: "Voucher History", i18n: "nav_voucher_history" },
+                    { path: "misc-income.html", label: "Miscellaneous Income", i18n: "nav_misc_income" }
+                ]
+            },
+            {
+                groupName: "Reports",
+                groupIcon: "ri-file-chart-line",
+                groupI18n: "nav_reports",
+                items: [
+                    { path: "misc-income-entries.html", label: "Miscellaneous Income Entries", i18n: "nav_misc_income_entries" },
+                    { path: "voucher-entries.html", label: "Voucher Entries", i18n: "nav_voucher_entries" }
+                ]
+            },
+            {
+                groupName: "Business Process",
+                groupIcon: "ri-briefcase-4-line",
+                groupI18n: "business_process",
+                items: [
+                    { path: "cashier-closing.html", label: "Cashier Closing", i18n: "nav_cashier_closing" },
+                    { path: "closing-reports.html", label: "Closing Reports", i18n: "nav_closing_reports" }
+                ]
+            },
+            {
+                groupName: "Human Resource",
+                groupIcon: "ri-team-line",
+                groupI18n: "hr",
+                items: [
+                    { path: "employees.html", label: "Employees", i18n: "nav_employees" },
+                    { path: "short-breaks.html", label: "Short Breaks", i18n: "nav_short_breaks" },
+                    { path: "absence-marker.html", label: "Absence Marker", i18n: "nav_absence_marker" },
+                    { path: "absence-report.html", label: "Monthly Absence Report", i18n: "nav_monthly_absence_report" }
+                ]
+            },
+            {
+                groupName: "Sales Analysis",
+                groupIcon: "ri-line-chart-line",
+                groupI18n: "nav_sales_analysis",
+                items: [
+                    { path: "input-daily-activities.html", label: "Input Daily Activities", i18n: "nav_input_daily_activities" },
+                    { path: "fetch-sales-data.html", label: "Fetch Sales Data", i18n: "nav_fetch_sales_data" },
+                    { path: "daily-kpi.html", label: "Daily KPI", i18n: "nav_daily_kpi" },
+                    { path: "item-kpi.html", label: "Item KPI", i18n: "nav_item_kpi" }
+                ]
+            },
+            {
+                groupName: "System",
+                groupIcon: "ri-settings-4-line",
+                groupI18n: "system",
+                items: [
+                    { path: "users.html", label: "User Management", i18n: "nav_user_management" },
+                    { path: "profiles.html", label: "Profiles", i18n: "nav_profiles" },
+                    { path: "locations.html", label: "Locations", i18n: "nav_locations" },
+                    { path: "nationalities.html", label: "Nationalities", i18n: "nav_nationalities" },
+                    { path: "shifts.html", label: "Shifts", i18n: "nav_shifts" },
+                    { path: "leave-types.html", label: "Leave Types", i18n: "nav_leave_types" },
+                    { path: "sync.html", label: "Data Sync (Navision)", i18n: "nav_data_sync" },
+                    { path: "altx-items.html", label: "Altx Items Sync", i18n: "nav_altx_items" },
+                    { path: "vendor-tasks.html", label: "Vendor Tasks", i18n: "nav_vendor_tasks" },
+                    { path: "announcements.html", label: "Announcements", i18n: "nav_announcements" },
+                    { path: "settings.html", label: "Account Settings", i18n: "nav_settings" }
+                ]
             }
+        ];
 
-        }
+        const navMenu = document.querySelector('.nav-menu, .nav-list');
+        if (navMenu) {
+            navModules.forEach(mod => {
+                const permittedItems = mod.items.filter(item => isPagePermitted(item.path));
+                if (permittedItems.length === 0) return;
 
-        // Dynamic Menu Injection for Sales Analysis
-        const _salesAllowedPagesStr = localStorage.getItem('allowedPages');
-        const _salesAllowedPages = _salesAllowedPagesStr ? JSON.parse(_salesAllowedPagesStr) : null;
-        const _salesUserRole = localStorage.getItem('userRole');
+                // Find or create group element
+                let groupEl = Array.from(navMenu.querySelectorAll('.nav-group')).find(g => {
+                    const headerSpan = g.querySelector('.group-header span');
+                    if (!headerSpan) return false;
+                    const txt = headerSpan.textContent.trim().toLowerCase();
+                    const i18nVal = headerSpan.getAttribute('data-i18n');
+                    return txt === mod.groupName.toLowerCase() || i18nVal === mod.groupI18n;
+                });
 
-        if (_salesUserRole?.toLowerCase() === 'admin' || !_salesAllowedPages || _salesAllowedPages.includes('input-daily-activities.html') || _salesAllowedPages.includes('fetch-sales-data.html')) {
-            let salesGroup = Array.from(document.querySelectorAll('.nav-group')).find(group => {
-                const header = group.querySelector('.group-header span');
-                return header && (header.textContent.trim().toLowerCase() === 'sales analysis' || header.getAttribute('data-i18n') === 'nav_sales_analysis');
-            });
-
-            if (!salesGroup) {
-                const navMenu = document.querySelector('.nav-menu, .nav-list');
-                if (navMenu) {
-                    salesGroup = document.createElement('li');
-                    salesGroup.className = 'nav-group';
-                    salesGroup.innerHTML = `
+                if (!groupEl) {
+                    groupEl = document.createElement('li');
+                    groupEl.className = 'nav-group';
+                    groupEl.innerHTML = `
                         <div class="group-header">
-                            <i class="ri-line-chart-line"></i>
-                            <span data-i18n="nav_sales_analysis">Sales Analysis</span>
+                            <i class="${mod.groupIcon}"></i>
+                            <span data-i18n="${mod.groupI18n}">${mod.groupName}</span>
                             <i class="ri-arrow-down-s-line arrow-icon"></i>
                         </div>
-                        <ul class="submenu">
-                            <li><a href="input-daily-activities.html" data-i18n="nav_input_daily_activities">Input Daily Activities</a></li>
-                            <li><a href="fetch-sales-data.html" data-i18n="nav_fetch_sales_data">Fetch Sales Data</a></li>
-                        </ul>
+                        <ul class="submenu"></ul>
                     `;
 
-                    const systemGroup = Array.from(navMenu.querySelectorAll('.nav-group')).find(group => {
-                        const header = group.querySelector('.group-header span');
-                        return header && (header.textContent.trim().toLowerCase() === 'system' || header.getAttribute('data-i18n') === 'system');
+                    // Insert before System group if it exists, else append
+                    const systemGrp = Array.from(navMenu.querySelectorAll('.nav-group')).find(g => {
+                        const h = g.querySelector('.group-header span');
+                        return h && (h.textContent.trim().toLowerCase() === 'system' || h.getAttribute('data-i18n') === 'system');
                     });
 
-                    if (systemGroup) {
-                        navMenu.insertBefore(salesGroup, systemGroup);
+                    if (systemGrp && mod.groupName !== 'System') {
+                        navMenu.insertBefore(groupEl, systemGrp);
                     } else {
-                        navMenu.appendChild(salesGroup);
+                        navMenu.appendChild(groupEl);
                     }
                 }
-            } else {
-                const submenu = salesGroup.querySelector('.submenu');
-                if (submenu && !submenu.querySelector('a[href="fetch-sales-data.html"]')) {
-                    const li = document.createElement('li');
-                    const a = document.createElement('a');
-                    a.href = 'fetch-sales-data.html';
-                    a.setAttribute('data-i18n', 'nav_fetch_sales_data');
-                    a.textContent = 'Fetch Sales Data';
-                    if (window.location.pathname.endsWith('fetch-sales-data.html')) {
-                        a.className = 'active';
-                    }
-                    li.appendChild(a);
-                    submenu.appendChild(li);
-                }
-            }
 
-            if (salesGroup && (window.location.pathname.endsWith('input-daily-activities.html') || window.location.pathname.endsWith('fetch-sales-data.html'))) {
-                salesGroup.classList.add('expanded', 'active');
-                const submenu = salesGroup.querySelector('.submenu');
-                if (submenu) submenu.style.display = 'block';
-                const currentFileName = window.location.pathname.split('/').pop();
-                const activeLink = salesGroup.querySelector(`a[href="${currentFileName}"]`);
-                if (activeLink) activeLink.classList.add('active');
-            }
-        }
+                const submenu = groupEl.querySelector('.submenu');
+                if (submenu) {
+                    permittedItems.forEach(item => {
+                        if (!submenu.querySelector(`a[href*="${item.path}"]`)) {
+                            const li = document.createElement('li');
+                            const a = document.createElement('a');
+                            a.href = item.path;
+                            a.setAttribute('data-i18n', item.i18n);
+                            a.textContent = item.label;
 
-        // Dynamic Menu Injection for Human Resource (only inject pages allowed by user profile)
-        const _hrAllowedPagesStr = localStorage.getItem('allowedPages');
-        const _hrAllowedPages = _hrAllowedPagesStr ? JSON.parse(_hrAllowedPagesStr) : null;
-        const hrGroup = Array.from(document.querySelectorAll('.nav-group')).find(group => {
-            const header = group.querySelector('.group-header span');
-            return header && (header.textContent.trim().toLowerCase() === 'human resource' || header.getAttribute('data-i18n') === 'hr');
-        });
-        
-        if (hrGroup) {
-            const submenu = hrGroup.querySelector('.submenu');
-            if (submenu) {
-                // 1. Ensure Short Breaks exists (only if allowed by profile)
-                let shortBreaksLi = Array.from(submenu.querySelectorAll('li')).find(item => {
-                    const link = item.querySelector('a');
-                    return link && link.getAttribute('href') && link.getAttribute('href').includes('short-breaks.html');
-                });
-                
-                if (!shortBreaksLi && (!_hrAllowedPages || _hrAllowedPages.includes('short-breaks.html'))) {
-                    shortBreaksLi = document.createElement('li');
-                    const a = document.createElement('a');
-                    a.href = 'short-breaks.html';
-                    a.setAttribute('data-i18n', 'nav_short_breaks');
-                    a.innerHTML = '<i class="ri-time-line"></i> Short Breaks';
-                    
-                    if (window.location.pathname.endsWith('short-breaks.html')) {
-                        a.className = 'active';
-                        hrGroup.classList.add('expanded');
-                        submenu.style.display = 'block';
-                    }
-                    shortBreaksLi.appendChild(a);
-                    
-                    // Insert after Employees (if it exists) or append
-                    const employeesLi = Array.from(submenu.querySelectorAll('li')).find(item => {
-                        const link = item.querySelector('a');
-                        return link && link.getAttribute('href') && link.getAttribute('href').includes('employees.html');
+                            if (currentFileName === item.path) {
+                                a.className = 'active';
+                                groupEl.classList.add('expanded', 'active');
+                                submenu.style.display = 'block';
+                            }
+                            li.appendChild(a);
+                            submenu.appendChild(li);
+                        } else if (currentFileName === item.path) {
+                            const existingA = submenu.querySelector(`a[href*="${item.path}"]`);
+                            if (existingA) existingA.className = 'active';
+                            groupEl.classList.add('expanded', 'active');
+                            submenu.style.display = 'block';
+                        }
                     });
-                    if (employeesLi) {
-                        employeesLi.parentNode.insertBefore(shortBreaksLi, employeesLi.nextSibling);
-                    } else {
-                        submenu.appendChild(shortBreaksLi);
-                    }
                 }
-                
-                // 2. Ensure Absence Marker exists (only if allowed by profile)
-                let absenceMarkerLi = Array.from(submenu.querySelectorAll('li')).find(item => {
-                    const link = item.querySelector('a');
-                    return link && link.getAttribute('href') && link.getAttribute('href').includes('absence-marker.html');
-                });
-                
-                if (!absenceMarkerLi && (!_hrAllowedPages || _hrAllowedPages.includes('absence-marker.html'))) {
-                    absenceMarkerLi = document.createElement('li');
-                    const a = document.createElement('a');
-                    a.href = 'absence-marker.html';
-                    a.setAttribute('data-i18n', 'nav_absence_marker');
-                    a.innerHTML = '<i class="ri-calendar-close-line"></i> Absence Marker';
-                    
-                    if (window.location.pathname.endsWith('absence-marker.html')) {
-                        a.className = 'active';
-                        hrGroup.classList.add('expanded');
-                        submenu.style.display = 'block';
-                    }
-                    absenceMarkerLi.appendChild(a);
-                    
-                    // Insert after Short Breaks (if injected) or after Employees
-                    const insertAfter = shortBreaksLi || Array.from(submenu.querySelectorAll('li')).find(item => {
-                        const link = item.querySelector('a');
-                        return link && link.getAttribute('href') && link.getAttribute('href').includes('employees.html');
-                    });
-                    if (insertAfter) {
-                        insertAfter.parentNode.insertBefore(absenceMarkerLi, insertAfter.nextSibling);
-                    } else {
-                        submenu.appendChild(absenceMarkerLi);
-                    }
-                }
-
-                // 3. Ensure Monthly Absence Report exists (only if allowed by profile)
-                let monthlyReportLi = Array.from(submenu.querySelectorAll('li')).find(item => {
-                    const link = item.querySelector('a');
-                    return link && link.getAttribute('href') && link.getAttribute('href').includes('absence-report.html');
-                });
-                
-                if (!monthlyReportLi && (!_hrAllowedPages || _hrAllowedPages.includes('absence-report.html'))) {
-                    monthlyReportLi = document.createElement('li');
-                    const a = document.createElement('a');
-                    a.href = 'absence-report.html';
-                    a.setAttribute('data-i18n', 'nav_monthly_absence_report');
-                    a.innerHTML = '<i class="ri-file-chart-line"></i> Monthly Absence Report';
-                    
-                    if (window.location.pathname.endsWith('absence-report.html')) {
-                        a.className = 'active';
-                        hrGroup.classList.add('expanded');
-                        submenu.style.display = 'block';
-                    }
-                    monthlyReportLi.appendChild(a);
-                    
-                    // Insert after Absence Marker (if injected)
-                    const insertAfterReport = absenceMarkerLi || shortBreaksLi;
-                    if (insertAfterReport) {
-                        insertAfterReport.parentNode.insertBefore(monthlyReportLi, insertAfterReport.nextSibling);
-                    } else {
-                        submenu.appendChild(monthlyReportLi);
-                    }
-                }
-            }
+            });
         }
 
         // Tag sidebar elements dynamically (handles text nodes inside a tags preserving icons)
@@ -564,7 +457,6 @@ document.addEventListener('DOMContentLoaded', () => {
         // 4. Role/Profile-based Navigation Control
         console.log('[DynamicsAltx] Current User Role:', userRole);
         
-        const allowedPagesStr = localStorage.getItem('allowedPages');
         const userDashboard = localStorage.getItem('userDashboard') || 'dashboard.html';
         const currentPath = window.location.pathname.split('/').pop().split('?')[0] || 'index.html';
         const dashboardFilename = userDashboard.split('/').pop().split('?')[0];
@@ -572,8 +464,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Route Guard: Protect pages from direct URL typing
         // Skip guard for index.html, and always allow userDashboard page itself
         // Also skip guard for Admin users who have full access
-        if (currentPath && currentPath !== 'index.html' && allowedPagesStr && (!userRole || userRole.toLowerCase() !== 'admin')) {
-            const allowedPages = JSON.parse(allowedPagesStr);
+        if (currentPath && currentPath !== 'index.html' && allowedPagesStr && !isAdmin) {
             if (!allowedPages.includes(currentPath) && currentPath !== dashboardFilename) {
                 console.log('[DynamicsAltx] Unauthorized page access, redirecting:', currentPath, '→', userDashboard);
                 window.location.href = userDashboard;
@@ -582,17 +473,25 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Sidebar Filtering: run AFTER all dynamic injections above
-        if (allowedPagesStr && (!userRole || userRole.toLowerCase() !== 'admin')) {
-            const allowedPages = JSON.parse(allowedPagesStr);
+        if (allowedPagesStr && !isAdmin) {
             console.log('[DynamicsAltx] Restricting sidebar based on profile allowed pages:', allowedPages);
 
             // Hide every sidebar link whose page is not in the allowedPages list
             document.querySelectorAll('.sidebar-nav a[href]').forEach(link => {
                 const href = link.getAttribute('href');
-                if (!href || href === '#' || href === 'index.html') return;
+                if (!href || href === 'index.html') return;
+                
+                // If link is placeholder href="#" inside a submenu, hide it for profile-restricted users
+                if (href === '#') {
+                    const parentLi = link.closest('li');
+                    if (parentLi) parentLi.style.display = 'none';
+                    return;
+                }
+
                 const filename = href.split('/').pop().split('?')[0];
                 if (!allowedPages.includes(filename)) {
-                    link.closest('li').style.display = 'none';
+                    const parentLi = link.closest('li');
+                    if (parentLi) parentLi.style.display = 'none';
                 }
             });
 
@@ -619,7 +518,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         }
-        else if (userRole && userRole.toLowerCase() !== 'admin') {
+        else if (!isAdmin) {
             // Hide Admin-only menu items fallback (if no allowedPages profile is in storage)
             const adminLinks = [
                 'users.html',

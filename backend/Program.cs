@@ -16,7 +16,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend",
-        policy => policy.WithOrigins("http://localhost:8000", "http://127.0.0.1:8000", "http://192.168.105.238:8000", "http://192.168.105.53:8000", "null")
+        policy => policy.SetIsOriginAllowed(_ => true)
                         .AllowAnyHeader()
                         .AllowAnyMethod());
 });
@@ -34,7 +34,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 
 // Serve static files (Fallback from local wwwroot to development login-page)
 var wwwrootPath = Path.Combine(builder.Environment.ContentRootPath, "wwwroot");

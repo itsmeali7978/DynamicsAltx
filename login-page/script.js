@@ -111,9 +111,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     localStorage.setItem('userName', data.user.name || 'ERP Admin');
                     localStorage.setItem('userLocation', data.user.location || 'Main Office');
                     localStorage.setItem('userEmail', data.user.email);
+                    localStorage.setItem('userMobileBatchName', data.user.mobileBatchName || '');
                     localStorage.setItem('userRole', data.user.role || 'User');
                     localStorage.setItem('userDashboard', data.user.dashboardPage || 'dashboard.html');
                     localStorage.setItem('allowedPages', JSON.stringify(data.user.allowedPages || []));
+                    localStorage.setItem('currentUser', JSON.stringify(data.user));
                     console.log("Session Role Assigned:", data.user.role);
                 }
 

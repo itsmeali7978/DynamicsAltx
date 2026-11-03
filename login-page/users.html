@@ -253,132 +253,7 @@
 <body>
     <div class="erp-app">
         <!-- Sidebar Navigation -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <div class="brand-logo">
-                    <i class="ri-rhythm-line"></i>
-                    <span>DynamicsAltx</span>
-                </div>
-                <button id="sidebar-toggle" class="icon-btn">
-                    <i class="ri-menu-fold-line"></i>
-                </button>
-            </div>
-
-            <nav class="sidebar-nav">
-                <ul class="nav-list">
-                    <li class="nav-item">
-                        <a href="dashboard.html" class="nav-link">
-                            <i class="ri-dashboard-3-line"></i>
-                            <span>Overview</span>
-                        </a>
-                    </li>
-                    <li class="nav-group">
-                        <div class="group-header">
-                            <i class="ri-bank-line"></i>
-                            <span>Finance</span>
-                            <i class="ri-arrow-down-s-line arrow"></i>
-                        </div>
-                        <ul class="submenu">
-                            <li><a href="voucher-history.html">Voucher History</a></li>
-                            <li><a href="#">General Ledger</a></li>
-                            <li><a href="#">Accounts Payable</a></li>
-                            <li><a href="#">Accounts Receivable</a></li>
-                        </ul>
-                    </li>
-                    
-                    <li class="nav-group">
-                        <div class="group-header">
-                            <i class="ri-briefcase-4-line"></i>
-                            <span>Business Process</span>
-                            <i class="ri-arrow-down-s-line arrow-icon"></i>
-                        </div>
-                        <ul class="submenu">
-                            <li><a href="cashier-closing.html"><i class="ri-file-list-3-line"></i> Cashier Closing</a></li>
-                            <li><a href="closing-reports.html"><i class="ri-file-chart-line"></i> Closing Reports</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-group">
-                        <div class="group-header">
-                            <i class="ri-team-line"></i>
-                            <span>Human Resource</span>
-                            <i class="ri-arrow-down-s-line arrow-icon"></i>
-                        </div>
-                        <ul class="submenu">
-                            <li><a href="employees.html"><i class="ri-user-settings-line"></i> Employees</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-group">
-                        <div class="group-header">
-                            <i class="ri-shopping-cart-2-line"></i>
-                            <span>Supply Chain</span>
-                            <i class="ri-arrow-down-s-line arrow"></i>
-                        </div>
-                        <ul class="submenu">
-                            <li><a href="vendor-profile.html">Vendor Profile</a></li>
-                            <li><a href="vendors.html">Create Vendor</a></li>
-                            <li><a href="bidding-create.html">Create Bid</a></li>
-                            <li><a href="bidding-list.html">Bidding List</a></li>
-                            <li><a href="barcode-print.html">Barcode Printing</a></li>
-                            <li><a href="vendor-pending-tasks.html">Vendor Pending Tasks</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-group">
-                        <div class="group-header">
-                            <i class="ri-customer-service-line"></i>
-                            <span>CRM & Sales</span>
-                            <i class="ri-arrow-down-s-line arrow"></i>
-                        </div>
-                        <ul class="submenu">
-                            <li><a href="reconciliation.html">Invoice Reconciliation</a></li>
-                            <li><a href="#">Sales Pipeline</a></li>
-                            <li><a href="#">Customers</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-group">
-                        <div class="group-header">
-                            <i class="ri-file-chart-line"></i>
-                            <span>Reports</span>
-                            <i class="ri-arrow-down-s-line arrow"></i>
-                        </div>
-                        <ul class="submenu">
-                            <li><a href="misc-income-entries.html">Miscellaneous Income Entries</a></li>
-                            <li><a href="voucher-entries.html">Voucher Entries</a></li>
-                            <li><a href="#">General Reports</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-group active">
-                        <div class="group-header">
-                            <i class="ri-settings-4-line"></i>
-                            <span>System</span>
-                            <i class="ri-arrow-down-s-line arrow"></i>
-                        </div>
-                        <ul class="submenu" style="display: block;">
-                            <li><a href="users.html" class="active">User Management</a></li>
-                            <li><a href="locations.html">Locations</a></li>
-                            <li><a href="profiles.html">Profiles</a></li>
-                            <li><a href="nationalities.html">Nationalities</a></li>
-                            <li><a href="shifts.html">Shifts</a></li>
-                            <li><a href="sync.html">Data Sync (Navision)</a></li>
-                            <li><a href="announcements.html">Announcements</a></li>
-                            <li><a href="settings.html">Account Settings</a></li>
-                        </ul>
-                    </li>
-                </ul>
-            </nav>
-
-            <div class="sidebar-footer">
-                <div class="user-block">
-                    <img src="https://ui-avatars.com/api/?name=Admin+User&background=6366f1&color=fff" alt="User">
-                    <div class="user-info">
-                        <p class="user-name">Admin User</p>
-                        <p class="user-role">System Administrator</p>
-                    </div>
-                    <button class="logout-btn icon-btn" title="Logout">
-                        <i class="ri-logout-box-r-line"></i>
-                    </button>
-                </div>
-            </div>
-        </aside>
+        <div id="sidebar-container"></div>
 
         <!-- Main Workspace -->
         <main class="main-content">
@@ -397,14 +272,42 @@
                         <h3>System Users</h3>
                         <p class="text-muted">Manage corporate executive accounts, profiles, and access levels.</p>
                     </div>
-                    <button class="btn-register-premium" id="btn-add-user">
-                        <i class="ri-user-add-fill"></i>
-                        <span>Register Executive</span>
-                    </button>
+                    <div style="display: flex; gap: 0.75rem; align-items: center;">
+                        <div class="view-toggle" style="display: inline-flex; background: #f1f5f9; padding: 4px; border-radius: 8px; border: 1px solid var(--border-color);">
+                            <button id="view-card-btn" class="view-btn active" title="Grid View" style="border: none; background: white; padding: 0.4rem 0.75rem; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 0.35rem; font-size: 0.85rem; font-weight: 600; color: var(--primary); box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                                <i class="ri-grid-fill"></i> Grid
+                            </button>
+                            <button id="view-table-btn" class="view-btn" title="Table View" style="border: none; background: transparent; padding: 0.4rem 0.75rem; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 0.35rem; font-size: 0.85rem; font-weight: 500; color: var(--text-muted);">
+                                <i class="ri-table-line"></i> Table
+                            </button>
+                        </div>
+                        <button class="btn-register-premium" id="btn-add-user">
+                            <i class="ri-user-add-fill"></i>
+                            <span>Register Executive</span>
+                        </button>
+                    </div>
                 </div>
 
                 <div id="user-list" class="user-grid animate-in">
-                    <!-- Users will be injected here -->
+                    <!-- Users cards will be injected here -->
+                </div>
+
+                <div id="user-table-container" class="animate-in" style="display: none; background: white; padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border-color); margin-top: 1.5rem; overflow-x: auto; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+                    <table class="erp-table">
+                        <thead>
+                            <tr>
+                                <th style="padding: 0.75rem 1rem;">User</th>
+                                <th style="padding: 0.75rem 1rem;">Email</th>
+                                <th style="padding: 0.75rem 1rem;">Location</th>
+                                <th style="padding: 0.75rem 1rem;">Mobile Batch Name</th>
+                                <th style="padding: 0.75rem 1rem;">Profile</th>
+                                <th style="padding: 0.75rem 1rem; text-align: right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="user-table-body">
+                            <!-- Dynamic rows populate here -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </main>
@@ -429,6 +332,10 @@
                 <div class="form-group">
                     <label for="reg-location">Location/Branch</label>
                     <input type="text" id="reg-location" placeholder="e.g. Main Office" required>
+                </div>
+                <div class="form-group">
+                    <label for="reg-mobile-batch">Mobile Batch Name <span style="font-weight: 400; color: var(--text-muted); font-size: 0.8rem;">(Optional)</span></label>
+                    <input type="text" id="reg-mobile-batch" placeholder="e.g. Batch A">
                 </div>
                 <div class="form-group">
                     <label for="reg-password">Security Password</label>
@@ -465,6 +372,10 @@
                 <div class="form-group">
                     <label for="edit-user-location">Location/Branch</label>
                     <input type="text" id="edit-user-location" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-user-mobile-batch">Mobile Batch Name <span style="font-weight: 400; color: var(--text-muted); font-size: 0.8rem;">(Optional)</span></label>
+                    <input type="text" id="edit-user-mobile-batch" placeholder="Optional mobile batch name">
                 </div>
                 <div class="form-group">
                     <label for="edit-user-profile">Assigned Profile</label>

@@ -111,6 +111,50 @@ async function loadItemKpi() {
     }
 }
 
+let currentSortColumn = null; // 'wastePercent' or 'sellThroughPercent'
+let currentSortDirection = 'asc';
+
+function toggleSort(column) {
+    if (currentSortColumn === column) {
+        currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+        currentSortColumn = column;
+        currentSortDirection = 'asc';
+    }
+    updateSortIcons();
+    const filterInput = document.getElementById('filterQuery');
+    onFilterInput(filterInput ? filterInput.value : '');
+}
+
+function updateSortIcons() {
+    const iconWaste = document.getElementById('sortIconWaste');
+    const iconSellThrough = document.getElementById('sortIconSellThrough');
+
+    if (iconWaste) {
+        if (currentSortColumn === 'wastePercent') {
+            iconWaste.className = currentSortDirection === 'asc' ? 'ri-arrow-up-line' : 'ri-arrow-down-line';
+            iconWaste.style.color = '#4f46e5';
+            iconWaste.style.opacity = '1';
+        } else {
+            iconWaste.className = 'ri-arrow-up-down-line';
+            iconWaste.style.color = 'inherit';
+            iconWaste.style.opacity = '0.6';
+        }
+    }
+
+    if (iconSellThrough) {
+        if (currentSortColumn === 'sellThroughPercent') {
+            iconSellThrough.className = currentSortDirection === 'asc' ? 'ri-arrow-up-line' : 'ri-arrow-down-line';
+            iconSellThrough.style.color = '#4f46e5';
+            iconSellThrough.style.opacity = '1';
+        } else {
+            iconSellThrough.className = 'ri-arrow-up-down-line';
+            iconSellThrough.style.color = 'inherit';
+            iconSellThrough.style.opacity = '0.6';
+        }
+    }
+}
+
 function onFilterInput(filterVal) {
     const cleanFilter = (filterVal || '').trim().toLowerCase();
     const hideZeros = document.getElementById('hideZerosCheckbox') ? document.getElementById('hideZerosCheckbox').checked : false;
@@ -146,7 +190,21 @@ function renderGrid(records) {
         return;
     }
 
-    tableBody.innerHTML = records.map(item => {
+    let sortedRecords = [...records];
+    if (currentSortColumn) {
+        sortedRecords.sort((a, b) => {
+            const valA = a[currentSortColumn] ?? 0;
+            const valB = b[currentSortColumn] ?? 0;
+            if (typeof valA === 'string') {
+                return currentSortDirection === 'asc'
+                    ? valA.localeCompare(valB)
+                    : valB.localeCompare(valA);
+            }
+            return currentSortDirection === 'asc' ? (valA - valB) : (valB - valA);
+        });
+    }
+
+    tableBody.innerHTML = sortedRecords.map(item => {
         const formattedDate = new Date(item.date).toLocaleDateString('en-GB'); // DD/MM/YYYY
         const wasteColor = item.wastePercent > 10 ? '#dc2626' : (item.wastePercent > 5 ? '#d97706' : '#059669');
         const sellThroughColor = item.sellThroughPercent >= 80 ? '#059669' : (item.sellThroughPercent >= 50 ? '#d97706' : '#dc2626');

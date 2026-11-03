@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DynamicsAltx - Vehicles (Expense Tracking)</title>
+    <!-- Google Fonts: Inter & Outfit & Cairo -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700&family=Cairo:wght@500;600;700&display=swap" rel="stylesheet">
+    <!-- Remix Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="dashboard.css">
+    <style>
+        /* Screen Fit & Layout */
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .erp-app {
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            background-color: var(--bg-app, #f8fafc);
+        }
+
+        /* Topbar Header */
+        .topbar {
+            height: 48px;
+            min-height: 48px;
+            background-color: #ffffff;
+            border-bottom: 1px solid var(--border-color, #e2e8f0);
+            padding: 0 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 50;
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .badge-nav-dimension {
+            background: rgba(14, 165, 233, 0.12);
+            color: #0284c7;
+            border: 1px solid rgba(14, 165, 233, 0.3);
+            padding: 0.15rem 0.55rem;
+            border-radius: 9999px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .badge-nav-dimension::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #0284c7;
+            display: inline-block;
+            box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.3);
+        }
+
+        /* Page Layout */
+        .vehicles-page {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 0.55rem 0.85rem;
+            gap: 0.45rem;
+            overflow: hidden;
+            min-height: 0;
+        }
+
+        /* Metrics Strip */
+        .metrics-strip {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.55rem;
+            flex-shrink: 0;
+        }
+
+        .metric-card-vehicle {
+            background: #ffffff;
+            border: 1px solid var(--border-color, #e2e8f0);
+            border-radius: 8px;
+            padding: 0.45rem 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+
+        .metric-card-vehicle:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .metric-card-vehicle .m-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .metric-card-vehicle.total .m-icon { background: #e0f2fe; color: #0284c7; }
+        .metric-card-vehicle.active-v .m-icon { background: #ecfdf5; color: #059669; }
+        .metric-card-vehicle.expense .m-icon { background: #fef3c7; color: #d97706; }
+        .metric-card-vehicle.filtered .m-icon { background: #eef2ff; color: #6366f1; }
+
+        .metric-card-vehicle .m-data {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .metric-card-vehicle .m-label {
+            font-size: 0.68rem;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .metric-card-vehicle .m-value {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            line-height: 1.2;
+            color: #0f172a;
+        }
+
+        /* Filter & Action Toolbar */
+        .vehicles-filter-panel {
+            background: #ffffff;
+            border-radius: 8px;
+            border: 1px solid var(--border-color, #e2e8f0);
+            padding: 0.4rem 0.65rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            flex-shrink: 0;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+        }
+
+        .filter-controls-left {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .filter-search-box {
+            position: relative;
+            flex: 1;
+            max-width: 280px;
+            min-width: 160px;
+        }
+
+        .filter-search-box input {
+            width: 100%;
+            height: 30px;
+            padding: 0 0.5rem 0 1.8rem;
+            font-size: 0.78rem;
+            border: 1.2px solid #cbd5e1;
+            border-radius: 6px;
+            outline: none;
+            transition: all 0.15s;
+            box-sizing: border-box;
+            background: #f8fafc;
+        }
+
+        .filter-search-box input:focus {
+            background: #ffffff;
+            border-color: #0284c7;
+            box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.15);
+        }
+
+        .filter-search-box i {
+            position: absolute;
+            left: 0.55rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.85rem;
+            color: #94a3b8;
+            pointer-events: none;
+        }
+
+        .filter-select {
+            height: 30px;
+            padding: 0 0.5rem;
+            font-size: 0.78rem;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            color: #0f172a;
+            background: #ffffff;
+            border: 1.2px solid #cbd5e1;
+            border-radius: 6px;
+            outline: none;
+            cursor: pointer;
+            min-width: 120px;
+        }
+
+        .filter-select:focus {
+            border-color: #0284c7;
+            box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.15);
+        }
+
+        .filter-controls-right {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .btn-compact {
+            height: 30px;
+            padding: 0 0.65rem;
+            font-size: 0.78rem;
+            font-weight: 600;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            cursor: pointer;
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            color: #334155;
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+
+        .btn-compact:hover {
+            background: #f1f5f9;
+            border-color: #94a3b8;
+        }
+
+        .btn-compact.primary {
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+            color: #ffffff;
+            border: none;
+            box-shadow: 0 2px 4px rgba(2, 132, 199, 0.2);
+        }
+
+        .btn-compact.primary:hover {
+            background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
+            box-shadow: 0 3px 6px rgba(2, 132, 199, 0.3);
+        }
+
+        /* Grid Card */
+        .vehicles-grid-card {
+            flex: 1;
+            background: #ffffff;
+            border-radius: 8px;
+            border: 1px solid var(--border-color, #e2e8f0);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+            min-height: 0;
+        }
+
+        .grid-header-strip {
+            padding: 0.4rem 0.85rem;
+            background: #ffffff;
+            border-bottom: 1px solid var(--border-color, #e2e8f0);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+            height: 38px;
+            box-sizing: border-box;
+        }
+
+        .grid-header-left {
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+        }
+
+        .grid-header-left h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .count-badge {
+            background: #f1f5f9;
+            color: #475569;
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 0.1rem 0.45rem;
+            border-radius: 9999px;
+            border: 1px solid #e2e8f0;
+        }
+
+        /* Table Container */
+        .table-responsive {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: auto;
+            min-height: 0;
+            position: relative;
+        }
+
+        .vehicles-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            text-align: left;
+        }
+
+        .vehicles-table thead th {
+            position: sticky;
+            top: 0;
+            background: #f8fafc;
+            color: #475569;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            padding: 0.45rem 0.65rem;
+            border-bottom: 1.5px solid #cbd5e1;
+            z-index: 10;
+            user-select: none;
+        }
+
+        .vehicles-table tbody tr {
+            border-bottom: 1px solid #f1f5f9;
+            transition: background-color 0.12s;
+        }
+
+        .vehicles-table tbody td {
+            padding: 0.4rem 0.65rem;
+            color: #1e293b;
+            vertical-align: middle;
+            font-size: 0.8rem;
+        }
+
+        .vehicles-table tbody tr:hover td {
+            background-color: #f8fafc;
+        }
+
+        /* Vehicle Image Box */
+        .vehicle-img-box {
+            width: 64px;
+            height: 44px;
+            border-radius: 6px;
+            overflow: hidden;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+            flex-shrink: 0;
+        }
+
+        .vehicle-img-box:hover {
+            transform: scale(1.08);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+            border-color: #0284c7;
+            z-index: 5;
+        }
+
+        .vehicle-img-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            opacity: 0;
+            transition: opacity 0.3s ease-in;
+        }
+
+        .vehicle-img-box img.loaded {
+            opacity: 1;
+        }
+
+        /* Blank Box on Offline / No Internet */
+        .vehicle-img-box.blank {
+            background: #f8fafc;
+            border: 1px dashed #cbd5e1;
+        }
+
+        .vehicle-img-box.blank i {
+            font-size: 1.1rem;
+            color: #cbd5e1;
+        }
+
+        /* Shimmer loader placeholder */
+        .vehicle-img-box.loading {
+            background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+            background-size: 200% 100%;
+            animation: imgShimmer 1.5s infinite;
+        }
+
+        @keyframes imgShimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* Cell Styling */
+        .cell-code {
+            font-family: 'Outfit', monospace;
+            font-weight: 700;
+            font-size: 0.82rem;
+            color: #0369a1;
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            padding: 0.12rem 0.45rem;
+            border-radius: 5px;
+            display: inline-block;
+        }
+
+        .cell-name {
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 0.82rem;
+            color: #0f172a;
+        }
+
+        .cell-expense-pill {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: #0f172a;
+            background: #fef3c7;
+            border: 1px solid #fde68a;
+            padding: 0.15rem 0.55rem;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .cell-expense-pill:hover {
+            background: #fde68a;
+            transform: translateY(-1px);
+        }
+
+        .cell-expense-pill.zero {
+            background: #f8fafc;
+            border-color: #e2e8f0;
+            color: #64748b;
+        }
+
+        .badge-status {
+            padding: 0.12rem 0.45rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .badge-status.active {
+            background: #ecfdf5;
+            color: #059669;
+            border: 1px solid #a7f3d0;
+        }
+
+        .badge-status.blocked {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+
+        .btn-action-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            color: #475569;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.15s;
+            font-size: 0.85rem;
+        }
+
+        .btn-action-icon:hover {
+            background: #f1f5f9;
+            color: #0284c7;
+            border-color: #0284c7;
+        }
+
+        /* Grid Footer */
+        .grid-footer-bar {
+            padding: 0.35rem 0.85rem;
+            background: #fafbfc;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.76rem;
+            color: #475569;
+            flex-shrink: 0;
+            height: 32px;
+            box-sizing: border-box;
+        }
+
+        .footer-totals {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+        }
+
+        .footer-totals strong {
+            color: #0f172a;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        /* Modal Backdrop & Box */
+        .modal-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(4px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal-backdrop.active {
+            display: flex;
+        }
+
+        .modal-box {
+            background: #ffffff;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            animation: modalFadeIn 0.2s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.96); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .modal-header {
+            padding: 1rem 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #f1f5f9;
+            background: #f8fafc;
+        }
+
+        .modal-header h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin: 0;
+            color: #0f172a;
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+        }
+
+        .btn-modal-close {
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            color: #64748b;
+            cursor: pointer;
+            padding: 0.2rem;
+            line-height: 1;
+            border-radius: 4px;
+        }
+
+        .btn-modal-close:hover {
+            color: #0f172a;
+            background: #e2e8f0;
+        }
+
+        .modal-body {
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+        }
+
+        .form-row {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .form-row label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #475569;
+            text-transform: uppercase;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            padding: 0.45rem 0.65rem;
+            font-size: 0.82rem;
+            font-family: 'Inter', sans-serif;
+            border: 1.2px solid #cbd5e1;
+            border-radius: 6px;
+            outline: none;
+            transition: all 0.15s;
+            box-sizing: border-box;
+            width: 100%;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            border-color: #0284c7;
+            box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.15);
+        }
+
+        .modal-footer {
+            padding: 0.75rem 1.25rem;
+            background: #fafbfc;
+            border-top: 1px solid #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 0.5rem;
+        }
+
+        /* Image Lightbox Modal */
+        .lightbox-box {
+            background: #ffffff;
+            border-radius: 12px;
+            max-width: 620px;
+            width: 100%;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        .lightbox-img-wrapper {
+            width: 100%;
+            height: 380px;
+            background: #0f172a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .lightbox-img-wrapper img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .lightbox-info {
+            padding: 1rem 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #ffffff;
+        }
+
+        /* Empty state */
+        .empty-state {
+            padding: 2.5rem 1rem;
+            text-align: center;
+            color: #64748b;
+        }
+
+        .empty-state i {
+            font-size: 2.5rem;
+            color: #cbd5e1;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="erp-app">
+        <!-- Sidebar Container (Dynamically populated) -->
+        <div id="sidebar-container"></div>
+
+        <!-- Main Workspace -->
+        <main class="main-content">
+            <!-- Topbar Header -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="menu-toggle icon-btn" id="sidebar-toggle" title="Toggle Navigation Sidebar">
+                        <i class="ri-menu-line"></i>
+                    </button>
+                    <div class="breadcrumb" style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; font-weight: 500; color: #64748b;">
+                        <span data-i18n="nav_expense_tracking">Expense Tracking</span>
+                        <i class="ri-arrow-right-s-line" style="font-size: 0.85rem; color: #cbd5e1;"></i>
+                        <span class="active" style="color: #0284c7; font-weight: 700;" data-i18n="nav_vehicles">Vehicles</span>
+                    </div>
+                    <span class="badge-nav-dimension" title="Connected to Navision [Dimension Value] WHERE [Dimension Code]='VEHICLE'">
+                        <i class="ri-truck-line"></i>
+                        <span>NAV Dimension: VEHICLE</span>
+                    </span>
+                </div>
+
+                <div class="topbar-right">
+                    <button class="icon-btn" id="theme-toggle" title="Switch Theme">
+                        <i class="ri-moon-line"></i>
+                    </button>
+                    <button class="icon-btn" id="lang-toggle" title="Toggle Language (العربية / English)">
+                        <i class="ri-global-line"></i>
+                        <span id="lang-label" style="font-size: 0.72rem; font-weight: 700; margin-left: 2px;">EN</span>
+                    </button>
+                    <div class="user-profile" style="display: flex; align-items: center; gap: 0.5rem;">
+                        <img src="https://ui-avatars.com/api/?name=Admin+User&background=0284c7&color=fff" alt="Admin" style="width: 28px; height: 28px; border-radius: 50%;">
+                        <span class="user-role-badge" style="font-size: 0.72rem; font-weight: 600; color: #475569;">Admin</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Vehicles Main Page -->
+            <div class="vehicles-page">
+                <!-- Metrics Strip -->
+                <div class="metrics-strip">
+                    <div class="metric-card-vehicle total">
+                        <div class="m-icon"><i class="ri-truck-line"></i></div>
+                        <div class="m-data">
+                            <span class="m-label">Total Vehicles</span>
+                            <span class="m-value" id="metricTotalVehicles">0</span>
+                        </div>
+                    </div>
+                    <div class="metric-card-vehicle active-v">
+                        <div class="m-icon"><i class="ri-checkbox-circle-line"></i></div>
+                        <div class="m-data">
+                            <span class="m-label">Active / Operational</span>
+                            <span class="m-value" id="metricActiveVehicles" style="color: #059669;">0</span>
+                        </div>
+                    </div>
+                    <div class="metric-card-vehicle expense">
+                        <div class="m-icon"><i class="ri-money-dollar-circle-line"></i></div>
+                        <div class="m-data">
+                            <span class="m-label">Total Expense Amount</span>
+                            <span class="m-value" id="metricTotalExpense" style="color: #b45309; font-size: 1.15rem;">0.00 SAR</span>
+                        </div>
+                    </div>
+                    <div class="metric-card-vehicle filtered">
+                        <div class="m-icon"><i class="ri-filter-3-line"></i></div>
+                        <div class="m-data">
+                            <span class="m-label">Filtered Grid Records</span>
+                            <span class="m-value" id="metricFilteredVehicles">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filter & Action Panel -->
+                <div class="vehicles-filter-panel">
+                    <div class="filter-controls-left">
+                        <div class="filter-search-box">
+                            <i class="ri-search-line"></i>
+                            <input type="text" id="filterSearch" placeholder="Search Code, Name, Model (e.g. TOYOTA, ISUZU)...">
+                        </div>
+
+                        <select id="filterStatus" class="filter-select">
+                            <option value="">All Statuses</option>
+                            <option value="active" selected>Active Only</option>
+                            <option value="blocked">Blocked Only</option>
+                        </select>
+
+                        <button class="btn-compact" id="btnRefresh" title="Reload from Navision">
+                            <i class="ri-refresh-line"></i>
+                            <span>Refresh</span>
+                        </button>
+                    </div>
+
+                    <div class="filter-controls-right">
+                        <!-- Actions from NAV will be implemented here -->
+                    </div>
+                </div>
+
+                <!-- Grid Card -->
+                <div class="vehicles-grid-card">
+                    <div class="grid-header-strip">
+                        <div class="grid-header-left">
+                            <h2 data-i18n="vehicles_title">
+                                <i class="ri-roadster-line" style="color: #0284c7;"></i>
+                                <span>Vehicles Registry (Dimension Code: VEHICLE)</span>
+                            </h2>
+                            <span class="count-badge" id="gridBadgeCount">0 vehicles</span>
+                        </div>
+                        <div class="grid-header-right">
+                            <span style="font-size: 0.72rem; color: #64748b;">
+                                <i class="ri-shield-check-line" style="color: #059669;"></i>
+                                Direct NAV Integration
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="vehicles-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 45px; text-align: center;">#</th>
+                                    <th style="width: 90px; text-align: center;" data-i18n="vehicles_col_image">Vehicle Image</th>
+                                    <th style="width: 120px;" data-i18n="vehicles_col_code">Code</th>
+                                    <th data-i18n="vehicles_col_name">Vehicle Name</th>
+                                    <th style="width: 150px;" data-i18n="vehicles_col_expense">Expense Amount</th>
+                                    <th style="width: 110px; text-align: center;" data-i18n="vehicles_col_status">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="vehiclesTableBody">
+                                <!-- Dynamic rows rendered here -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Footer Totals Bar -->
+                    <div class="grid-footer-bar">
+                        <div class="footer-left">
+                            <span>NAV Table: <strong>[House Care Live$Dimension Value]</strong> WHERE [Dimension Code]='VEHICLE'</span>
+                        </div>
+                        <div class="footer-totals">
+                            <span>Vehicles: <strong id="footCount">0</strong></span>
+                            <span>Total Expenses: <strong id="footTotalExpense" style="color: #b45309;">0.00 SAR</strong></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Image Lightbox Modal -->
+    <div class="modal-backdrop" id="lightboxModal">
+        <div class="lightbox-box">
+            <div class="modal-header">
+                <h3 id="lightboxTitle"><i class="ri-image-line" style="color: #0284c7;"></i> Vehicle Photo</h3>
+                <button type="button" class="btn-modal-close" id="btnCloseLightbox">&times;</button>
+            </div>
+            <div class="lightbox-img-wrapper">
+                <img id="lightboxImg" src="" alt="Vehicle Photo">
+            </div>
+            <div class="lightbox-info">
+                <div>
+                    <strong id="lightboxVehicleCode" style="font-family: 'Outfit'; color: #0284c7;"></strong>
+                    <span id="lightboxVehicleName" style="margin-left: 0.5rem; color: #475569; font-size: 0.85rem;"></span>
+                </div>
+                <button type="button" class="btn-compact" id="btnCloseLightbox2">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="translations.js"></script>
+    <script src="common.js"></script>
+    <script src="vehicles.js"></script>
+</body>
+
+</html>

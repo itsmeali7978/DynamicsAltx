@@ -200,6 +200,8 @@ function onDateChanged() {
     loadActivitiesForSelectedDate();
 }
 
+let currentDateRecords = [];
+
 // Load activities from API
 async function loadActivitiesForSelectedDate() {
     const dateVal = document.getElementById('activityDate').value;
@@ -209,6 +211,7 @@ async function loadActivitiesForSelectedDate() {
     if (!dateVal) {
         tableBody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 2rem;">Please select a date.</td></tr>`;
         recordCount.textContent = '0 Records';
+        currentDateRecords = [];
         return;
     }
 
@@ -219,6 +222,7 @@ async function loadActivitiesForSelectedDate() {
         if (!res.ok) throw new Error('Failed to fetch daily activities');
 
         const records = await res.json();
+        currentDateRecords = records || [];
         recordCount.textContent = `${records.length} Record${records.length === 1 ? '' : 's'}`;
 
         if (records.length === 0) {
@@ -255,6 +259,7 @@ async function loadActivitiesForSelectedDate() {
     } catch (err) {
         console.error(err);
         tableBody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: #ef4444; padding: 2rem;">Failed to load data. ${err.message}</td></tr>`;
+        currentDateRecords = [];
     }
 }
 
@@ -287,11 +292,46 @@ async function handleFormSubmit(e) {
         return;
     }
 
+    const itemNoInt = parseInt(itemNoVal);
+
+    // Check if a line already exists for this date and itemNo
+    const existing = currentDateRecords.find(x =>
+        x.itemNo === itemNoInt &&
+        x.activityDate.split('T')[0] === activityDate
+    );
+
+    if (existing) {
+        const hasProducedConflict = existing.producedQty > 0 && producedQty > 0;
+        const hasExpiredConflict = existing.expiredQty > 0 && expiredQty > 0;
+
+        if (hasProducedConflict) {
+            promptConflict(existing, 'produced', producedQty, expiredQty, expiryReason, notes);
+            return;
+        } else if (hasExpiredConflict) {
+            promptConflict(existing, 'expired', producedQty, expiredQty, expiryReason, notes);
+            return;
+        } else {
+            // Auto-merge without prompt
+            const finalProduced = producedQty > 0 ? producedQty : existing.producedQty;
+            const finalExpired = expiredQty > 0 ? expiredQty : existing.expiredQty;
+            const finalReason = expiryReason || existing.expiryReason || '';
+            const finalNotes = notes || existing.notes || '';
+            await submitRecordUpdate(existing.id, activityDate, itemNoInt, finalProduced, finalExpired, finalReason, finalNotes, null);
+            return;
+        }
+    }
+
+    // No existing line found -> Create new activity record
+    await submitNewRecord(activityDate, itemNoInt, producedQty, expiredQty, expiryReason, notes);
+}
+
+// Submit New Activity Record
+async function submitNewRecord(activityDate, itemNoInt, producedQty, expiredQty, expiryReason, notes) {
     const currentUser = localStorage.getItem('username') || 'System';
 
     const payload = {
         activityDate: activityDate,
-        itemNo: parseInt(itemNoVal),
+        itemNo: itemNoInt,
         descEng: currentItemData.descEng,
         descAra: currentItemData.descAra,
         producedQty: producedQty,
@@ -319,22 +359,7 @@ async function handleFormSubmit(e) {
 
         showAlert('Daily activity added successfully!', 'success');
 
-        // Clear item form inputs
-        document.getElementById('itemNo').value = '';
-        document.getElementById('producedQty').value = '0';
-        document.getElementById('expiredQty').value = '0';
-        document.getElementById('expiryReason').value = '';
-        document.getElementById('notes').value = '';
-        document.getElementById('itemDescPreview').innerHTML = '<i class="ri-information-line"></i> Item name will display here';
-        currentItemData = { descEng: '', descAra: '' };
-
-        // Return focus to Item No for rapid continuous entry
-        const itemNoInput = document.getElementById('itemNo');
-        if (itemNoInput) {
-            itemNoInput.focus();
-        }
-
-        // Refresh Grid
+        resetFormInputs();
         loadActivitiesForSelectedDate();
     } catch (err) {
         console.error(err);
@@ -343,6 +368,143 @@ async function handleFormSubmit(e) {
         const btnSubmit = document.getElementById('btnSubmit');
         btnSubmit.disabled = false;
         btnSubmit.innerHTML = '<i class="ri-save-line"></i> Submit Activity';
+    }
+}
+
+// Submit Record Update (for Existing Line)
+async function submitRecordUpdate(id, activityDate, itemNo, finalProduced, finalExpired, finalReason, finalNotes, updateMode) {
+    const currentUser = localStorage.getItem('username') || 'System';
+
+    const payload = {
+        activityDate: activityDate,
+        itemNo: itemNo,
+        descEng: currentItemData.descEng,
+        descAra: currentItemData.descAra,
+        producedQty: finalProduced,
+        expiredQty: finalExpired,
+        expiryReason: finalReason,
+        notes: finalNotes,
+        createdBy: currentUser,
+        updateMode: updateMode
+    };
+
+    try {
+        const btnSubmit = document.getElementById('btnSubmit');
+        if (btnSubmit) {
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = '<i class="ri-loader-4-line spin"></i> Updating...';
+        }
+
+        const res = await fetch(`/api/DailyActivity/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) throw new Error('Failed to update existing daily activity record.');
+
+        const modeMsg = updateMode === 'add' ? ' (Added to existing)' : (updateMode === 'replace' ? ' (Replaced existing)' : '');
+        showAlert(`Existing line for Item ${itemNo} updated successfully${modeMsg}!`, 'success');
+
+        resetFormInputs();
+        loadActivitiesForSelectedDate();
+    } catch (err) {
+        console.error(err);
+        showAlert(err.message, 'error');
+    } finally {
+        const btnSubmit = document.getElementById('btnSubmit');
+        if (btnSubmit) {
+            btnSubmit.disabled = false;
+            btnSubmit.innerHTML = '<i class="ri-save-line"></i> Submit Activity';
+        }
+    }
+}
+
+// Prompt Conflict Resolution Modal
+function promptConflict(existing, type, newProduced, newExpired, expiryReason, notes) {
+    const modal = document.getElementById('conflictModal');
+    const titleEl = document.getElementById('conflictModalTitle');
+    const bodyEl = document.getElementById('conflictModalBody');
+    const btnAdd = document.getElementById('btnConflictAdd');
+    const btnReplace = document.getElementById('btnConflictReplace');
+
+    const itemName = currentItemData.descEng || currentItemData.descAra || existing.descEng || existing.descAra || `Item #${existing.itemNo}`;
+    const formattedDate = new Date(existing.activityDate).toLocaleDateString('en-GB');
+
+    if (type === 'produced') {
+        titleEl.textContent = 'Existing Production Entry Found';
+        bodyEl.innerHTML = `Item <strong>${existing.itemNo} (${itemName})</strong> already has <strong>${existing.producedQty}</strong> Produced Qty on <strong>${formattedDate}</strong>.<br><br>Do you want to <strong>ADD</strong> the new <strong>${newProduced}</strong> Qty to the old <strong>${existing.producedQty}</strong> (Total: <strong>${existing.producedQty + newProduced}</strong>) or <strong>REPLACE</strong> <strong>${existing.producedQty}</strong> with <strong>${newProduced}</strong>?`;
+
+        btnAdd.innerHTML = `<i class="ri-add-line"></i> Add ${newProduced} to ${existing.producedQty} (Total: ${existing.producedQty + newProduced})`;
+        btnReplace.innerHTML = `<i class="ri-refresh-line"></i> Replace ${existing.producedQty} with ${newProduced}`;
+    } else {
+        titleEl.textContent = 'Existing Expired Entry Found';
+        bodyEl.innerHTML = `Item <strong>${existing.itemNo} (${itemName})</strong> already has <strong>${existing.expiredQty}</strong> Expired Qty on <strong>${formattedDate}</strong>.<br><br>Do you want to <strong>ADD</strong> the new <strong>${newExpired}</strong> Qty to the old <strong>${existing.expiredQty}</strong> (Total: <strong>${existing.expiredQty + newExpired}</strong>) or <strong>REPLACE</strong> <strong>${existing.expiredQty}</strong> with <strong>${newExpired}</strong>?`;
+
+        btnAdd.innerHTML = `<i class="ri-add-line"></i> Add ${newExpired} to ${existing.expiredQty} (Total: ${existing.expiredQty + newExpired})`;
+        btnReplace.innerHTML = `<i class="ri-refresh-line"></i> Replace ${existing.expiredQty} with ${newExpired}`;
+    }
+
+    // Set click handlers
+    btnAdd.onclick = async () => {
+        closeConflictModal();
+        let finalProduced = existing.producedQty;
+        let finalExpired = existing.expiredQty;
+
+        if (type === 'produced') {
+            finalProduced = existing.producedQty + newProduced;
+            if (newExpired > 0) finalExpired = existing.expiredQty > 0 ? existing.expiredQty + newExpired : newExpired;
+        } else {
+            finalExpired = existing.expiredQty + newExpired;
+            if (newProduced > 0) finalProduced = existing.producedQty > 0 ? existing.producedQty + newProduced : newProduced;
+        }
+
+        const finalReason = expiryReason || existing.expiryReason || '';
+        const finalNotes = notes || existing.notes || '';
+
+        await submitRecordUpdate(existing.id, existing.activityDate.split('T')[0], existing.itemNo, finalProduced, finalExpired, finalReason, finalNotes, 'add');
+    };
+
+    btnReplace.onclick = async () => {
+        closeConflictModal();
+        let finalProduced = existing.producedQty;
+        let finalExpired = existing.expiredQty;
+
+        if (type === 'produced') {
+            finalProduced = newProduced;
+            if (newExpired > 0) finalExpired = newExpired;
+        } else {
+            finalExpired = newExpired;
+            if (newProduced > 0) finalProduced = newProduced;
+        }
+
+        const finalReason = expiryReason || existing.expiryReason || '';
+        const finalNotes = notes || existing.notes || '';
+
+        await submitRecordUpdate(existing.id, existing.activityDate.split('T')[0], existing.itemNo, finalProduced, finalExpired, finalReason, finalNotes, 'replace');
+    };
+
+    modal.style.display = 'flex';
+}
+
+function closeConflictModal() {
+    const modal = document.getElementById('conflictModal');
+    if (modal) modal.style.display = 'none';
+}
+
+// Reset form inputs & focus back to Item No
+function resetFormInputs() {
+    document.getElementById('itemNo').value = '';
+    document.getElementById('producedQty').value = '0';
+    document.getElementById('expiredQty').value = '0';
+    document.getElementById('expiryReason').value = '';
+    document.getElementById('notes').value = '';
+    document.getElementById('itemDescPreview').innerHTML = '<i class="ri-information-line"></i> Item name will display here';
+    currentItemData = { descEng: '', descAra: '' };
+
+    const itemNoInput = document.getElementById('itemNo');
+    if (itemNoInput) {
+        itemNoInput.focus();
     }
 }
 

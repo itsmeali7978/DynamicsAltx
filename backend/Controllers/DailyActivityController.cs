@@ -20,6 +20,7 @@ namespace Backend.Controllers
         public string? ExpiryReason { get; set; }
         public string? Notes { get; set; }
         public string? CreatedBy { get; set; }
+        public string? UpdateMode { get; set; } // "add", "replace", or null
     }
 
     [Route("api/[controller]")]
@@ -111,6 +112,65 @@ namespace Backend.Controllers
 
                 string descEng = localItem.DescEng ?? "";
                 string descAra = localItem.DescAra ?? "";
+
+                // Check if an activity for the same date and itemNo already exists
+                var existing = await _context.DailyActivities
+                    .FirstOrDefaultAsync(a => a.ActivityDate.Date == dto.ActivityDate.Date && a.ItemNo == dto.ItemNo);
+
+                if (existing != null)
+                {
+                    if (dto.UpdateMode == "add")
+                    {
+                        existing.ProducedQty += dto.ProducedQty;
+                        if (dto.ExpiredQty > 0)
+                        {
+                            existing.ExpiredQty = existing.ExpiredQty > 0 ? existing.ExpiredQty + dto.ExpiredQty : dto.ExpiredQty;
+                        }
+                        if (!string.IsNullOrWhiteSpace(dto.ExpiryReason)) existing.ExpiryReason = dto.ExpiryReason;
+                        if (!string.IsNullOrWhiteSpace(dto.Notes)) existing.Notes = dto.Notes;
+
+                        await _context.SaveChangesAsync();
+                        return Ok(existing);
+                    }
+                    else if (dto.UpdateMode == "replace")
+                    {
+                        if (dto.ProducedQty > 0 || dto.ExpiredQty == 0) existing.ProducedQty = dto.ProducedQty;
+                        if (dto.ExpiredQty > 0) existing.ExpiredQty = dto.ExpiredQty;
+                        if (!string.IsNullOrWhiteSpace(dto.ExpiryReason)) existing.ExpiryReason = dto.ExpiryReason;
+                        if (!string.IsNullOrWhiteSpace(dto.Notes)) existing.Notes = dto.Notes;
+
+                        await _context.SaveChangesAsync();
+                        return Ok(existing);
+                    }
+                    else
+                    {
+                        // Auto-update if no conflict (i.e. updating non-conflicting field, or old was 0)
+                        bool producedConflict = existing.ProducedQty > 0 && dto.ProducedQty > 0;
+                        bool expiredConflict = existing.ExpiredQty > 0 && dto.ExpiredQty > 0;
+
+                        if (producedConflict || expiredConflict)
+                        {
+                            return Conflict(new
+                            {
+                                message = "Conflict",
+                                existingId = existing.Id,
+                                existingProducedQty = existing.ProducedQty,
+                                existingExpiredQty = existing.ExpiredQty,
+                                producedConflict = producedConflict,
+                                expiredConflict = expiredConflict
+                            });
+                        }
+
+                        // No conflict -> merge seamlessly
+                        if (dto.ProducedQty > 0) existing.ProducedQty = dto.ProducedQty;
+                        if (dto.ExpiredQty > 0) existing.ExpiredQty = dto.ExpiredQty;
+                        if (!string.IsNullOrWhiteSpace(dto.ExpiryReason)) existing.ExpiryReason = dto.ExpiryReason;
+                        if (!string.IsNullOrWhiteSpace(dto.Notes)) existing.Notes = dto.Notes;
+
+                        await _context.SaveChangesAsync();
+                        return Ok(existing);
+                    }
+                }
 
                 var entity = new DailyActivity
                 {

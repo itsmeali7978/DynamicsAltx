@@ -25,10 +25,8 @@ namespace Backend.Controllers
 
         // GET: api/Employees?userEmail=...
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Employee>>> GetEmployees([FromQuery] string userEmail)
+        public async Task<ActionResult<IEnumerable<Employee>>> GetEmployees([FromQuery] string? userEmail)
         {
-            if (!await IsAdmin(userEmail)) return Forbid();
-
             return await _context.Employees.OrderBy(e => e.EmpId).ToListAsync();
         }
 

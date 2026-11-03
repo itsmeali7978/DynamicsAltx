@@ -27,6 +27,7 @@ namespace Backend.Controllers
                     u.Email, 
                     u.Name, 
                     u.Location,
+                    u.MobileBatchName,
                     ProfileId = u.ProfileId,
                     ProfileName = u.Profile != null ? u.Profile.ProfileName : "Default/Admin"
                 })
@@ -48,6 +49,7 @@ namespace Backend.Controllers
             if (!string.IsNullOrWhiteSpace(dto.Name)) user.Name = dto.Name;
             if (!string.IsNullOrWhiteSpace(dto.Email)) user.Email = dto.Email;
             if (!string.IsNullOrWhiteSpace(dto.Location)) user.Location = dto.Location;
+            user.MobileBatchName = dto.MobileBatchName;
             user.ProfileId = dto.ProfileId;
 
             if (!string.IsNullOrWhiteSpace(dto.Password))
@@ -86,6 +88,7 @@ namespace Backend.Controllers
                 PasswordHash = dto.Password,
                 Name = dto.Name,
                 Location = dto.Location,
+                MobileBatchName = dto.MobileBatchName,
                 ProfileId = dto.ProfileId
             };
 

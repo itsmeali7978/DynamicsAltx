@@ -21,6 +21,9 @@ namespace Backend.Models
         [StringLength(25)]
         public string Location { get; set; } = string.Empty;
 
+        [StringLength(100)]
+        public string? MobileBatchName { get; set; }
+
         [Required]
         [StringLength(20)]
         public string Role { get; set; } = "User";

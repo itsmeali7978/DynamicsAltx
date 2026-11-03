@@ -33,7 +33,11 @@ const APP_PAGES = [
     { path: 'input-daily-activities.html', label: 'Input Daily Activities' },
     { path: 'fetch-sales-data.html', label: 'Fetch Sales Data' },
     { path: 'daily-kpi.html', label: 'Daily KPI' },
-    { path: 'item-kpi.html', label: 'Item KPI' }
+    { path: 'item-kpi.html', label: 'Item KPI' },
+    { path: 'inventory-sync.html', label: 'Inventory - Sync Data' },
+    { path: 'stock-count.html', label: 'Inventory - Stock Count' },
+    { path: 'inventory-altx-nav.html', label: 'Inventory - Inventory Altx-NAV' },
+    { path: 'vehicles.html', label: 'Expense Tracking - Vehicles' }
 ];
 
 document.addEventListener('DOMContentLoaded', () => {

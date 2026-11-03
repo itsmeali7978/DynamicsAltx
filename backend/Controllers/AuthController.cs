@@ -72,6 +72,7 @@ namespace Backend.Controllers
                     email = user.Email,
                     name = user.Name?.Trim(),
                     location = user.Location?.Trim(),
+                    mobileBatchName = user.MobileBatchName?.Trim(),
                     role = user.Role,
                     dashboardPage = dashboardPage,
                     allowedPages = allowedPages

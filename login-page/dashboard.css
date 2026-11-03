@@ -51,6 +51,13 @@ body {
     position: relative; /* Ensure overlay covers this */
 }
 
+#sidebar-container {
+    display: flex;
+    height: 100%;
+    min-height: 100vh;
+    flex-shrink: 0;
+}
+
 /* Sidebar Styles */
 .sidebar {
     width: var(--sidebar-width);
@@ -58,6 +65,9 @@ body {
     color: var(--sidebar-text);
     display: flex;
     flex-direction: column;
+    height: 100%;
+    min-height: 100vh;
+    flex-shrink: 0;
     transition: var(--transition);
     z-index: 100;
 }

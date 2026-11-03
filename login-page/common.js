@@ -2,6 +2,18 @@
  * DynamicsAltx - Shared common logic for all pages
  */
 
+// Immediate Authentication Guard: Redirect to login if user is not authenticated
+(function checkAuthentication() {
+    const currentPath = window.location.pathname.split('/').pop().split('?')[0] || 'index.html';
+    if (currentPath && currentPath !== 'index.html') {
+        const userEmail = localStorage.getItem('userEmail');
+        if (!userEmail) {
+            console.warn('[DynamicsAltx] Unauthenticated access attempt to:', currentPath, '- Redirecting to login page.');
+            window.location.href = 'index.html';
+        }
+    }
+})();
+
 // Dynamically load translations.js
 const loadTranslations = () => {
     return new Promise((resolve) => {
@@ -33,6 +45,7 @@ const sidebarMappings = {
     "accounts payable": "nav_accounts_payable",
     "accounts receivable": "nav_accounts_receivable",
     "employees": "nav_employees",
+    "employee documents": "nav_employee_documents",
     "short breaks": "nav_short_breaks",
     "create vendor": "nav_vendors",
     "create bid": "nav_create_bid",
@@ -69,10 +82,39 @@ const sidebarMappings = {
     "fetch sales data": "nav_fetch_sales_data",
     "daily kpi": "nav_daily_kpi",
     "item kpi": "nav_item_kpi",
-    "profiles": "nav_profiles"
+    "profiles": "nav_profiles",
+    "printer configuration": "nav_printer_config",
+    "inventory": "nav_inventory",
+    "sync data": "nav_inventory_sync",
+    "stock count": "nav_stock_count"
 };
 
-document.addEventListener('DOMContentLoaded', () => {
+const loadSidebarComponent = async () => {
+    let container = document.getElementById('sidebar-container');
+    let existingSidebar = document.querySelector('aside.sidebar');
+
+    if (container || !existingSidebar) {
+        try {
+            const res = await fetch('sidebar.html');
+            if (res.ok) {
+                const html = await res.text();
+                if (container) {
+                    container.outerHTML = html;
+                } else if (!existingSidebar) {
+                    const erpApp = document.querySelector('.erp-app');
+                    if (erpApp) {
+                        erpApp.insertAdjacentHTML('afterbegin', html);
+                    }
+                }
+            }
+        } catch (err) {
+            console.error('[DynamicsAltx] Failed to load sidebar.html:', err);
+        }
+    }
+};
+
+document.addEventListener('DOMContentLoaded', async () => {
+    await loadSidebarComponent();
     loadTranslations().then(() => {
         // Universal Dynamic Menu Injector
         // Dynamically ensures all standard nav groups (Finance, Reports, Business Process, HR, Sales Analysis, System, etc.)
@@ -113,7 +155,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 groupI18n: "business_process",
                 items: [
                     { path: "cashier-closing.html", label: "Cashier Closing", i18n: "nav_cashier_closing" },
-                    { path: "closing-reports.html", label: "Closing Reports", i18n: "nav_closing_reports" }
+                    { path: "closing-reports.html", label: "Closing Reports", i18n: "nav_closing_reports" },
+                    { path: "reconciliation.html", label: "Invoice Reconciliation", i18n: "nav_reconciliation" }
+                ]
+            },
+            {
+                groupName: "Supply Chain & Bidding",
+                groupIcon: "ri-shopping-cart-2-line",
+                groupI18n: "supply_chain",
+                items: [
+                    { path: "vendor-profile.html", label: "Vendor Profile", i18n: "nav_vendor_profile" },
+                    { path: "vendor-pending-tasks.html", label: "Vendor Pending Tasks", i18n: "nav_vendor_pending_tasks" },
+                    { path: "bidding-create.html", label: "Create Bid", i18n: "nav_create_bid" },
+                    { path: "bidding-list.html", label: "Bidding List", i18n: "nav_bidding_list" },
+                    { path: "vendors.html", label: "Vendors", i18n: "nav_vendors" },
+                    { path: "barcode-print.html", label: "Barcode Printing", i18n: "nav_barcode" }
                 ]
             },
             {
@@ -122,6 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 groupI18n: "hr",
                 items: [
                     { path: "employees.html", label: "Employees", i18n: "nav_employees" },
+                    { path: "employee-documents.html", label: "Employee Documents", i18n: "nav_employee_documents" },
                     { path: "short-breaks.html", label: "Short Breaks", i18n: "nav_short_breaks" },
                     { path: "absence-marker.html", label: "Absence Marker", i18n: "nav_absence_marker" },
                     { path: "absence-report.html", label: "Monthly Absence Report", i18n: "nav_monthly_absence_report" }
@@ -139,6 +196,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 ]
             },
             {
+                groupName: "Inventory",
+                groupIcon: "ri-archive-line",
+                groupI18n: "nav_inventory",
+                items: [
+                    { path: "inventory-sync.html", label: "Sync Data", i18n: "nav_inventory_sync" },
+                    { path: "stock-count.html", label: "Stock Count", i18n: "nav_stock_count" },
+                    { path: "inventory-altx-nav.html", label: "Inventory Altx-NAV", i18n: "nav_inventory_altx_nav" }
+                ]
+            },
+            {
+                groupName: "Expense Tracking",
+                groupIcon: "ri-car-line",
+                groupI18n: "nav_expense_tracking",
+                items: [
+                    { path: "vehicles.html", label: "Vehicles", i18n: "nav_vehicles" }
+                ]
+            },
+            {
                 groupName: "System",
                 groupIcon: "ri-settings-4-line",
                 groupI18n: "system",
@@ -153,6 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     { path: "altx-items.html", label: "Altx Items Sync", i18n: "nav_altx_items" },
                     { path: "vendor-tasks.html", label: "Vendor Tasks", i18n: "nav_vendor_tasks" },
                     { path: "announcements.html", label: "Announcements", i18n: "nav_announcements" },
+                    { path: "printer-config.html", label: "Printer Configuration", i18n: "nav_printer_config" },
                     { path: "settings.html", label: "Account Settings", i18n: "nav_settings" }
                 ]
             }
@@ -461,6 +537,25 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentPath = window.location.pathname.split('/').pop().split('?')[0] || 'index.html';
         const dashboardFilename = userDashboard.split('/').pop().split('?')[0];
 
+        // Ensure top-level Dashboard links point to the user's specific assigned landing page (userDashboard)
+        document.querySelectorAll('.sidebar-nav .nav-item a[href], a[href="dashboard.html"]').forEach(link => {
+            const href = link.getAttribute('href');
+            if (href === 'dashboard.html' || link.closest('.nav-item')) {
+                link.setAttribute('href', userDashboard);
+            }
+        });
+
+        // Make the sidebar brand logo / title clickable to return to the user's default landing page
+        const sidebarBrand = document.querySelector('.sidebar-brand');
+        if (sidebarBrand) {
+            sidebarBrand.style.cursor = 'pointer';
+            sidebarBrand.setAttribute('title', 'Return to Home / Landing Page');
+            sidebarBrand.onclick = (e) => {
+                if (e.target.closest('#sidebar-toggle')) return;
+                window.location.href = userDashboard;
+            };
+        }
+
         // Route Guard: Protect pages from direct URL typing
         // Skip guard for index.html, and always allow userDashboard page itself
         // Also skip guard for Admin users who have full access
@@ -476,7 +571,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (allowedPagesStr && !isAdmin) {
             console.log('[DynamicsAltx] Restricting sidebar based on profile allowed pages:', allowedPages);
 
-            // Hide every sidebar link whose page is not in the allowedPages list
+            // Hide every sidebar link whose page is not in the allowedPages list (except the user's assigned landing page)
             document.querySelectorAll('.sidebar-nav a[href]').forEach(link => {
                 const href = link.getAttribute('href');
                 if (!href || href === 'index.html') return;
@@ -489,6 +584,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 const filename = href.split('/').pop().split('?')[0];
+
+                // Always allow the user's assigned landing page (userDashboard)
+                if (filename === dashboardFilename || filename === 'dashboard.html') {
+                    link.setAttribute('href', userDashboard);
+                    const parentLi = link.closest('li, .nav-item');
+                    if (parentLi) parentLi.style.display = 'block';
+                    return;
+                }
+
                 if (!allowedPages.includes(filename)) {
                     const parentLi = link.closest('li');
                     if (parentLi) parentLi.style.display = 'none';
@@ -506,13 +610,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            // Also hide top-level nav-items (non-group) that point to restricted pages
+            // Ensure top-level Dashboard nav-item stays visible and points to userDashboard
             document.querySelectorAll('.nav-item').forEach(item => {
                 const link = item.querySelector('a[href]');
                 if (!link) return;
                 const href = link.getAttribute('href');
                 if (!href || href === '#' || href === 'index.html') return;
                 const filename = href.split('/').pop().split('?')[0];
+                if (filename === dashboardFilename || filename === 'dashboard.html') {
+                    link.setAttribute('href', userDashboard);
+                    item.style.display = 'block';
+                    return;
+                }
                 if (!allowedPages.includes(filename)) {
                     item.style.display = 'none';
                 }

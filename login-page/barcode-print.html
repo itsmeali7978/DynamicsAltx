@@ -142,143 +142,19 @@
         .btn-secondary:hover {
             background-color: #f1f5f9;
         }
+        .barcode-row.selected-row {
+            background-color: rgba(99, 102, 241, 0.1) !important;
+        }
+        .barcode-row:hover {
+            background-color: rgba(99, 102, 241, 0.05);
+        }
     </style>
 </head>
 
 <body>
     <div class="erp-app">
         <!-- Sidebar Navigation -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <div class="brand-logo">
-                    <i class="ri-rhythm-line"></i>
-                    <span>DynamicsAltx</span>
-                </div>
-                <button id="sidebar-toggle" class="icon-btn">
-                    <i class="ri-menu-fold-line"></i>
-                </button>
-            </div>
-
-            <nav class="sidebar-nav">
-                <ul class="nav-list">
-                    <li class="nav-item">
-                        <a href="dashboard.html" class="nav-link">
-                            <i class="ri-dashboard-3-line"></i>
-                            <span>Overview</span>
-                        </a>
-                    </li>
-
-                    
-                    
-                    
-                                        <li class="nav-group">
-                        <div class="group-header">
-                            <i class="ri-briefcase-4-line"></i>
-                            <span>Business Process</span>
-                            <i class="ri-arrow-down-s-line arrow-icon"></i>
-                        </div>
-                        <ul class="submenu">
-                            <li><a href="cashier-closing.html"><i class="ri-file-list-3-line"></i> Cashier Closing</a></li>
-                            <li><a href="closing-reports.html"><i class="ri-file-chart-line"></i> Closing Reports</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-group">
-                        <div class="group-header">
-                            <i class="ri-team-line"></i>
-                            <span>Human Resource</span>
-                            <i class="ri-arrow-down-s-line arrow-icon"></i>
-                        </div>
-                        <ul class="submenu">
-                            <li><a href="employees.html"><i class="ri-user-settings-line"></i> Employees</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-group">
-                        <div class="group-header">
-                            <i class="ri-bank-line"></i>
-                            <span>Finance</span>
-                            <i class="ri-arrow-down-s-line arrow"></i>
-                        </div>
-                        <ul class="submenu">
-                            <li><a href="voucher-history.html">Voucher History</a></li>
-                            <li><a href="#">General Ledger</a></li>
-                            <li><a href="#">Accounts Payable</a></li>
-                            <li><a href="#">Accounts Receivable</a></li>
-                        </ul>
-                    </li>
-
-                    <li class="nav-group expanded">
-                        <div class="group-header">
-                            <i class="ri-shopping-cart-2-line"></i>
-                            <span>Supply Chain</span>
-                            <i class="ri-arrow-down-s-line arrow"></i>
-                        </div>
-                        <ul class="submenu">
-                            <li><a href="vendor-profile.html">Vendor Profile</a></li>
-                            <li><a href="vendors.html">Create Vendor</a></li>
-                            <li><a href="bidding-create.html">Create Bid</a></li>
-                            <li><a href="bidding-list.html">Bidding List</a></li>
-                            <li><a href="barcode-print.html" class="active">Barcode Printing</a></li>
-                            <li><a href="#">Inventory Management</a></li>
-                        </ul>
-                    </li>
-
-                    <li class="nav-group">
-                        <div class="group-header">
-                            <i class="ri-customer-service-line"></i>
-                            <span>CRM & Sales</span>
-                            <i class="ri-arrow-down-s-line arrow"></i>
-                        </div>
-                        <ul class="submenu">
-                            <li><a href="reconciliation.html">Invoice Reconciliation</a></li>
-                            <li><a href="#">Sales Pipeline</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-group">
-                        <div class="group-header">
-                            <i class="ri-file-chart-line"></i>
-                            <span>Reports</span>
-                            <i class="ri-arrow-down-s-line arrow"></i>
-                        </div>
-                        <ul class="submenu">
-                            <li><a href="misc-income-entries.html">Miscellaneous Income Entries</a></li>
-                            <li><a href="voucher-entries.html">Voucher Entries</a></li>
-                            <li><a href="#">General Reports</a></li>
-                        </ul>
-                    </li>
-
-                    <li class="nav-group">
-                        <div class="group-header">
-                            <i class="ri-settings-4-line"></i>
-                            <span>System</span>
-                            <i class="ri-arrow-down-s-line arrow"></i>
-                        </div>
-                        <ul class="submenu">
-                            <li><a href="users.html">User Management</a></li>
-                            <li><a href="locations.html">Locations</a></li>
-                            <li><a href="profiles.html">Profiles</a></li>
-                            <li><a href="nationalities.html">Nationalities</a></li>
-                                                        <li><a href="shifts.html">Shifts</a></li>
-                            <li><a href="sync.html">Data Sync (Navision)</a></li>
-
-                            <li><a href="announcements.html">Announcements</a></li>
-                        </ul>
-                    </li>
-                </ul>
-            </nav>
-
-            <div class="sidebar-footer">
-                <div class="user-block">
-                    <img src="https://ui-avatars.com/api/?name=Admin+User&background=6366f1&color=fff" alt="User">
-                    <div class="user-info">
-                        <p class="user-name">Admin User</p>
-                        <p class="user-role">System Administrator</p>
-                    </div>
-                    <button class="logout-btn icon-btn">
-                        <i class="ri-logout-box-r-line"></i>
-                    </button>
-                </div>
-            </div>
-        </aside>
+        <div id="sidebar-container"></div>
 
         <!-- Main Workspace -->
         <main class="main-content">
@@ -340,13 +216,14 @@
                             <table class="erp-table">
                                 <thead>
                                     <tr>
+                                        <th style="width: 60px; text-align: center;">Select</th>
                                         <th>Item No</th>
-                                        <th>Barcodes</th>
+                                        <th>Barcode</th>
                                     </tr>
                                 </thead>
                                 <tbody id="item-grid-body">
                                     <tr>
-                                        <td colspan="2" class="text-center" style="padding: 2rem; color: var(--text-muted);">
+                                        <td colspan="3" class="text-center" style="padding: 2rem; color: var(--text-muted);">
                                             Enter SKU to see barcodes
                                         </td>
                                     </tr>
@@ -397,11 +274,15 @@
                 <div class="card animate-in price-display-card" style="animation-delay: 0.5s;">
                     <div class="price-item">
                         <span class="price-label">Regular Price</span>
-                        <span class="price-value regular" id="reg-price">SR 0.00</span>
+                        <span class="price-value regular" id="reg-price">
+                            <svg class="riyal-symbol-icon" viewBox="0 0 1124.14 1256.39" style="width: 0.85em; height: 0.95em; vertical-align: -0.1em; fill: currentColor; margin-right: 0.25rem;"><path d="M699.62,1113.02h0c-20.06,44.48-33.32,92.75-38.4,143.37l424.51-90.24c20.06-44.47,33.31-92.75,38.4-143.37l-424.51,90.24Z"/><path d="M1085.73,895.8c20.06-44.47,33.32-92.75,38.4-143.37l-330.68,70.33v-135.2l292.27-62.11c20.06-44.47,33.32-92.75,38.4-143.37l-330.68,70.27V66.13c-50.67,28.45-95.67,66.32-132.25,110.99v403.35l-132.25,28.11V0c-50.67,28.44-95.67,66.32-132.25,110.99v525.69l-295.91,62.88c-20.06,44.47-33.33,92.75-38.42,143.37l334.33-71.05v170.26l-358.3,76.14c-20.06,44.47-33.32,92.75-38.4,143.37l375.04-79.7c30.53-6.35,56.77-24.4,73.83-49.24l68.78-101.97v-.02c7.14-10.55,11.3-23.27,11.3-36.97v-149.98l132.25-28.11v270.4l424.53-90.28Z"/></svg>0.00
+                        </span>
                     </div>
                     <div class="price-item">
                         <span class="price-label">Offer Price</span>
-                        <span class="price-value offer" id="offer-price">SR 0.00</span>
+                        <span class="price-value offer" id="offer-price">
+                            <svg class="riyal-symbol-icon" viewBox="0 0 1124.14 1256.39" style="width: 0.85em; height: 0.95em; vertical-align: -0.1em; fill: currentColor; margin-right: 0.25rem;"><path d="M699.62,1113.02h0c-20.06,44.48-33.32,92.75-38.4,143.37l424.51-90.24c20.06-44.47,33.31-92.75,38.4-143.37l-424.51,90.24Z"/><path d="M1085.73,895.8c20.06-44.47,33.32-92.75,38.4-143.37l-330.68,70.33v-135.2l292.27-62.11c20.06-44.47,33.32-92.75,38.4-143.37l-330.68,70.27V66.13c-50.67,28.45-95.67,66.32-132.25,110.99v403.35l-132.25,28.11V0c-50.67,28.44-95.67,66.32-132.25,110.99v525.69l-295.91,62.88c-20.06,44.47-33.33,92.75-38.42,143.37l334.33-71.05v170.26l-358.3,76.14c-20.06,44.47-33.32,92.75-38.4,143.37l375.04-79.7c30.53-6.35,56.77-24.4,73.83-49.24l68.78-101.97v-.02c7.14-10.55,11.3-23.27,11.3-36.97v-149.98l132.25-28.11v270.4l424.53-90.28Z"/></svg>0.00
+                        </span>
                     </div>
                 </div>
 

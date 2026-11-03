@@ -44,31 +44,18 @@ namespace Backend.Models
         [StringLength(50)]
         public string Section { get; set; }
 
-        [StringLength(10)]
-        public string BloodGroup { get; set; }
-
-        public DateTime? IqamaExpiryGrego { get; set; }
-
-        public DateTime? IqamaExpiryHijiri { get; set; }
-
         [StringLength(20)]
         public string IqamaNo { get; set; }
 
         [StringLength(20)]
         public string PassportNo { get; set; }
 
-        public DateTime? PassportExpiry { get; set; }
-
         public DateTime? DateOfJoin { get; set; }
 
         [StringLength(20)]
         public string Status { get; set; } // Active / Passive
 
-        public DateTime? HealthMedicalDate { get; set; }
-
-        public DateTime? HealthMadrasaDate { get; set; }
-
-        [StringLength(20)]
-        public string HealthStatus { get; set; } // Active / Passive
+        [StringLength(50)]
+        public string? PermanentStatus { get; set; }
     }
 }

@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DynamicsAltx - Stock Count</title>
+    <!-- Google Fonts: Inter & Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700&family=Cairo:wght@500;600;700&display=swap" rel="stylesheet">
+    <!-- Remix Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="dashboard.css">
+    <style>
+        /* Screen Fit & Zero Vertical Waste */
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .erp-app {
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            background-color: var(--bg-app, #f8fafc);
+        }
+
+        /* Topbar Header Alignment */
+        .topbar {
+            height: 48px;
+            min-height: 48px;
+            background-color: #ffffff;
+            border-bottom: 1px solid var(--border-color, #e2e8f0);
+            padding: 0 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 50;
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .badge-live-compact {
+            background: rgba(16, 185, 129, 0.12);
+            color: #059669;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            padding: 0.15rem 0.45rem;
+            border-radius: 9999px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .badge-live-compact::before {
+            content: '';
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: #10b981;
+            display: inline-block;
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.3);
+        }
+
+        /* Main Workspace Container - Fitted to Screen */
+        .stock-count-page {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 0.35rem 0.75rem 0.35rem;
+            gap: 0.35rem;
+            overflow: hidden;
+            min-height: 0;
+        }
+
+        /* Compact Top Bar inside Page */
+        .sc-page-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: nowrap;
+            height: 24px;
+            min-height: 24px;
+        }
+
+        .sc-page-title {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-main, #1e293b);
+            margin: 0;
+            line-height: 1;
+        }
+
+        .sc-page-title i {
+            color: var(--primary, #6366f1);
+            font-size: 1.2rem;
+        }
+
+        .sc-page-metrics {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.75rem;
+        }
+
+        .metric-chip {
+            background: #ffffff;
+            border: 1px solid var(--border-color, #e2e8f0);
+            border-radius: 5px;
+            padding: 0.12rem 0.45rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            color: #475569;
+            font-weight: 500;
+            font-size: 0.72rem;
+            line-height: 1.2;
+        }
+
+        .metric-chip strong {
+            color: #0f172a;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .metric-chip.highlight strong {
+            color: #059669;
+        }
+
+        .sc-top-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .btn-compact {
+            height: 28px;
+            padding: 0 0.65rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            cursor: pointer;
+            transition: var(--transition, all 0.2s);
+            border: 1px solid var(--border-color, #e2e8f0);
+            background: #ffffff;
+            color: #334155;
+        }
+
+        .btn-compact:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+            color: var(--primary, #6366f1);
+        }
+
+        .btn-compact.danger:hover {
+            background: #fef2f2;
+            border-color: #fca5a5;
+            color: #dc2626;
+        }
+
+        .btn-compact.btn-verify {
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+            color: #ffffff;
+            border: 1px solid #059669;
+            box-shadow: 0 1px 3px rgba(16, 185, 129, 0.25);
+            font-weight: 700;
+        }
+
+        .btn-compact.btn-verify:hover {
+            background: linear-gradient(135deg, #047857 0%, #059669 100%);
+            color: #ffffff;
+            border-color: #047857;
+            box-shadow: 0 2px 6px rgba(16, 185, 129, 0.35);
+            transform: translateY(-0.5px);
+        }
+
+        /* Compact Scan Form Panel */
+        .sc-compact-panel {
+            background: #ffffff;
+            border-radius: 8px;
+            border: 1px solid var(--border-color, #e2e8f0);
+            padding: 0.3rem 0.65rem 0.35rem;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .sc-form-row {
+            display: flex;
+            align-items: flex-end;
+            gap: 0.45rem;
+            width: 100%;
+            flex-wrap: nowrap;
+        }
+
+        .sc-field-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.15rem;
+            min-width: 0;
+        }
+
+        .sc-field-group label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            display: flex;
+            align-items: center;
+            gap: 0.2rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1;
+        }
+
+        .sc-field-group label i {
+            color: #64748b;
+            font-size: 0.74rem;
+        }
+
+        .sc-input-box {
+            position: relative;
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+        .sc-input-box i.field-icon {
+            position: absolute;
+            left: 0.45rem;
+            color: #94a3b8;
+            font-size: 0.8rem;
+            pointer-events: none;
+        }
+
+        .sc-field {
+            width: 100%;
+            height: 28px;
+            padding: 0 0.45rem;
+            font-size: 0.78rem;
+            font-family: 'Inter', sans-serif;
+            color: #0f172a;
+            background: #ffffff;
+            border: 1.2px solid #cbd5e1;
+            border-radius: 5px;
+            outline: none;
+            transition: all 0.15s ease-in-out;
+            box-sizing: border-box;
+        }
+
+        .sc-field.has-icon {
+            padding-left: 1.6rem;
+        }
+
+        .sc-field:focus {
+            border-color: var(--primary, #6366f1);
+            box-shadow: 0 0 0 2.5px rgba(99, 102, 241, 0.18);
+        }
+
+        .sc-field[readonly] {
+            background-color: #f8fafc;
+            border-color: #e2e8f0;
+            color: #334155;
+            cursor: default;
+        }
+
+        .sc-field.arabic-text {
+            font-family: 'Cairo', 'Inter', sans-serif;
+            font-size: 0.88rem;
+            font-weight: 600;
+            direction: rtl;
+            text-align: right;
+            color: #0f172a;
+            background-color: #f8fafc;
+        }
+
+        .sc-select {
+            width: 100%;
+            height: 28px;
+            padding: 0 0.35rem;
+            font-size: 0.76rem;
+            font-family: 'Outfit', 'Inter', sans-serif;
+            font-weight: 600;
+            color: #0f172a;
+            background: #ffffff;
+            border: 1.2px solid #cbd5e1;
+            border-radius: 5px;
+            outline: none;
+            cursor: pointer;
+            box-sizing: border-box;
+        }
+
+        .sc-select:focus {
+            border-color: var(--primary, #6366f1);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.18);
+        }
+
+        .conv-qty-display {
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f0fdf4;
+            border: 1.2px solid #86efac;
+            border-radius: 5px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #15803d;
+            padding: 0 0.4rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            box-sizing: border-box;
+        }
+
+        .btn-save-inline {
+            height: 28px;
+            background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            font-size: 0.76rem;
+            font-weight: 700;
+            font-family: 'Inter', sans-serif;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+            cursor: pointer;
+            padding: 0 0.65rem;
+            white-space: nowrap;
+            box-shadow: 0 2px 5px rgba(99, 102, 241, 0.25);
+            transition: all 0.15s ease-in-out;
+            width: 100%;
+        }
+
+        .btn-save-inline:hover {
+            background: linear-gradient(135deg, #4338ca 0%, #4f46e5 100%);
+            box-shadow: 0 2px 7px rgba(99, 102, 241, 0.35);
+            transform: translateY(-0.5px);
+        }
+
+        .btn-save-inline:active {
+            transform: translateY(0.5px);
+        }
+
+        /* Flex Proportion per column for High Density Screen Fit */
+        .fg-barcode { flex: 2.2; min-width: 140px; }
+        .fg-sku { flex: 1.5; min-width: 100px; }
+        .fg-desc { flex: 3.5; min-width: 180px; }
+        .fg-baseuom { flex: 1.1; min-width: 75px; }
+        .fg-scanneduom { flex: 1.8; min-width: 120px; }
+        .fg-qty { flex: 1.0; min-width: 70px; }
+        .fg-convqty { flex: 1.3; min-width: 85px; }
+        .fg-save { flex: 1.3; min-width: 90px; }
+
+        @media (max-width: 1100px) {
+            .sc-form-row {
+                flex-wrap: wrap;
+                gap: 0.35rem;
+            }
+            .fg-barcode { flex: 1 1 28%; }
+            .fg-sku { flex: 1 1 20%; }
+            .fg-desc { flex: 1 1 45%; }
+            .fg-baseuom { flex: 1 1 18%; }
+            .fg-scanneduom { flex: 1 1 28%; }
+            .fg-qty { flex: 1 1 15%; }
+            .fg-convqty { flex: 1 1 18%; }
+            .fg-save { flex: 1 1 15%; }
+        }
+
+        @media (max-width: 768px) {
+            .topbar {
+                padding: 0 0.5rem;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            .topbar::-webkit-scrollbar {
+                display: none;
+            }
+            .topbar-right {
+                flex-shrink: 0;
+            }
+            .sc-page-bar {
+                height: auto !important;
+                min-height: auto !important;
+                flex-wrap: wrap !important;
+                gap: 0.25rem;
+            }
+            .sc-page-metrics {
+                flex-wrap: wrap !important;
+                gap: 0.25rem;
+            }
+            .grid-search-box {
+                width: 140px;
+            }
+        }
+
+        @media (max-width: 540px) {
+            .fg-barcode, .fg-sku, .fg-desc, .fg-baseuom, .fg-scanneduom, .fg-qty, .fg-convqty, .fg-save {
+                min-width: 0 !important;
+            }
+            .fg-barcode { flex: 1 1 52%; }
+            .fg-sku { flex: 1 1 42%; }
+            .fg-desc { flex: 1 1 100%; }
+            .fg-baseuom { flex: 1 1 26%; }
+            .fg-scanneduom { flex: 1 1 42%; }
+            .fg-qty { flex: 1 1 24%; }
+            .fg-convqty { flex: 1 1 46%; }
+            .fg-save { flex: 1 1 48%; }
+            #lastScanChip { display: none; }
+            .grid-header-bar {
+                flex-wrap: wrap;
+                gap: 0.4rem;
+            }
+            .grid-search-box {
+                width: 100%;
+            }
+            .footer-totals {
+                gap: 0.6rem;
+                font-size: 0.72rem;
+            }
+        }
+
+        /* Feedback Banner (Compact float/inline) */
+        .scan-feedback-banner {
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            margin-top: 0.35rem;
+            font-size: 0.78rem;
+            line-height: 1.2;
+        }
+
+        .scan-feedback-banner.success {
+            display: flex;
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            color: #065f46;
+        }
+
+        .scan-feedback-banner.error {
+            display: flex;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+        }
+
+        .scan-feedback-banner.loading {
+            display: flex;
+            background: #eef2ff;
+            border: 1px solid #c7d2fe;
+            color: #3730a3;
+        }
+
+        /* High Density Table Card - Fills All Remaining Height */
+        .sc-grid-card {
+            background: #ffffff;
+            border-radius: 10px;
+            border: 1px solid var(--border-color, #e2e8f0);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        .grid-header-bar {
+            padding: 0.45rem 0.85rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fafbfc;
+            flex-shrink: 0;
+            gap: 0.75rem;
+        }
+
+        .grid-title-area {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .grid-title-area h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .count-pill {
+            background: #e2e8f0;
+            color: #334155;
+            padding: 0.1rem 0.45rem;
+            border-radius: 9999px;
+            font-size: 0.72rem;
+            font-weight: 700;
+        }
+
+        .grid-search-box {
+            position: relative;
+            width: 220px;
+        }
+
+        .grid-search-box input {
+            width: 100%;
+            height: 28px;
+            padding: 0 0.55rem 0 1.85rem;
+            font-size: 0.75rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 5px;
+            outline: none;
+            transition: all 0.15s;
+            box-sizing: border-box;
+        }
+
+        .grid-search-box input:focus {
+            border-color: var(--primary, #6366f1);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.12);
+        }
+
+        .grid-search-box i {
+            position: absolute;
+            left: 0.55rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 0.82rem;
+        }
+
+        /* High Density Table Body - Fits At Least 20 Items on Screen */
+        .table-responsive {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: auto;
+            min-height: 0;
+            width: 100%;
+        }
+
+        .sc-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            text-align: left;
+            font-size: 0.78rem;
+        }
+
+        .sc-table th {
+            background: #f1f5f9;
+            color: #334155;
+            font-weight: 700;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            padding: 0.18rem 0.45rem;
+            border-bottom: 1px solid #cbd5e1;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            white-space: nowrap;
+            height: 24px;
+            box-sizing: border-box;
+        }
+
+        .sc-table td {
+            padding: 0.12rem 0.45rem;
+            border-bottom: 1px solid #f1f5f9;
+            color: #1e293b;
+            vertical-align: middle;
+            white-space: nowrap;
+            height: 24px;
+            box-sizing: border-box;
+            font-size: 0.75rem;
+        }
+
+        .sc-table tbody tr:hover td {
+            background-color: #f8fafc;
+        }
+
+        .sc-table .cell-sku {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            color: var(--primary-dark, #4338ca);
+            font-size: 0.78rem;
+        }
+
+        .sc-table .cell-desc {
+            font-family: 'Cairo', 'Inter', sans-serif;
+            font-size: 0.8rem;
+            color: #0f172a;
+            font-weight: 600;
+            max-width: 320px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sc-table .cell-uom {
+            display: inline-block;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            color: #334155;
+            padding: 0.12rem 0.45rem;
+            border-radius: 4px;
+            font-family: 'Outfit', monospace;
+            font-weight: 600;
+            font-size: 0.74rem;
+            line-height: 1.2;
+        }
+
+        .sc-table .cell-qty {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 0.88rem;
+            color: #0f172a;
+        }
+
+        .sc-table .cell-converted {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 0.88rem;
+            color: #059669;
+            background: #ecfdf5;
+            padding: 0.12rem 0.5rem;
+            border-radius: 4px;
+            display: inline-block;
+            line-height: 1.2;
+        }
+
+        .sc-table .cell-time {
+            font-size: 0.72rem;
+            color: #94a3b8;
+        }
+
+        .btn-action-row {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.18rem 0.22rem;
+            border-radius: 4px;
+            font-size: 0.92rem;
+            line-height: 1;
+            transition: all 0.15s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-edit-row {
+            color: #6366f1;
+        }
+
+        .btn-edit-row:hover {
+            color: #4338ca;
+            background: #e0e7ff;
+        }
+
+        .btn-delete-row {
+            color: #94a3b8;
+        }
+
+        .btn-delete-row:hover {
+            color: #ef4444;
+            background: #fee2e2;
+        }
+
+        .btn-cancel-inline {
+            height: 28px;
+            width: 28px;
+            min-width: 28px;
+            background: #f1f5f9;
+            color: #64748b;
+            border: 1px solid #cbd5e1;
+            border-radius: 5px;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .btn-cancel-inline:hover {
+            background: #fee2e2;
+            color: #dc2626;
+            border-color: #fca5a5;
+        }
+
+        .sc-table tbody tr.row-editing td {
+            background-color: #eef2ff !important;
+            border-bottom: 1px solid #c7d2fe;
+        }
+
+        /* Empty State */
+        .empty-grid-state {
+            padding: 2.5rem 1rem;
+            text-align: center;
+            color: #64748b;
+        }
+
+        .empty-grid-state i {
+            font-size: 2.5rem;
+            color: #cbd5e1;
+            margin-bottom: 0.5rem;
+            display: inline-block;
+        }
+
+        .empty-grid-state h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            color: #475569;
+            margin-bottom: 0.2rem;
+        }
+
+        .empty-grid-state p {
+            font-size: 0.78rem;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        /* Table Summary Footer */
+        .grid-footer-bar {
+            padding: 0.35rem 0.85rem;
+            background: #fafbfc;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.78rem;
+            color: #475569;
+            flex-shrink: 0;
+            height: 30px;
+            box-sizing: border-box;
+        }
+
+        .footer-totals {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+        }
+
+        .footer-totals strong {
+            color: #0f172a;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="erp-app">
+        <!-- Sidebar Navigation -->
+        <div id="sidebar-container"></div>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Topbar Header (Standard DynamicsAltx Header) -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="hamburger-menu" id="mobile-menu-btn" title="Toggle Navigation">
+                        <i class="ri-menu-line"></i>
+                    </button>
+                    <div class="breadcrumb">
+                        <span data-i18n="nav_inventory">Inventory</span>
+                        <i class="ri-arrow-right-s-line"></i>
+                        <span class="active" data-i18n="nav_stock_count">Stock Count</span>
+                    </div>
+                    <span class="badge-live-compact">
+                        <span id="sessionStatusText">Live Stock Audit</span>
+                    </span>
+                </div>
+
+                <div class="topbar-right">
+                    <button class="btn-compact btn-verify" id="btnVerifyGrid" title="Verify all current active entries (marks as completed & removes from active grid)">
+                        <i class="ri-check-double-line"></i>
+                        <span>Verify</span>
+                    </button>
+                    <button class="btn-compact" id="btnExportCsv" title="Export Count List to CSV">
+                        <i class="ri-file-excel-2-line"></i>
+                        <span>Export CSV</span>
+                    </button>
+                    <button class="btn-compact danger" id="btnClearGrid" title="Clear current active count entries">
+                        <i class="ri-delete-bin-line"></i>
+                        <span>Clear Session</span>
+                    </button>
+                    <div class="user-profile-badge">
+                        <i class="ri-map-pin-line"></i>
+                        <span id="header-location">HO</span>
+                    </div>
+                    <div class="topbar-actions">
+                        <button class="icon-btn" id="lang-toggle" title="Switch Language">
+                            <span id="current-lang" style="font-size: 0.8rem; font-weight: 700;">العربية</span>
+                        </button>
+                        <div class="user-block" style="padding: 0.25rem 0.65rem; border-radius: 20px; background: #f1f5f9; display: flex; align-items: center; gap: 0.4rem;">
+                            <i class="ri-user-3-line" style="color: var(--primary, #6366f1); font-size: 0.95rem;"></i>
+                            <span style="font-size: 0.82rem; font-weight: 600; color: #1e293b;" id="user-display-name">Admin User</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Screen-Fitting Stock Count Content Workspace -->
+            <div class="stock-count-page">
+                <!-- Page Header Strip with Integrated Metrics -->
+                <div class="sc-page-bar">
+                    <div class="sc-page-title">
+                        <i class="ri-barcode-box-line"></i>
+                        <span data-i18n="nav_stock_count">Stock Count</span>
+                    </div>
+
+                    <div class="sc-page-metrics">
+                        <div class="metric-chip">
+                            <span>Counted Rows:</span>
+                            <strong id="statTotalRows">0</strong>
+                        </div>
+                        <div class="metric-chip highlight">
+                            <span>Total Converted:</span>
+                            <strong id="statTotalConverted">0</strong>
+                        </div>
+                        <div class="metric-chip">
+                            <span>Total Qty:</span>
+                            <strong id="statTotalQty">0</strong>
+                        </div>
+                        <div class="metric-chip" id="lastScanChip" style="max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            <span>Last:</span>
+                            <strong id="statLastSku">—</strong>
+                            <span id="statLastTime" style="color: #94a3b8; font-size: 0.72rem;"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- High-Density Compact Form Panel -->
+                <div class="sc-compact-panel">
+                    <form id="stockCountForm" autocomplete="off" onsubmit="return false;">
+                        <div class="sc-form-row">
+                            <!-- 1. Barcode -->
+                            <div class="sc-field-group fg-barcode">
+                                <label for="barcodeInput">
+                                    <i class="ri-barcode-line"></i> Barcode
+                                </label>
+                                <div class="sc-input-box">
+                                    <input type="text" id="barcodeInput" class="sc-field has-icon" 
+                                           placeholder="Scan barcode & press Enter..." autofocus autocomplete="off" />
+                                    <i class="ri-barcode-line field-icon"></i>
+                                </div>
+                            </div>
+
+                            <!-- 2. SKU -->
+                            <div class="sc-field-group fg-sku">
+                                <label for="skuInput">
+                                    <i class="ri-hashtag"></i> SKU
+                                </label>
+                                <div class="sc-input-box">
+                                    <input type="text" id="skuInput" class="sc-field has-icon" 
+                                           placeholder="SKU & Enter..." autocomplete="off" />
+                                    <i class="ri-hashtag field-icon"></i>
+                                </div>
+                            </div>
+
+                            <!-- 3. Description (ArabicName - Non editable) -->
+                            <div class="sc-field-group fg-desc">
+                                <label for="descriptionInput">
+                                    <i class="ri-file-text-line"></i> Description
+                                </label>
+                                <div class="sc-input-box">
+                                    <input type="text" id="descriptionInput" class="sc-field arabic-text" 
+                                           placeholder="وصف الصنف..." readonly tabindex="-1" />
+                                </div>
+                            </div>
+
+                            <!-- 4. BaseUOM (Non editable) -->
+                            <div class="sc-field-group fg-baseuom">
+                                <label for="baseUomInput">
+                                    <i class="ri-scales-3-line"></i> Base UOM
+                                </label>
+                                <div class="sc-input-box">
+                                    <input type="text" id="baseUomInput" class="sc-field" 
+                                           placeholder="Base" readonly tabindex="-1" style="font-weight: 700; text-align: center;" />
+                                </div>
+                            </div>
+
+                            <!-- 5. Scanned UOM (Dropdown PCS(1) etc.) -->
+                            <div class="sc-field-group fg-scanneduom">
+                                <label for="scannedUomSelect">
+                                    <i class="ri-menu-unfold-line"></i> Scanned UOM
+                                </label>
+                                <select id="scannedUomSelect" class="sc-select">
+                                    <option value="">-- UOM --</option>
+                                </select>
+                            </div>
+
+                            <!-- 6. Qty (Cursor moves here automatically) -->
+                            <div class="sc-field-group fg-qty">
+                                <label for="qtyInput">
+                                    <i class="ri-add-circle-line"></i> Qty <span style="color: #ef4444;">*</span>
+                                </label>
+                                <div class="sc-input-box">
+                                    <input type="number" id="qtyInput" class="sc-field" 
+                                           min="0.0001" step="any" value="1" placeholder="1" autocomplete="off" style="font-weight: 700; text-align: center;" />
+                                </div>
+                            </div>
+
+                            <!-- 7. Converted Qty (Qty * QtyPerUOM - Non editable) -->
+                            <div class="sc-field-group fg-convqty">
+                                <label for="convertedQtyBox">
+                                    <i class="ri-calculator-line"></i> Conv. Qty
+                                </label>
+                                <div class="conv-qty-display" id="convertedQtyBox">
+                                    0
+                                </div>
+                            </div>
+
+                            <!-- 8. Save / Update Button -->
+                            <div class="sc-field-group fg-save">
+                                <label id="saveActionLabel">&nbsp;</label>
+                                <div style="display: flex; gap: 0.25rem; width: 100%;">
+                                    <button type="button" class="btn-save-inline" id="btnSave">
+                                        <i class="ri-save-line"></i>
+                                        <span>Save</span>
+                                    </button>
+                                    <button type="button" class="btn-cancel-inline" id="btnCancelEdit" style="display: none;" title="Cancel edit (Esc)">
+                                        <i class="ri-close-line"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Scan Feedback Banner -->
+                    <div id="scanFeedback" class="scan-feedback-banner">
+                        <div id="feedbackText" style="display: flex; align-items: center; gap: 0.4rem;"></div>
+                        <button type="button" onclick="this.parentElement.style.display='none'" style="background: none; border: none; cursor: pointer; color: inherit; font-size: 1rem; line-height: 1;">
+                            <i class="ri-close-line"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- High-Density Stock Count Grid Card -->
+                <div class="sc-grid-card">
+                    <div class="grid-header-bar">
+                        <div class="grid-title-area">
+                            <h2>Stock Count Entries</h2>
+                            <span class="count-pill" id="gridRowsCountPill">0 records</span>
+                        </div>
+
+                        <div class="grid-search-box">
+                            <i class="ri-search-line"></i>
+                            <input type="text" id="gridFilterInput" placeholder="Filter SKU, Desc, UOM..." />
+                        </div>
+                    </div>
+
+                    <!-- Scrollable Table Container -->
+                    <div class="table-responsive">
+                        <table class="sc-table" id="stockCountTable">
+                            <thead>
+                                <tr>
+                                    <th style="width: 38px; text-align: center;">#</th>
+                                    <th style="width: 120px;">SKU</th>
+                                    <th>Description (Arabic)</th>
+                                    <th style="width: 125px; text-align: center;">Scanned UOM</th>
+                                    <th style="width: 80px; text-align: center;">Qty</th>
+                                    <th style="width: 110px; text-align: center;">Converted Qty</th>
+                                    <th style="width: 65px; text-align: center;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="gridTableBody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+
+                        <!-- Empty State View -->
+                        <div class="empty-grid-state" id="gridEmptyState">
+                            <i class="ri-inbox-line"></i>
+                            <h3>No count entries yet</h3>
+                            <p>Scan a barcode or enter an SKU above. Press Save or hit Enter in the Qty field to record items.</p>
+                        </div>
+                    </div>
+
+                    <!-- Grid Footer with Totals -->
+                    <div class="grid-footer-bar">
+                        <div class="footer-info">
+                            <span>User Scans &bull; Active unverified count entries</span>
+                        </div>
+                        <div class="footer-totals">
+                            <span>Counted Rows: <strong id="footerTotalRows">0</strong></span>
+                            <span>Total Converted: <strong id="footerTotalConverted" style="color: #059669;">0.00</strong></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="common.js?v=13"></script>
+    <script src="translations.js"></script>
+    <script src="stock-count.js?v=16"></script>
+</body>
+
+</html>

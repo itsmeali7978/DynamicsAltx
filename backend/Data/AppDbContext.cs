@@ -19,6 +19,7 @@ namespace Backend.Data
         public DbSet<Nationality> Nationalities { get; set; }
         public DbSet<Shift> Shifts { get; set; }
         public DbSet<Employee> Employees { get; set; }
+        public DbSet<EmployeeDocument> EmployeeDocuments { get; set; }
         public DbSet<ShortBreak> ShortBreaks { get; set; }
         public DbSet<CashierClosing> CashierClosings { get; set; }
         public DbSet<CashierClosingDenomination> CashierClosingDenominations { get; set; }
@@ -34,5 +35,12 @@ namespace Backend.Data
         public DbSet<AltxItem> AltxItems { get; set; }
         public DbSet<DailyActivity> DailyActivities { get; set; }
         public DbSet<FetchedSalesData> FetchedSalesData { get; set; }
+        public DbSet<PrinterSetting> PrinterSettings { get; set; }
+        public DbSet<AltxInvItem> AltxInvItems { get; set; }
+        public DbSet<AltxInvItemUOM> AltxInvItemUOMs { get; set; }
+        public DbSet<AltxInvItemBarcode> AltxInvItemBarcodes { get; set; }
+        public DbSet<InventorySyncStatus> InventorySyncStatuses { get; set; }
+        public DbSet<StockCountEntry> StockCountEntries { get; set; }
+        public DbSet<VehicleExpense> VehicleExpenses { get; set; }
     }
 }

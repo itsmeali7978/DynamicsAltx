@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const voucherNo = voucherInput.value.trim();
         const transDate = document.getElementById('trans-date').value;
-        const currentUser = localStorage.getItem('userEmail') || 'admin@example.com'; // Fallback for testing
+        const currentUser = localStorage.getItem('userEmail');
 
         const submitBtn = postForm.querySelector('.btn-post');
         submitBtn.disabled = true;

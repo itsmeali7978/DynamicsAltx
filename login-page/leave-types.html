@@ -238,58 +238,7 @@
 <body>
     <div class="erp-app">
         <!-- Sidebar Navigation -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <div class="brand-logo">
-                    <i class="ri-rhythm-line"></i>
-                    <span data-i18n="brand_name">DynamicsAltx</span>
-                </div>
-                <button id="sidebar-toggle" class="icon-btn">
-                    <i class="ri-menu-fold-line"></i>
-                </button>
-            </div>
-
-            <nav class="sidebar-nav">
-                <!-- Nav list will be dynamically handled by common.js -->
-                <ul class="nav-list">
-                    <li class="nav-item">
-                        <a href="dashboard.html" class="nav-link">
-                            <i class="ri-dashboard-3-line"></i>
-                            <span data-i18n="nav_overview">Overview</span>
-                        </a>
-                    </li>
-                    <li class="nav-group active">
-                        <div class="group-header">
-                            <i class="ri-settings-4-line"></i>
-                            <span data-i18n="system">System</span>
-                            <i class="ri-arrow-down-s-line arrow"></i>
-                        </div>
-                        <ul class="submenu" style="display: block;">
-                            <li><a href="users.html"><span data-i18n="nav_user_management">User Management</span></a></li>
-                            <li><a href="locations.html"><span data-i18n="nav_locations">Locations</span></a></li>
-                            <li><a href="nationalities.html"><span data-i18n="nav_nationalities">Nationalities</span></a></li>
-                            <li><a href="shifts.html"><span data-i18n="nav_shifts">Shifts</span></a></li>
-                            <li><a href="sync.html"><span data-i18n="nav_data_sync">Data Sync (Navision)</span></a></li>
-                            <li><a href="announcements.html"><span data-i18n="nav_announcements">Announcements</span></a></li>
-                            <li><a href="settings.html"><span data-i18n="nav_settings">Account Settings</span></a></li>
-                        </ul>
-                    </li>
-                </ul>
-            </nav>
-
-            <div class="sidebar-footer">
-                <div class="user-block">
-                    <img src="https://ui-avatars.com/api/?name=Admin+User&background=6366f1&color=fff" alt="User">
-                    <div class="user-info">
-                        <p class="user-name">Admin User</p>
-                        <p class="user-role">System Administrator</p>
-                    </div>
-                    <button class="logout-btn icon-btn" title="Logout" data-i18n="logout">
-                        <i class="ri-logout-box-r-line"></i>
-                    </button>
-                </div>
-            </div>
-        </aside>
+        <div id="sidebar-container"></div>
 
         <!-- Main Workspace -->
         <main class="main-content">

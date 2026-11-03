@@ -99,9 +99,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     <button class="action-btn btn-edit" title="Edit" onclick="editEmployee(${emp.empId})">
                         <i class="ri-edit-line"></i>
                     </button>
-                    <button class="action-btn btn-delete" title="Delete" onclick="deleteEmployee(${emp.empId})">
-                        <i class="ri-delete-bin-line"></i>
-                    </button>
                 </td>
             </tr>
         `).join('');
@@ -149,11 +146,12 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         
         const isEdit = document.getElementById('is-edit').value === 'true';
-        const empId = parseInt(document.getElementById('emp-id').value);
+        const empIdVal = document.getElementById('emp-id').value;
+        const empIdInt = parseInt(empIdVal, 10);
 
-        // Map all fields from form to object
-        const data = {
-            empId: empId,
+        // Map Employee core fields
+        const empData = {
+            empId: empIdVal,
             englishName: document.getElementById('english-name').value,
             arabicName: document.getElementById('arabic-name').value,
             nationalityCode: document.getElementById('nationality-dropdown').value,
@@ -165,32 +163,65 @@ document.addEventListener('DOMContentLoaded', () => {
             locationCode: document.getElementById('location-dropdown').value,
             shiftNo: document.getElementById('shift-dropdown').value,
             section: document.getElementById('section').value,
-            bloodGroup: document.getElementById('blood-group').value,
-            iqamaExpiryGrego: document.getElementById('iqama-expiry-grego').value || null,
-            iqamaExpiryHijiri: document.getElementById('iqama-expiry-hijiri').value || null,
             iqamaNo: document.getElementById('iqama-no').value,
             passportNo: document.getElementById('passport-no').value,
-            passportExpiry: document.getElementById('passport-expiry').value || null,
             dateOfJoin: document.getElementById('join-date').value || null,
             status: document.getElementById('employment-status').value,
-            healthMedicalDate: document.getElementById('health-medical-date').value || null,
-            healthMadrasaDate: document.getElementById('health-madrasa-date').value || null,
-            healthStatus: document.getElementById('health-status').value
+            permanentStatus: document.getElementById('permanent-status')?.value || ''
         };
 
-        const url = isEdit ? `${apiBase}/${empId}?userEmail=${encodeURIComponent(userEmail)}` : `${apiBase}?userEmail=${encodeURIComponent(userEmail)}`;
-        const method = isEdit ? 'PUT' : 'POST';
+        // Map Employee Document fields
+        const docData = {
+            empId: empIdInt,
+            healthMedicalDate: document.getElementById('health-medical-date').value || null,
+            healthMadrasaDate: document.getElementById('health-madrasa-date').value || null,
+            healthStatus: document.getElementById('health-status').value || 'Active',
+            iqamaNo: document.getElementById('iqama-no').value,
+            iqamaExpiryGrego: document.getElementById('iqama-expiry-grego').value || null,
+            iqamaExpiryHijiri: document.getElementById('iqama-expiry-hijiri').value || null,
+            passportNo: document.getElementById('passport-no').value,
+            passportIssue: document.getElementById('passport-issue')?.value || null,
+            passportExpiry: document.getElementById('passport-expiry').value || null,
+            contractExpiry: document.getElementById('contract-expiry')?.value || null,
+            bloodGroup: document.getElementById('blood-group').value
+        };
+
+        const empUrl = isEdit ? `${apiBase}/${empIdVal}?userEmail=${encodeURIComponent(userEmail)}` : `${apiBase}?userEmail=${encodeURIComponent(userEmail)}`;
+        const empMethod = isEdit ? 'PUT' : 'POST';
 
         try {
-            const response = await fetch(url, {
-                method: method,
+            const response = await fetch(empUrl, {
+                method: empMethod,
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
+                body: JSON.stringify(empData)
             });
 
             if (!response.ok) {
                 const error = await response.json();
                 throw new Error(error.message || 'Operation failed');
+            }
+
+            // Next, save/update document record
+            try {
+                // Check if document record already exists
+                const checkDoc = await fetch(`${apiDocs}/by-emp/${empIdInt}?userEmail=${encodeURIComponent(userEmail)}`);
+                if (checkDoc.ok) {
+                    const existingDoc = await checkDoc.json();
+                    docData.id = existingDoc.id;
+                    await fetch(`${apiDocs}/${existingDoc.id}?userEmail=${encodeURIComponent(userEmail)}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(docData)
+                    });
+                } else {
+                    await fetch(`${apiDocs}?userEmail=${encodeURIComponent(userEmail)}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(docData)
+                    });
+                }
+            } catch (docErr) {
+                console.error('Error saving employee document:', docErr);
             }
 
             showToast(`Employee ${isEdit ? 'updated' : 'added'} successfully`, 'success');
@@ -212,7 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('emp-id').value = emp.empId;
             document.getElementById('emp-id').readOnly = true;
 
-            // Fill all fields
+            // Fill Employee fields
             document.getElementById('english-name').value = emp.englishName || '';
             document.getElementById('arabic-name').value = emp.arabicName || '';
             document.getElementById('nationality-dropdown').value = emp.nationalityCode || '';
@@ -224,17 +255,43 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('location-dropdown').value = emp.locationCode || '';
             document.getElementById('shift-dropdown').value = emp.shiftNo || '';
             document.getElementById('section').value = emp.section || '';
-            document.getElementById('blood-group').value = emp.bloodGroup || '';
-            document.getElementById('iqama-expiry-grego').value = emp.iqamaExpiryGrego ? emp.iqamaExpiryGrego.split('T')[0] : '';
-            document.getElementById('iqama-expiry-hijiri').value = emp.iqamaExpiryHijiri || '';
             document.getElementById('iqama-no').value = emp.iqamaNo || '';
             document.getElementById('passport-no').value = emp.passportNo || '';
-            document.getElementById('passport-expiry').value = emp.passportExpiry ? emp.passportExpiry.split('T')[0] : '';
             document.getElementById('join-date').value = emp.dateOfJoin ? emp.dateOfJoin.split('T')[0] : '';
             document.getElementById('employment-status').value = emp.status || 'Active';
-            document.getElementById('health-medical-date').value = emp.healthMedicalDate ? emp.healthMedicalDate.split('T')[0] : '';
-            document.getElementById('health-madrasa-date').value = emp.healthMadrasaDate ? emp.healthMadrasaDate.split('T')[0] : '';
-            document.getElementById('health-status').value = emp.healthStatus || 'Active';
+            if (document.getElementById('permanent-status')) {
+                document.getElementById('permanent-status').value = emp.permanentStatus || '';
+            }
+
+            // Reset document fields defaults
+            document.getElementById('blood-group').value = '';
+            document.getElementById('iqama-expiry-grego').value = '';
+            document.getElementById('iqama-expiry-hijiri').value = '';
+            document.getElementById('passport-issue') ? document.getElementById('passport-issue').value = '' : null;
+            document.getElementById('passport-expiry').value = '';
+            document.getElementById('contract-expiry') ? document.getElementById('contract-expiry').value = '' : null;
+            document.getElementById('health-medical-date').value = '';
+            document.getElementById('health-madrasa-date').value = '';
+            document.getElementById('health-status').value = 'Active';
+
+            // Fetch Document details if available
+            try {
+                const docResp = await fetch(`${apiDocs}/by-emp/${emp.empId}?userEmail=${encodeURIComponent(userEmail)}`);
+                if (docResp.ok) {
+                    const doc = await docResp.json();
+                    document.getElementById('blood-group').value = doc.bloodGroup || '';
+                    document.getElementById('iqama-expiry-grego').value = doc.iqamaExpiryGrego ? doc.iqamaExpiryGrego.split('T')[0] : '';
+                    document.getElementById('iqama-expiry-hijiri').value = doc.iqamaExpiryHijiri || '';
+                    if (document.getElementById('passport-issue')) document.getElementById('passport-issue').value = doc.passportIssue ? doc.passportIssue.split('T')[0] : '';
+                    document.getElementById('passport-expiry').value = doc.passportExpiry ? doc.passportExpiry.split('T')[0] : '';
+                    if (document.getElementById('contract-expiry')) document.getElementById('contract-expiry').value = doc.contractExpiry ? doc.contractExpiry.split('T')[0] : '';
+                    document.getElementById('health-medical-date').value = doc.healthMedicalDate ? doc.healthMedicalDate.split('T')[0] : '';
+                    document.getElementById('health-madrasa-date').value = doc.healthMadrasaDate ? doc.healthMadrasaDate.split('T')[0] : '';
+                    document.getElementById('health-status').value = doc.healthStatus || 'Active';
+                }
+            } catch (dErr) {
+                console.log('No existing document record found for empId', emp.empId);
+            }
 
             tabBtns[0].click();
             employeeModal.classList.add('active');

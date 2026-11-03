@@ -46,20 +46,20 @@ namespace Backend.Controllers
 
             try
             {
-                // 1. Get existing employee IDs for deduplication
-                var idsList = await _context.Employees.Select(e => e.EmpId).ToListAsync();
-                var existingIds = idsList.ToHashSet();
+                // 1. Fetch existing local employees dictionary
+                var existingEmployees = await _context.Employees.ToDictionaryAsync(e => e.EmpId);
+                var newEmployees = new List<Employee>();
+                int updatedCount = 0;
 
                 // 2. Fetch from Navision
                 var navConnectionString = _configuration.GetConnectionString("NavisionConnection");
-                var newEmployees = new List<Employee>();
 
                 using (var navConnection = new SqlConnection(navConnectionString))
                 {
                     await navConnection.OpenAsync();
                     using (var command = navConnection.CreateCommand())
                     {
-                        // Navision Employee table structure for "House Care Live"
+                        // Navision Employee table query including [Grounds for Term_ Code]
                         command.CommandText = @"
                             SELECT 
                                 [No_], 
@@ -73,7 +73,8 @@ namespace Backend.Controllers
                                 [Iqama No__Saudi ID], 
                                 [Passport No_], 
                                 [Employment Date], 
-                                [Status]
+                                [Status],
+                                [Grounds for Term_ Code]
                             FROM [dbo].[House Care Live$Employee]";
 
                         using (var reader = await command.ExecuteReaderAsync())
@@ -81,91 +82,92 @@ namespace Backend.Controllers
                             while (await reader.ReadAsync())
                             {
                                 var empId = reader.IsDBNull(0) ? "" : reader.GetString(0).Trim();
-                                
-                                // Skip if empty or already exists in local ERP
-                                if (string.IsNullOrEmpty(empId) || existingIds.Contains(empId)) continue;
+                                if (string.IsNullOrEmpty(empId)) continue;
 
-                                // Mapping Logic per User Requirements:
-                                
-                                // [EnglishName] = [First Name] + [Middle Name] + [Last Name]
+                                // Mapping Logic:
                                 var first = reader.IsDBNull(1) ? "" : reader.GetString(1).Trim();
                                 var middle = reader.IsDBNull(2) ? "" : reader.GetString(2).Trim();
                                 var last = reader.IsDBNull(3) ? "" : reader.GetString(3).Trim();
                                 var englishName = $"{first} {middle} {last}".Replace("  ", " ").Trim();
 
-                                // [ArabicName] = [Employee Name Arabic]
                                 var arabicName = reader.IsDBNull(4) ? "" : reader.GetString(4).Trim();
 
-                                // [Gender] mapping: 1 -> Female, 2 -> Male, 0 -> Blank
                                 var genderVal = reader.IsDBNull(5) ? 0 : reader.GetInt32(5);
                                 var gender = genderVal == 1 ? "Female" : (genderVal == 2 ? "Male" : "");
 
-                                // [MobileNo] = [Mobile Phone No_]
                                 var mobileNo = reader.IsDBNull(6) ? "" : reader.GetString(6).Trim();
-
-                                // [DOB] = [Birth Date]
                                 DateTime? dob = reader.IsDBNull(7) ? (DateTime?)null : reader.GetDateTime(7);
-
-                                // [JobTitle] = [Department Code]
                                 var jobTitle = reader.IsDBNull(8) ? "" : reader.GetString(8).Trim();
-
-                                // [LocationCode] = [Global Dimension 2 Code]
                                 var locationCode = reader.IsDBNull(9) ? "" : reader.GetString(9).Trim();
-
-                                // [IqamaNo] = [Iqama No__Saudi ID]
                                 var iqamaNo = reader.IsDBNull(10) ? "" : reader.GetString(10).Trim();
-
-                                // [PassportNo] = [Passport No_]
                                 var passportNo = reader.IsDBNull(11) ? "" : reader.GetString(11).Trim();
-
-                                // [DateOfJoin] = [Employment Date]
                                 DateTime? doj = reader.IsDBNull(12) ? (DateTime?)null : reader.GetDateTime(12);
 
-                                // [Status] mapping: 0 -> Active, others -> Inactive
                                 var statusVal = reader.IsDBNull(13) ? -1 : reader.GetInt32(13);
                                 var status = statusVal == 0 ? "Active" : "Inactive";
 
-                                newEmployees.Add(new Employee
+                                // Grounds for Term_ Code mapping logic:
+                                // If [Grounds for Term_ Code] <> blank -> PermanentStatus = "Inactive"
+                                // If [Grounds for Term_ Code] == '' -> PermanentStatus = "Active"
+                                string groundsForTermCode = reader.IsDBNull(14) ? "" : reader.GetString(14).Trim();
+                                string permanentStatus = !string.IsNullOrEmpty(groundsForTermCode) ? "Inactive" : "Active";
+
+                                if (existingEmployees.TryGetValue(empId, out var existingEmp))
                                 {
-                                    EmpId = empId,
-                                    EnglishName = englishName,
-                                    ArabicName = arabicName,
-                                    Gender = gender,
-                                    MobileNo = mobileNo,
-                                    DOB = dob,
-                                    JobTitle = jobTitle,
-                                    LocationCode = locationCode,
-                                    IqamaNo = iqamaNo,
-                                    PassportNo = passportNo,
-                                    DateOfJoin = doj,
-                                    Status = status,
-                                    // Initialize other non-nullable string fields to avoid DB constraint errors
-                                    NationalityCode = "",
-                                    Profession = jobTitle,
-                                    ShiftNo = "",
-                                    Section = "",
-                                    BloodGroup = "",
-                                    HealthStatus = "Active"
-                                });
+                                    // Update existing local record with synced PermanentStatus and core fields
+                                    existingEmp.EnglishName = englishName;
+                                    existingEmp.ArabicName = arabicName;
+                                    existingEmp.Gender = gender;
+                                    existingEmp.MobileNo = mobileNo;
+                                    existingEmp.DOB = dob;
+                                    existingEmp.JobTitle = jobTitle;
+                                    existingEmp.LocationCode = locationCode;
+                                    existingEmp.IqamaNo = iqamaNo;
+                                    existingEmp.PassportNo = passportNo;
+                                    existingEmp.DateOfJoin = doj;
+                                    existingEmp.Status = status;
+                                    existingEmp.PermanentStatus = permanentStatus;
+
+                                    updatedCount++;
+                                }
+                                else
+                                {
+                                    // Add new record
+                                    newEmployees.Add(new Employee
+                                    {
+                                        EmpId = empId,
+                                        EnglishName = englishName,
+                                        ArabicName = arabicName,
+                                        Gender = gender,
+                                        MobileNo = mobileNo,
+                                        DOB = dob,
+                                        JobTitle = jobTitle,
+                                        LocationCode = locationCode,
+                                        IqamaNo = iqamaNo,
+                                        PassportNo = passportNo,
+                                        DateOfJoin = doj,
+                                        Status = status,
+                                        PermanentStatus = permanentStatus,
+                                        NationalityCode = "",
+                                        Profession = jobTitle,
+                                        ShiftNo = "",
+                                        Section = ""
+                                    });
+                                }
                             }
                         }
                     }
                 }
 
-                // 3. Perform Batch Insert
+                // 3. Save new and updated records
                 if (newEmployees.Any())
                 {
-                    // EF Core batches these effectively, but we can process in chunks for extreme cases
-                    const int batchSize = 500;
-                    for (int i = 0; i < newEmployees.Count; i += batchSize)
-                    {
-                        var batch = newEmployees.Skip(i).Take(batchSize).ToList();
-                        _context.Employees.AddRange(batch);
-                        await _context.SaveChangesAsync();
-                    }
+                    _context.Employees.AddRange(newEmployees);
                 }
 
-                return Ok(new { message = $"Successfully synchronized {newEmployees.Count} new employee records from Navision." });
+                await _context.SaveChangesAsync();
+
+                return Ok(new { message = $"Successfully synchronized {newEmployees.Count} new and updated {updatedCount} employee records from Navision." });
             }
             catch (Exception ex)
             {

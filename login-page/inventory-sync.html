@@ -1,0 +1,1549 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DynamicsAltx - Inventory Synchronization & Master Setup</title>
+    <meta name="description" content="Prepare and synchronize inventory master tables and manage stock count session initialization.">
+    <!-- Google Fonts: Inter & Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Remix Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="dashboard.css">
+    <style>
+        /* -------------------------------------------------------------
+           SCREEN FIT & ZERO PAGE SCROLLING (SINGLE SCREEN LAYOUT)
+        ------------------------------------------------------------- */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-app, #f8fafc);
+        }
+
+        .erp-app {
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+            width: 100vw;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            background-color: var(--bg-app, #f8fafc);
+            min-width: 0;
+        }
+
+        /* Topbar Header Alignment */
+        .topbar {
+            height: 42px;
+            min-height: 42px;
+            background-color: #ffffff;
+            border-bottom: 1px solid var(--border-color, #e2e8f0);
+            padding: 0 0.85rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 50;
+            flex-shrink: 0;
+            box-sizing: border-box;
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.82rem;
+            color: #64748b;
+        }
+
+        .breadcrumb .active {
+            color: #0f172a;
+            font-weight: 600;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .topbar-sync-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+        }
+
+        .btn-flush-header {
+            background: #ffffff;
+            color: #e11d48;
+            border: 1px solid #fecdd3;
+            padding: 0.3rem 0.75rem;
+            border-radius: 7px;
+            font-weight: 600;
+            font-size: 0.78rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            transition: all 0.15s;
+            height: 28px;
+            box-sizing: border-box;
+        }
+
+        .btn-flush-header:hover {
+            background: #fff1f2;
+            border-color: #fda4af;
+            transform: translateY(-1px);
+        }
+
+        .btn-sync-all-hero {
+            background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+            color: white;
+            border: none;
+            padding: 0.3rem 0.85rem;
+            border-radius: 7px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            transition: all 0.15s;
+            box-shadow: 0 2px 6px rgba(79, 70, 229, 0.25);
+            font-size: 0.78rem;
+            height: 28px;
+            box-sizing: border-box;
+        }
+
+        .btn-sync-all-hero:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.35);
+        }
+
+        .btn-sync-all-hero:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* -------------------------------------------------------------
+           MAIN FITTED WORKSPACE (FLEX COLUMN, ZERO PAGE SCROLLING)
+        ------------------------------------------------------------- */
+        .sync-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 0.45rem 0.85rem 0.45rem;
+            gap: 0.4rem;
+            overflow: hidden;
+            min-height: 0;
+            box-sizing: border-box;
+            max-width: 100%;
+            width: 100%;
+        }
+
+        /* -------------------------------------------------------------
+           1. SOP WORKFLOW CARD (COMPACT DIAGRAMMATIC FLOW AT TOP)
+        ------------------------------------------------------------- */
+        .sop-workflow-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 0.45rem 0.75rem 0.55rem;
+            box-shadow: 0 2px 8px -2px rgba(15, 23, 42, 0.04);
+            position: relative;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .sop-workflow-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #e11d48 0%, #4f46e5 33%, #0284c7 66%, #10b981 100%);
+        }
+
+        .sop-workflow-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.4rem;
+            padding-bottom: 0.3rem;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .sop-header-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .sop-badge-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 999px;
+            background: rgba(99, 102, 241, 0.1);
+            color: #4f46e5;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+        }
+
+        .sop-header-title h2 {
+            margin: 0;
+            font-size: 0.92rem;
+            font-family: 'Outfit', sans-serif;
+            color: #0f172a;
+            font-weight: 700;
+            display: inline-block;
+        }
+
+        .sop-header-title p {
+            margin: 0;
+            font-size: 0.72rem;
+            color: #64748b;
+            display: inline-block;
+        }
+
+        .btn-full-prep {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #ffffff;
+            border: 1px solid #334155;
+            padding: 0.2rem 0.65rem;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.72rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            transition: all 0.15s;
+            height: 24px;
+        }
+
+        .btn-full-prep:hover:not(:disabled) {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            transform: translateY(-1px);
+        }
+
+        .btn-full-prep:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Horizontal Pipeline Layout */
+        .sop-pipeline-track {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr auto 1.05fr;
+            align-items: stretch;
+            gap: 0.25rem;
+        }
+
+        .sop-step-node {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 0.4rem 0.55rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            transition: all 0.15s ease;
+        }
+
+        .sop-step-node:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px -2px rgba(15, 23, 42, 0.06);
+            background: #ffffff;
+        }
+
+        .sop-step-node.step-danger:hover { border-color: rgba(225, 29, 72, 0.35); }
+        .sop-step-node.step-primary:hover { border-color: rgba(99, 102, 241, 0.35); }
+        .sop-step-node.step-sky:hover { border-color: rgba(2, 132, 199, 0.35); }
+        .sop-step-node.step-purple:hover { border-color: rgba(147, 51, 234, 0.35); }
+        .sop-step-node.step-emerald {
+            background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
+            border-color: #bbf7d0;
+        }
+        .sop-step-node.step-emerald:hover { border-color: #86efac; }
+
+        .step-top-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.2rem;
+        }
+
+        .step-badges-left {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .step-num-badge {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            font-weight: 800;
+            font-family: 'Outfit', sans-serif;
+            color: #ffffff;
+        }
+
+        .step-danger .step-num-badge { background: #e11d48; }
+        .step-primary .step-num-badge { background: #4f46e5; }
+        .step-sky .step-num-badge { background: #0284c7; }
+        .step-purple .step-num-badge { background: #9333ea; }
+        .step-emerald .step-num-badge { background: #059669; }
+
+        .step-icon-box {
+            width: 22px;
+            height: 22px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+        }
+
+        .step-danger .step-icon-box { background: rgba(225, 29, 72, 0.1); color: #e11d48; }
+        .step-primary .step-icon-box { background: rgba(79, 70, 229, 0.1); color: #4f46e5; }
+        .step-sky .step-icon-box { background: rgba(2, 132, 199, 0.1); color: #0284c7; }
+        .step-purple .step-icon-box { background: rgba(147, 51, 234, 0.1); color: #9333ea; }
+        .step-emerald .step-icon-box { background: rgba(5, 150, 105, 0.12); color: #059669; }
+
+        .sop-step-node h4 {
+            margin: 0;
+            font-size: 0.78rem;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            color: #0f172a;
+            line-height: 1.15;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .step-table-target {
+            font-size: 0.65rem;
+            color: #64748b;
+            margin: 0.1rem 0 0.15rem;
+            font-family: monospace;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .step-table-target code {
+            background: #ffffff;
+            padding: 0.05rem 0.25rem;
+            border-radius: 3px;
+            border: 1px solid #e2e8f0;
+            color: #334155;
+            font-size: 0.62rem;
+        }
+
+        .sop-step-node p {
+            margin: 0 0 0.35rem;
+            font-size: 0.66rem;
+            color: #64748b;
+            line-height: 1.25;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .step-footer-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.3rem;
+            padding-top: 0.3rem;
+            border-top: 1px dashed #e2e8f0;
+        }
+
+        .step-status-chip {
+            padding: 0.1rem 0.35rem;
+            border-radius: 4px;
+            font-size: 0.64rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            background: #e2e8f0;
+            color: #475569;
+            white-space: nowrap;
+        }
+
+        .step-status-chip.clean { background: #dcfce7; color: #15803d; }
+        .step-status-chip.active-entries { background: #ffe4e6; color: #be123c; }
+        .step-status-chip.synced { background: #dcfce7; color: #15803d; }
+        .step-status-chip.pending { background: #fef3c7; color: #b45309; }
+
+        .btn-step-action {
+            height: 20px;
+            padding: 0 0.45rem;
+            border-radius: 5px;
+            font-size: 0.66rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.2rem;
+            text-decoration: none;
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+
+        .btn-step-action.danger {
+            background: #ffe4e6;
+            color: #be123c;
+            border: 1px solid #fecdd3;
+        }
+        .btn-step-action.danger:hover {
+            background: #e11d48;
+            color: #ffffff;
+        }
+
+        .btn-step-action.primary {
+            background: #e0e7ff;
+            color: #4338ca;
+            border: 1px solid #c7d2fe;
+        }
+        .btn-step-action.primary:hover {
+            background: #4f46e5;
+            color: #ffffff;
+        }
+
+        .btn-step-action.sky {
+            background: #e0f2fe;
+            color: #0369a1;
+            border: 1px solid #bae6fd;
+        }
+        .btn-step-action.sky:hover {
+            background: #0284c7;
+            color: #ffffff;
+        }
+
+        .btn-step-action.purple {
+            background: #f3e8ff;
+            color: #7e22ce;
+            border: 1px solid #e9d5ff;
+        }
+        .btn-step-action.purple:hover {
+            background: #9333ea;
+            color: #ffffff;
+        }
+
+        .btn-step-action.emerald {
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+            color: #ffffff;
+            border: none;
+            font-weight: 700;
+        }
+
+        /* Pipeline Connector */
+        .sop-connector {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 0 0.05rem;
+        }
+
+        .connector-line {
+            width: 100%;
+            height: 2px;
+            background: #cbd5e1;
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1;
+        }
+
+        .connector-arrow {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            font-size: 0.72rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* -------------------------------------------------------------
+           2. STATS OVERVIEW STRIP (5 COMPACT CARDS)
+        ------------------------------------------------------------- */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.45rem;
+            flex-shrink: 0;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 8px;
+            padding: 0.35rem 0.65rem;
+            border: 1px solid var(--border-color, #e2e8f0);
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+            height: 44px;
+            box-sizing: border-box;
+        }
+
+        .stat-card:hover {
+            border-color: #cbd5e1;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .stat-icon.stockcount { background: rgba(225, 29, 72, 0.12); color: #e11d48; }
+        .stat-icon.items { background: rgba(99, 102, 241, 0.12); color: #4f46e5; }
+        .stat-icon.uom { background: rgba(14, 165, 233, 0.12); color: #0284c7; }
+        .stat-icon.barcodes { background: rgba(168, 85, 247, 0.12); color: #9333ea; }
+        .stat-icon.sync { background: rgba(16, 185, 129, 0.12); color: #059669; }
+
+        .stat-info {
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .stat-info h3 {
+            margin: 0;
+            font-size: 0.98rem;
+            font-family: 'Outfit', sans-serif;
+            color: var(--text-main, #0f172a);
+            font-weight: 700;
+            line-height: 1.1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .stat-info p {
+            margin: 0.05rem 0 0;
+            font-size: 0.66rem;
+            color: var(--text-muted, #64748b);
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* -------------------------------------------------------------
+           3. TABLE ACTION CARDS (FLEXIBLE ROW FITTING REMAINING SCREEN)
+        ------------------------------------------------------------- */
+        .sync-cards-grid {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.45rem;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        .sync-card {
+            background: white;
+            border-radius: 10px;
+            padding: 0.55rem 0.75rem;
+            border: 1px solid var(--border-color, #e2e8f0);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+            height: 100%;
+            box-sizing: border-box;
+        }
+
+        .sync-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .sync-card.flush-card-highlight {
+            border-color: #fecdd3;
+            background: linear-gradient(180deg, #fffbfb 0%, #ffffff 100%);
+        }
+        .sync-card.flush-card-highlight:hover {
+            border-color: #fda4af;
+        }
+
+        .sync-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.4rem;
+        }
+
+        .card-title-group {
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            min-width: 0;
+        }
+
+        .card-title-group h3 {
+            margin: 0;
+            font-size: 0.85rem;
+            color: var(--text-main, #0f172a);
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .card-title-group p {
+            margin: 0;
+            font-size: 0.66rem;
+            color: var(--text-muted, #64748b);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .card-badge {
+            padding: 0.12rem 0.45rem;
+            border-radius: 999px;
+            font-size: 0.64rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            white-space: nowrap;
+        }
+
+        .badge-ready { background: #f1f5f9; color: #475569; }
+        .badge-syncing { background: #fef3c7; color: #d97706; }
+        .badge-success { background: #dcfce7; color: #15803d; }
+        .badge-error { background: #fee2e2; color: #b91c1c; }
+        .badge-active { background: #ffe4e6; color: #be123c; }
+
+        .table-meta-details {
+            background: #f8fafc;
+            border-radius: 6px;
+            padding: 0.45rem 0.55rem;
+            margin-bottom: 0.4rem;
+            border: 1px solid #edf2f7;
+            font-size: 0.72rem;
+        }
+
+        .meta-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.2rem;
+            color: var(--text-muted, #64748b);
+            font-size: 0.7rem;
+        }
+
+        .meta-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .meta-row span.val {
+            font-weight: 600;
+            color: var(--text-main, #0f172a);
+            text-align: right;
+            max-width: 60%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .card-instruction-alert {
+            background: #fff1f2;
+            border: 1px solid #fecdd3;
+            border-radius: 6px;
+            padding: 0.35rem 0.5rem;
+            font-size: 0.68rem;
+            color: #9f1239;
+            margin-bottom: 0.4rem;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            line-height: 1.25;
+        }
+
+        .card-instruction-alert i {
+            font-size: 0.95rem;
+            flex-shrink: 0;
+        }
+
+        .progress-box {
+            margin-bottom: 0.4rem;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.68rem;
+            margin-bottom: 0.2rem;
+            color: var(--text-muted, #64748b);
+            font-weight: 600;
+        }
+
+        .progress-header .pct {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.78rem;
+            color: var(--primary, #4f46e5);
+            font-weight: 700;
+        }
+
+        .progress-bar-track {
+            width: 100%;
+            height: 5px;
+            background: #e2e8f0;
+            border-radius: 999px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #4f46e5 0%, #8b5cf6 100%);
+            border-radius: 999px;
+            transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .progress-bar-fill.success {
+            background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+        }
+
+        .progress-bar-fill.error {
+            background: linear-gradient(90deg, #ef4444 0%, #b91c1c 100%);
+        }
+
+        .sync-status-msg {
+            font-size: 0.68rem;
+            color: var(--text-muted, #64748b);
+            margin-top: 0.2rem;
+            min-height: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .btn-sync-action {
+            width: 100%;
+            background: #4f46e5;
+            color: white;
+            border: none;
+            padding: 0.45rem 0.75rem;
+            border-radius: 7px;
+            font-weight: 600;
+            font-size: 0.78rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            transition: all 0.15s;
+            height: 30px;
+            box-sizing: border-box;
+            box-shadow: 0 2px 5px rgba(79, 70, 229, 0.2);
+        }
+
+        .btn-sync-action:hover:not(:disabled) {
+            background: #4338ca;
+            transform: translateY(-1px);
+        }
+
+        .btn-sync-action:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .btn-flush-action {
+            background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
+            box-shadow: 0 2px 5px rgba(225, 29, 72, 0.25);
+        }
+
+        .btn-flush-action:hover:not(:disabled) {
+            background: linear-gradient(135deg, #be123c 0%, #9f1239 100%);
+        }
+
+        /* -------------------------------------------------------------
+           FLUSH SAFETY MODAL
+        ------------------------------------------------------------- */
+        .flush-modal-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .flush-modal-backdrop.active {
+            display: flex;
+        }
+
+        .flush-modal-box {
+            background: #ffffff;
+            border-radius: 12px;
+            max-width: 460px;
+            width: 100%;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.25);
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            animation: modalIn 0.15s ease-out;
+        }
+
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.96); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .flush-modal-header {
+            padding: 0.85rem 1.15rem;
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            background: #fff1f2;
+            border-bottom: 1px solid #fecdd3;
+            position: relative;
+        }
+
+        .flush-modal-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: #ffe4e6;
+            color: #e11d48;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .flush-modal-title {
+            margin: 0;
+            font-size: 0.98rem;
+            font-family: 'Outfit', sans-serif;
+            color: #9f1239;
+            font-weight: 700;
+        }
+
+        .flush-modal-subtitle {
+            margin: 0.05rem 0 0;
+            font-size: 0.72rem;
+            color: #be123c;
+            font-weight: 500;
+        }
+
+        .flush-modal-close {
+            position: absolute;
+            right: 0.85rem;
+            top: 0.85rem;
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            color: #9f1239;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .flush-modal-body {
+            padding: 1rem 1.15rem;
+        }
+
+        .flush-alert-banner {
+            background: #fffbeb;
+            border: 1px solid #fef3c7;
+            border-radius: 6px;
+            padding: 0.6rem 0.75rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.76rem;
+            color: #92400e;
+        }
+
+        .flush-alert-banner i {
+            font-size: 1.1rem;
+            color: #d97706;
+            flex-shrink: 0;
+        }
+
+        .flush-count-badge-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 0.55rem 0.85rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: #475569;
+        }
+
+        .flush-count-badge-box strong {
+            font-family: 'Outfit', sans-serif;
+            color: #e11d48;
+            font-size: 1rem;
+        }
+
+        .flush-modal-footer {
+            padding: 0.65rem 1.15rem;
+            background: #fafbfc;
+            border-top: 1px solid #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 0.5rem;
+        }
+
+        .btn-modal-cancel {
+            height: 30px;
+            padding: 0 0.85rem;
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            color: #475569;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.76rem;
+            cursor: pointer;
+        }
+
+        .btn-modal-danger {
+            height: 30px;
+            padding: 0 1rem;
+            border: none;
+            border-radius: 6px;
+            background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 0.76rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        /* Responsive Breakpoints (Fallbacks for Mobile/Tablet) */
+        @media (max-width: 1024px) {
+            html, body {
+                overflow-y: auto;
+            }
+            .erp-app {
+                height: auto;
+                min-height: 100vh;
+            }
+            .main-content {
+                height: auto;
+                overflow: visible;
+            }
+            .sync-container {
+                overflow: visible;
+                height: auto;
+            }
+            .sop-pipeline-track {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.5rem;
+            }
+            .sop-connector {
+                display: none;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .sync-cards-grid {
+                grid-template-columns: repeat(2, 1fr);
+                height: auto;
+                overflow: visible;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .sop-pipeline-track {
+                grid-template-columns: 1fr;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            .sync-cards-grid {
+                grid-template-columns: 1fr;
+            }
+            .topbar-sync-actions {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="erp-app">
+        <!-- Sidebar Navigation -->
+        <div id="sidebar-container"></div>
+
+        <!-- Main Workspace -->
+        <main class="main-content">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="hamburger-menu" id="mobile-menu-btn" title="Toggle Navigation">
+                        <i class="ri-menu-line"></i>
+                    </button>
+                    <div class="breadcrumb">
+                        <span data-i18n="nav_inventory">Inventory</span>
+                        <i class="ri-arrow-right-s-line"></i>
+                        <span class="active" data-i18n="nav_inventory_sync">Sync Data</span>
+                    </div>
+                </div>
+                <div class="topbar-right">
+                    <div class="topbar-sync-actions">
+                        <button class="btn-flush-header" id="btn-header-flush" onclick="openFlushModal()" title="Flush entire stock count entries table for a fresh inventory process">
+                            <i class="ri-delete-bin-7-line"></i>
+                            <span>Flush Count Table</span>
+                        </button>
+                        <button class="btn-sync-all-hero" id="btn-sync-all" onclick="syncAllTables()" title="Synchronize all 3 master catalog tables from Navision">
+                            <i class="ri-refresh-line"></i>
+                            <span>Sync All Tables (2→4)</span>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <div class="sync-container">
+                <!-- -------------------------------------------------------------
+                     1. SOP DIAGRAMMATIC PIPELINE (COMPACT SINGLE-SCREEN DESIGN)
+                ------------------------------------------------------------- -->
+                <div class="sop-workflow-card">
+                    <div class="sop-workflow-header">
+                        <div class="sop-header-title">
+                            <div class="sop-badge-pill">
+                                <i class="ri-git-merge-line"></i>
+                                <span>SOP Pipeline</span>
+                            </div>
+                            <h2>Fresh Inventory Preparation & Sync Workflow</h2>
+                            <p>(Follow 4 steps in order before starting count)</p>
+                        </div>
+                        <div class="sop-header-actions">
+                            <button class="btn-full-prep" id="btn-run-full-prep" onclick="runFullPreparationWorkflow()" title="Run Step 1 Flush, then Steps 2, 3 & 4 automatically in sequence">
+                                <i class="ri-play-circle-line"></i>
+                                <span>1-Click Full Setup (1 → 4)</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Visual Interactive Flow Pipeline -->
+                    <div class="sop-pipeline-track">
+                        <!-- Step 1: Flush Table -->
+                        <div class="sop-step-node step-danger" id="step-node-flush">
+                            <div class="step-top-row">
+                                <div class="step-badges-left">
+                                    <div class="step-num-badge">01</div>
+                                    <div class="step-icon-box"><i class="ri-delete-bin-7-line"></i></div>
+                                </div>
+                                <span class="step-status-chip" id="flow-chip-stockcount">Checking...</span>
+                            </div>
+                            <h4>Flush Count Entries</h4>
+                            <div class="step-table-target"><code>[StockCountEntries]</code></div>
+                            <p>Flush previous count table contents first so users start with a clean slate.</p>
+                            <div class="step-footer-bar">
+                                <span style="font-size: 0.65rem; color: #be123c; font-weight: 700;">Step 1</span>
+                                <button class="btn-step-action danger" onclick="openFlushModal()">
+                                    <i class="ri-eraser-line"></i> Flush Table
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Connector 1 -->
+                        <div class="sop-connector">
+                            <div class="connector-line"></div>
+                            <div class="connector-arrow"><i class="ri-arrow-right-s-line"></i></div>
+                        </div>
+
+                        <!-- Step 2: Sync Items -->
+                        <div class="sop-step-node step-primary" id="step-node-items">
+                            <div class="step-top-row">
+                                <div class="step-badges-left">
+                                    <div class="step-num-badge">02</div>
+                                    <div class="step-icon-box"><i class="ri-box-3-line"></i></div>
+                                </div>
+                                <span class="step-status-chip" id="flow-chip-items">Ready</span>
+                            </div>
+                            <h4>Sync Altx Inv Items</h4>
+                            <div class="step-table-target">NAV <code>[Item]</code> → Local</div>
+                            <p>Pull active SKU catalog, Arabic/English descriptions, and Base UOM from NAV.</p>
+                            <div class="step-footer-bar">
+                                <span style="font-size: 0.65rem; color: #4338ca; font-weight: 700;">Step 2</span>
+                                <button class="btn-step-action primary" id="flow-btn-items" onclick="syncTable('items')">
+                                    <i class="ri-refresh-line"></i> Sync Items
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Connector 2 -->
+                        <div class="sop-connector">
+                            <div class="connector-line"></div>
+                            <div class="connector-arrow"><i class="ri-arrow-right-s-line"></i></div>
+                        </div>
+
+                        <!-- Step 3: Sync ItemUOM -->
+                        <div class="sop-step-node step-sky" id="step-node-itemuom">
+                            <div class="step-top-row">
+                                <div class="step-badges-left">
+                                    <div class="step-num-badge">03</div>
+                                    <div class="step-icon-box"><i class="ri-scales-3-line"></i></div>
+                                </div>
+                                <span class="step-status-chip" id="flow-chip-itemuom">Ready</span>
+                            </div>
+                            <h4>Sync Altx Inv ItemUOM</h4>
+                            <div class="step-table-target">NAV <code>[Item Unit of Measure]</code></div>
+                            <p>Pull packaging units, cartons, pieces, and conversion multipliers per SKU.</p>
+                            <div class="step-footer-bar">
+                                <span style="font-size: 0.65rem; color: #0369a1; font-weight: 700;">Step 3</span>
+                                <button class="btn-step-action sky" id="flow-btn-itemuom" onclick="syncTable('itemuom')">
+                                    <i class="ri-refresh-line"></i> Sync UOM
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Connector 3 -->
+                        <div class="sop-connector">
+                            <div class="connector-line"></div>
+                            <div class="connector-arrow"><i class="ri-arrow-right-s-line"></i></div>
+                        </div>
+
+                        <!-- Step 4: Sync Barcodes -->
+                        <div class="sop-step-node step-purple" id="step-node-barcodes">
+                            <div class="step-top-row">
+                                <div class="step-badges-left">
+                                    <div class="step-num-badge">04</div>
+                                    <div class="step-icon-box"><i class="ri-barcode-line"></i></div>
+                                </div>
+                                <span class="step-status-chip" id="flow-chip-barcodes">Ready</span>
+                            </div>
+                            <h4>Sync Item Barcodes</h4>
+                            <div class="step-table-target">NAV <code>[Barcodes]</code> → Local</div>
+                            <p>Sync all retail and case barcodes mapped to SKUs & UOMs for scanner lookup.</p>
+                            <div class="step-footer-bar">
+                                <span style="font-size: 0.65rem; color: #7e22ce; font-weight: 700;">Step 4</span>
+                                <button class="btn-step-action purple" id="flow-btn-barcodes" onclick="syncTable('barcodes')">
+                                    <i class="ri-refresh-line"></i> Sync Barcodes
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Connector 4 -->
+                        <div class="sop-connector finish-connector">
+                            <div class="connector-line"></div>
+                            <div class="connector-arrow" style="color: #059669; border-color: #86efac;"><i class="ri-arrow-right-s-line"></i></div>
+                        </div>
+
+                        <!-- Finish Milestone State -->
+                        <div class="sop-step-node step-emerald" id="step-node-ready">
+                            <div class="step-top-row">
+                                <div class="step-badges-left">
+                                    <div class="step-num-badge"><i class="ri-check-line"></i></div>
+                                    <div class="step-icon-box"><i class="ri-checkbox-circle-fill"></i></div>
+                                </div>
+                                <span class="step-status-chip clean">Ready</span>
+                            </div>
+                            <h4>Start Stock Count!</h4>
+                            <div class="step-table-target">100+ Live Users Supported</div>
+                            <p>All tables synchronized! Warehouse teams can now open Stock Count.</p>
+                            <div class="step-footer-bar">
+                                <span style="font-size: 0.65rem; color: #047857; font-weight: 700;">Finish</span>
+                                <a href="stock-count.html" class="btn-step-action emerald" title="Open Stock Count Scanning Page">
+                                    <i class="ri-barcode-box-line"></i> Count <i class="ri-arrow-right-line"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- -------------------------------------------------------------
+                     2. STATS OVERVIEW STRIP (5 COMPACT CARDS)
+                ------------------------------------------------------------- -->
+                <div class="stats-grid">
+                    <!-- Stat 1: Stock Count Entries -->
+                    <div class="stat-card">
+                        <div class="stat-icon stockcount">
+                            <i class="ri-delete-bin-7-line"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="stat-stockcount-count">—</h3>
+                            <p>Stock Count Entries</p>
+                        </div>
+                    </div>
+
+                    <!-- Stat 2: Altx Inv Items -->
+                    <div class="stat-card">
+                        <div class="stat-icon items">
+                            <i class="ri-box-3-line"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="stat-items-count">—</h3>
+                            <p>Altx Inv Items</p>
+                        </div>
+                    </div>
+
+                    <!-- Stat 3: Altx Inv ItemUOM -->
+                    <div class="stat-card">
+                        <div class="stat-icon uom">
+                            <i class="ri-scales-3-line"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="stat-itemuom-count">—</h3>
+                            <p>Altx Inv ItemUOM</p>
+                        </div>
+                    </div>
+
+                    <!-- Stat 4: Altx Inv ItemBarcodes -->
+                    <div class="stat-card">
+                        <div class="stat-icon barcodes">
+                            <i class="ri-barcode-line"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="stat-barcodes-count">—</h3>
+                            <p>Altx Inv ItemBarcodes</p>
+                        </div>
+                    </div>
+
+                    <!-- Stat 5: Latest Activity -->
+                    <div class="stat-card">
+                        <div class="stat-icon sync">
+                            <i class="ri-history-line"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="stat-last-sync-time">—</h3>
+                            <p>Latest Sync Activity</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- -------------------------------------------------------------
+                     3. TABLE ACTION CARDS (FLEXIBLE ROW FITTING REMAINING SCREEN)
+                ------------------------------------------------------------- -->
+                <div class="sync-cards-grid">
+                    <!-- 1. Stock Count Entries (Flush Card) -->
+                    <div class="sync-card flush-card-highlight" id="card-stockcount">
+                        <div>
+                            <div class="sync-card-header">
+                                <div class="card-title-group">
+                                    <div class="stat-icon stockcount" style="width: 26px; height: 26px; font-size: 0.95rem;">
+                                        <i class="ri-delete-bin-7-line"></i>
+                                    </div>
+                                    <div>
+                                        <h3>Stock Count Entries</h3>
+                                        <p>Local session store</p>
+                                    </div>
+                                </div>
+                                <span class="card-badge badge-ready" id="badge-stockcount">Clean (0)</span>
+                            </div>
+
+                            <div class="card-instruction-alert">
+                                <i class="ri-information-line"></i>
+                                <div>
+                                    <strong>Step 1:</strong> Flush this table before a fresh count session begins.
+                                </div>
+                            </div>
+
+                            <div class="table-meta-details">
+                                <div class="meta-row">
+                                    <span>Local Table:</span>
+                                    <span class="val"><code>[StockCountEntries]</code></span>
+                                </div>
+                                <div class="meta-row">
+                                    <span>Purpose:</span>
+                                    <span class="val">Physical Count Scans</span>
+                                </div>
+                                <div class="meta-row">
+                                    <span>Phase:</span>
+                                    <span class="val" style="color: #e11d48; font-weight: 700;">Step 1 (Initialize)</span>
+                                </div>
+                                <div class="meta-row">
+                                    <span>Current Records:</span>
+                                    <span class="val" id="count-stockcount">—</span>
+                                </div>
+                                <div class="meta-row">
+                                    <span>Last Flushed:</span>
+                                    <span class="val" id="time-stockcount">Never</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="btn-sync-action btn-flush-action" id="btn-stockcount" onclick="openFlushModal()">
+                            <i class="ri-delete-bin-7-line"></i>
+                            <span>Flush Stock Count Entries</span>
+                        </button>
+                    </div>
+
+                    <!-- 2. Altx Inv Items -->
+                    <div class="sync-card" id="card-items">
+                        <div>
+                            <div class="sync-card-header">
+                                <div class="card-title-group">
+                                    <div class="stat-icon items" style="width: 26px; height: 26px; font-size: 0.95rem;">
+                                        <i class="ri-box-3-line"></i>
+                                    </div>
+                                    <div>
+                                        <h3>Altx Inv Items</h3>
+                                        <p>Master items & descriptions</p>
+                                    </div>
+                                </div>
+                                <span class="card-badge badge-ready" id="badge-items">Ready</span>
+                            </div>
+
+                            <div class="table-meta-details">
+                                <div class="meta-row">
+                                    <span>NAV Source:</span>
+                                    <span class="val"><code>[Item]</code></span>
+                                </div>
+                                <div class="meta-row">
+                                    <span>Primary Key:</span>
+                                    <span class="val">ItemNo (No_)</span>
+                                </div>
+                                <div class="meta-row">
+                                    <span>Mapped:</span>
+                                    <span class="val">ItemNo, Names, BaseUOM</span>
+                                </div>
+                                <div class="meta-row">
+                                    <span>Current Records:</span>
+                                    <span class="val" id="count-items">—</span>
+                                </div>
+                                <div class="meta-row">
+                                    <span>Last Sync:</span>
+                                    <span class="val" id="time-items">Never</span>
+                                </div>
+                            </div>
+
+                            <!-- Progress Track -->
+                            <div class="progress-box">
+                                <div class="progress-header">
+                                    <span id="progress-label-items">Sync Progress</span>
+                                    <span class="pct" id="pct-items">0%</span>
+                                </div>
+                                <div class="progress-bar-track">
+                                    <div class="progress-bar-fill" id="bar-items"></div>
+                                </div>
+                                <div class="sync-status-msg" id="msg-items">Idle. Ready to synchronize.</div>
+                            </div>
+                        </div>
+
+                        <button class="btn-sync-action" id="btn-items" onclick="syncTable('items')">
+                            <i class="ri-refresh-line"></i>
+                            <span>Sync Altx Inv Items</span>
+                        </button>
+                    </div>
+
+                    <!-- 3. Altx Inv ItemUOM -->
+                    <div class="sync-card" id="card-itemuom">
+                        <div>
+                            <div class="sync-card-header">
+                                <div class="card-title-group">
+                                    <div class="stat-icon uom" style="width: 26px; height: 26px; font-size: 0.95rem;">
+                                        <i class="ri-scales-3-line"></i>
+                                    </div>
+                                    <div>
+                                        <h3>Altx Inv ItemUOM</h3>
+                                        <p>Units & conversion factors</p>
+                                    </div>
+                                </div>
+                                <span class="card-badge badge-ready" id="badge-itemuom">Ready</span>
+                            </div>
+
+                            <div class="table-meta-details">
+                                <div class="meta-row">
+                                    <span>NAV Source:</span>
+                                    <span class="val"><code>[Item Unit of Measure]</code></span>
+                                </div>
+                                <div class="meta-row">
+                                    <span>Item Ref:</span>
+                                    <span class="val">ItemNo (Item No_)</span>
+                                </div>
+                                <div class="meta-row">
+                                    <span>Mapped:</span>
+                                    <span class="val">ItemNo, UOMCode, Qty</span>
+                                </div>
+                                <div class="meta-row">
+                                    <span>Current Records:</span>
+                                    <span class="val" id="count-itemuom">—</span>
+                                </div>
+                                <div class="meta-row">
+                                    <span>Last Sync:</span>
+                                    <span class="val" id="time-itemuom">Never</span>
+                                </div>
+                            </div>
+
+                            <!-- Progress Track -->
+                            <div class="progress-box">
+                                <div class="progress-header">
+                                    <span id="progress-label-itemuom">Sync Progress</span>
+                                    <span class="pct" id="pct-itemuom">0%</span>
+                                </div>
+                                <div class="progress-bar-track">
+                                    <div class="progress-bar-fill" id="bar-itemuom"></div>
+                                </div>
+                                <div class="sync-status-msg" id="msg-itemuom">Idle. Ready to synchronize.</div>
+                            </div>
+                        </div>
+
+                        <button class="btn-sync-action" id="btn-itemuom" onclick="syncTable('itemuom')">
+                            <i class="ri-refresh-line"></i>
+                            <span>Sync Altx Inv ItemUOM</span>
+                        </button>
+                    </div>
+
+                    <!-- 4. Altx Inv ItemBarcodes -->
+                    <div class="sync-card" id="card-barcodes">
+                        <div>
+                            <div class="sync-card-header">
+                                <div class="card-title-group">
+                                    <div class="stat-icon barcodes" style="width: 26px; height: 26px; font-size: 0.95rem;">
+                                        <i class="ri-barcode-line"></i>
+                                    </div>
+                                    <div>
+                                        <h3>Altx Inv ItemBarcodes</h3>
+                                        <p>Retail & warehouse barcodes</p>
+                                    </div>
+                                </div>
+                                <span class="card-badge badge-ready" id="badge-barcodes">Ready</span>
+                            </div>
+
+                            <div class="table-meta-details">
+                                <div class="meta-row">
+                                    <span>NAV Source:</span>
+                                    <span class="val"><code>[Barcodes]</code></span>
+                                </div>
+                                <div class="meta-row">
+                                    <span>Barcode Ref:</span>
+                                    <span class="val">BarcodeNo</span>
+                                </div>
+                                <div class="meta-row">
+                                    <span>Mapped:</span>
+                                    <span class="val">BarcodeNo, ItemNo, UOM</span>
+                                </div>
+                                <div class="meta-row">
+                                    <span>Current Records:</span>
+                                    <span class="val" id="count-barcodes">—</span>
+                                </div>
+                                <div class="meta-row">
+                                    <span>Last Sync:</span>
+                                    <span class="val" id="time-barcodes">Never</span>
+                                </div>
+                            </div>
+
+                            <!-- Progress Track -->
+                            <div class="progress-box">
+                                <div class="progress-header">
+                                    <span id="progress-label-barcodes">Sync Progress</span>
+                                    <span class="pct" id="pct-barcodes">0%</span>
+                                </div>
+                                <div class="progress-bar-track">
+                                    <div class="progress-bar-fill" id="bar-barcodes"></div>
+                                </div>
+                                <div class="sync-status-msg" id="msg-barcodes">Idle. Ready to synchronize.</div>
+                            </div>
+                        </div>
+
+                        <button class="btn-sync-action" id="btn-barcodes" onclick="syncTable('barcodes')">
+                            <i class="ri-refresh-line"></i>
+                            <span>Sync Altx Inv ItemBarcodes</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- -------------------------------------------------------------
+         SAFETY FLUSH CONFIRMATION MODAL
+    ------------------------------------------------------------- -->
+    <div class="flush-modal-backdrop" id="flushModalBackdrop">
+        <div class="flush-modal-box">
+            <div class="flush-modal-header">
+                <div class="flush-modal-icon">
+                    <i class="ri-alert-line"></i>
+                </div>
+                <div>
+                    <h3 class="flush-modal-title">Flush Stock Count Entries</h3>
+                    <p class="flush-modal-subtitle">Permanent Deletion Warning</p>
+                </div>
+                <button class="flush-modal-close" onclick="closeFlushModal()" title="Close">&times;</button>
+            </div>
+            <div class="flush-modal-body">
+                <div class="flush-alert-banner">
+                    <i class="ri-error-warning-fill"></i>
+                    <div>
+                        <strong>Step 1 Preparation:</strong> This action will permanently remove all records from the local <code>[StockCountEntries]</code> table.
+                    </div>
+                </div>
+                <p style="font-size: 0.82rem; color: #475569; line-height: 1.4; margin: 0 0 0.8rem;">
+                    For a <strong>fresh inventory process</strong>, you flush the table contents first so the new count starts with zero residual entries. Ensure any previous count entries have already been pushed to Navision.
+                </p>
+                <div class="flush-count-badge-box">
+                    <span>Current Entries to be Removed:</span>
+                    <strong id="modal-flush-count">0 records</strong>
+                </div>
+            </div>
+            <div class="flush-modal-footer">
+                <button class="btn-modal-cancel" onclick="closeFlushModal()">Cancel</button>
+                <button class="btn-modal-danger" id="btnConfirmFlush" onclick="confirmFlushStockCount()">
+                    <i class="ri-delete-bin-7-line"></i>
+                    <span id="btnConfirmFlushText">Yes, Flush Entire Table</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="common.js?v=13"></script>
+    <script src="inventory-sync.js?v=4"></script>
+</body>
+
+</html>

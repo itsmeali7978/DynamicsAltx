@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DynamicsAltx - Inventory Altx-NAV</title>
+    <!-- Google Fonts: Inter & Outfit & Cairo -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700&family=Cairo:wght@500;600;700&display=swap" rel="stylesheet">
+    <!-- Remix Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="dashboard.css">
+    <style>
+        /* Screen Fit & Zero Outer Waste */
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .erp-app {
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            background-color: var(--bg-app, #f8fafc);
+        }
+
+        /* Topbar Header Alignment */
+        .topbar {
+            height: 48px;
+            min-height: 48px;
+            background-color: #ffffff;
+            border-bottom: 1px solid var(--border-color, #e2e8f0);
+            padding: 0 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 50;
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .badge-nav-bridge {
+            background: rgba(99, 102, 241, 0.12);
+            color: #4f46e5;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            padding: 0.15rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .badge-nav-bridge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #6366f1;
+            display: inline-block;
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Main Workspace Container - Fitted to Screen */
+        .nav-sync-page {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 0.5rem 0.85rem 0.5rem;
+            gap: 0.45rem;
+            overflow: hidden;
+            min-height: 0;
+        }
+
+        /* Metrics Strip */
+        .metrics-strip {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+            flex-shrink: 0;
+        }
+
+        .metric-card-nav {
+            background: #ffffff;
+            border: 1px solid var(--border-color, #e2e8f0);
+            border-radius: 8px;
+            padding: 0.45rem 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+            transition: all 0.2s;
+        }
+
+        .metric-card-nav:hover {
+            border-color: #cbd5e1;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .metric-card-nav .m-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .metric-card-nav .m-label {
+            font-size: 0.68rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #64748b;
+            letter-spacing: 0.02em;
+        }
+
+        .metric-card-nav .m-val {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #0f172a;
+            line-height: 1.2;
+        }
+
+        .metric-card-nav.unverified .m-val {
+            color: #d97706;
+        }
+
+        .metric-card-nav.verified .m-val {
+            color: #059669;
+        }
+
+        .metric-card-nav .m-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 7px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.15rem;
+        }
+
+        .metric-card-nav.total .m-icon { background: #eef2ff; color: #6366f1; }
+        .metric-card-nav.unverified .m-icon { background: #fffbeb; color: #d97706; }
+        .metric-card-nav.verified .m-icon { background: #ecfdf5; color: #059669; }
+        .metric-card-nav.filtered .m-icon { background: #f0fdf4; color: #16a34a; }
+
+        /* Filter Control Toolbar */
+        .nav-filter-panel {
+            background: #ffffff;
+            border-radius: 8px;
+            border: 1px solid var(--border-color, #e2e8f0);
+            padding: 0.4rem 0.65rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            flex-shrink: 0;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+            flex-wrap: nowrap;
+        }
+
+        .filter-controls-left {
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            flex: 1;
+            flex-wrap: nowrap;
+            min-width: 0;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.75rem;
+        }
+
+        .filter-group label {
+            font-size: 0.68rem;
+            font-weight: 700;
+            color: #475569;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .filter-select {
+            height: 28px;
+            padding: 0 0.45rem;
+            font-size: 0.76rem;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            color: #0f172a;
+            background: #ffffff;
+            border: 1.2px solid #cbd5e1;
+            border-radius: 5px;
+            outline: none;
+            transition: all 0.15s;
+            cursor: pointer;
+            min-width: 130px;
+        }
+
+        .filter-select:focus {
+            border-color: var(--primary, #6366f1);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
+        }
+
+        .filter-search-box {
+            position: relative;
+            flex: 1;
+            max-width: 240px;
+            min-width: 140px;
+        }
+
+        .filter-search-box input {
+            width: 100%;
+            height: 28px;
+            padding: 0 0.5rem 0 1.7rem;
+            font-size: 0.75rem;
+            border: 1.2px solid #cbd5e1;
+            border-radius: 5px;
+            outline: none;
+            transition: all 0.15s;
+            box-sizing: border-box;
+        }
+
+        .filter-search-box input:focus {
+            border-color: var(--primary, #6366f1);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
+        }
+
+        .filter-search-box i {
+            position: absolute;
+            left: 0.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 0.8rem;
+            pointer-events: none;
+        }
+
+        .btn-compact {
+            height: 28px;
+            padding: 0 0.65rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            cursor: pointer;
+            transition: var(--transition, all 0.2s);
+            border: 1px solid var(--border-color, #e2e8f0);
+            background: #ffffff;
+            color: #334155;
+            white-space: nowrap;
+        }
+
+        .btn-compact:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+            color: var(--primary, #6366f1);
+        }
+
+        .btn-compact.btn-push-nav {
+            background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+            color: #ffffff;
+            border: 1px solid #4338ca;
+            box-shadow: 0 2px 6px rgba(99, 102, 241, 0.35);
+            font-weight: 700;
+            padding: 0 0.9rem;
+        }
+
+        .btn-compact.btn-push-nav:hover {
+            background: linear-gradient(135deg, #4338ca 0%, #4f46e5 100%);
+            box-shadow: 0 3px 8px rgba(99, 102, 241, 0.45);
+            transform: translateY(-0.5px);
+        }
+
+        .btn-compact.btn-push-nav:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* High Density Table Card */
+        .nav-grid-card {
+            background: #ffffff;
+            border-radius: 10px;
+            border: 1px solid var(--border-color, #e2e8f0);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        .grid-header-strip {
+            padding: 0.4rem 0.85rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fafbfc;
+            flex-shrink: 0;
+            gap: 0.75rem;
+        }
+
+        .grid-header-left {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        .grid-header-left h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .count-badge {
+            background: #e2e8f0;
+            color: #334155;
+            padding: 0.1rem 0.45rem;
+            border-radius: 9999px;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        .grid-header-right {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+        }
+
+        /* Table Area */
+        .table-responsive {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: auto;
+            min-height: 0;
+            width: 100%;
+        }
+
+        .nav-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            text-align: left;
+            font-size: 0.78rem;
+        }
+
+        .nav-table th {
+            background: #f1f5f9;
+            color: #334155;
+            font-weight: 700;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            padding: 0.22rem 0.45rem;
+            border-bottom: 1px solid #cbd5e1;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            white-space: nowrap;
+            height: 26px;
+            box-sizing: border-box;
+        }
+
+        .nav-table td {
+            padding: 0.15rem 0.45rem;
+            border-bottom: 1px solid #f1f5f9;
+            color: #1e293b;
+            vertical-align: middle;
+            white-space: nowrap;
+            height: 26px;
+            box-sizing: border-box;
+            font-size: 0.75rem;
+        }
+
+        .nav-table tbody tr:hover td {
+            background-color: #f8fafc;
+        }
+
+        .nav-table tbody tr.row-selected td {
+            background-color: #eef2ff !important;
+        }
+
+        .badge-status {
+            padding: 0.12rem 0.45rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            line-height: 1.2;
+        }
+
+        .badge-status.status-unverified {
+            background: #fffbeb;
+            color: #d97706;
+            border: 1px solid #fde68a;
+        }
+
+        .badge-status.status-verified {
+            background: #ecfdf5;
+            color: #059669;
+            border: 1px solid #a7f3d0;
+        }
+
+        .badge-status.status-pushed {
+            background: #eef2ff;
+            color: #4f46e5;
+            border: 1px solid #c7d2fe;
+        }
+
+        .cell-sku {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            color: var(--primary-dark, #4338ca);
+        }
+
+        .cell-desc {
+            font-family: 'Cairo', 'Inter', sans-serif;
+            font-size: 0.8rem;
+            color: #0f172a;
+            font-weight: 600;
+            max-width: 280px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .cell-uom-tag {
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            padding: 0.1rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Outfit', monospace;
+            font-weight: 600;
+            font-size: 0.72rem;
+        }
+
+        .cell-qty {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        .cell-conv {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            color: #059669;
+            background: #ecfdf5;
+            padding: 0.1rem 0.45rem;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .cell-user {
+            font-size: 0.72rem;
+            color: #475569;
+            max-width: 160px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .cell-batch {
+            font-family: 'Outfit', monospace;
+            font-size: 0.72rem;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 0.08rem 0.35rem;
+            border-radius: 4px;
+            color: #334155;
+        }
+
+        /* Footer Bar */
+        .grid-footer-bar {
+            padding: 0.35rem 0.85rem;
+            background: #fafbfc;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.76rem;
+            color: #475569;
+            flex-shrink: 0;
+            height: 30px;
+            box-sizing: border-box;
+        }
+
+        .footer-totals {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+        }
+
+        .footer-totals strong {
+            color: #0f172a;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 1024px) {
+            .metrics-strip {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .nav-filter-panel {
+                flex-wrap: wrap;
+            }
+            .filter-controls-left {
+                flex-wrap: wrap;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .metrics-strip {
+                grid-template-columns: 1fr;
+            }
+            .topbar {
+                padding: 0 0.5rem;
+                overflow-x: auto;
+            }
+            .topbar-right {
+                flex-shrink: 0;
+            }
+            .filter-search-box {
+                max-width: 100%;
+                width: 100%;
+            }
+        }
+
+        /* Warning & Confirmation Modal Styles */
+        .nav-modal-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(4px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .nav-modal-backdrop.active {
+            display: flex;
+        }
+
+        .nav-modal-box {
+            background: #ffffff;
+            border-radius: 12px;
+            max-width: 480px;
+            width: 100%;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            animation: modalFadeIn 0.2s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.96); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .nav-modal-header {
+            padding: 1rem 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .nav-modal-header.warning {
+            background: #fffbeb;
+            color: #b45309;
+        }
+
+        .nav-modal-header.info {
+            background: #eef2ff;
+            color: #4338ca;
+        }
+
+        .nav-modal-header.success {
+            background: #ecfdf5;
+            color: #065f46;
+        }
+
+        .nav-modal-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.35rem;
+            flex-shrink: 0;
+        }
+
+        .nav-modal-header.warning .nav-modal-icon {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .nav-modal-header.info .nav-modal-icon {
+            background: #e0e7ff;
+            color: #4f46e5;
+        }
+
+        .nav-modal-header.success .nav-modal-icon {
+            background: #d1fae5;
+            color: #059669;
+        }
+
+        .nav-modal-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .nav-modal-body {
+            padding: 1.25rem;
+            color: #334155;
+            font-size: 0.88rem;
+            line-height: 1.5;
+        }
+
+        .nav-modal-highlight {
+            font-weight: 700;
+            font-size: 1rem;
+            color: #0f172a;
+            margin-bottom: 0.4rem;
+        }
+
+        .nav-modal-pending-box {
+            margin-top: 0.85rem;
+            padding: 0.65rem 0.85rem;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            line-height: 1.4;
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+        }
+
+        .nav-modal-pending-box.has-pending {
+            background: #fffbeb;
+            border: 1px solid #fef3c7;
+            color: #92400e;
+        }
+
+        .nav-modal-pending-box.has-pending i {
+            color: #d97706;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .nav-modal-pending-box.all-clear {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #166534;
+        }
+
+        .nav-modal-pending-box.all-clear i {
+            color: #16a34a;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .nav-modal-footer {
+            padding: 0.75rem 1.25rem;
+            background: #fafbfc;
+            border-top: 1px solid #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 0.5rem;
+        }
+
+        .btn-modal-cancel {
+            height: 32px;
+            padding: 0 1rem;
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            color: #475569;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .btn-modal-cancel:hover {
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+        .btn-modal-confirm {
+            height: 32px;
+            padding: 0 1.15rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .btn-modal-confirm.warning {
+            background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
+            color: #ffffff;
+            box-shadow: 0 2px 6px rgba(217, 119, 6, 0.35);
+        }
+
+        .btn-modal-confirm.warning:hover {
+            background: linear-gradient(135deg, #b45309 0%, #d97706 100%);
+        }
+
+        .btn-modal-confirm.primary {
+            background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+            color: #ffffff;
+            box-shadow: 0 2px 6px rgba(99, 102, 241, 0.35);
+        }
+
+        .btn-modal-confirm.primary:hover {
+            background: linear-gradient(135deg, #4338ca 0%, #4f46e5 100%);
+        }
+
+        /* Loading Spinner */
+        .spinner-inline {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #ffffff;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="erp-app">
+        <!-- Sidebar Navigation Container -->
+        <div id="sidebar-container"></div>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Topbar Header -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="hamburger-menu" id="mobile-menu-btn" title="Toggle Navigation">
+                        <i class="ri-menu-line"></i>
+                    </button>
+                    <div class="breadcrumb">
+                        <span data-i18n="nav_inventory">Inventory</span>
+                        <i class="ri-arrow-right-s-line"></i>
+                        <span class="active" data-i18n="nav_inventory_altx_nav">Inventory Altx-NAV</span>
+                    </div>
+                    <span class="badge-nav-bridge">
+                        <span>NAV Sync Bridge</span>
+                    </span>
+                </div>
+
+                <div class="topbar-right">
+                    <button class="btn-compact btn-push-nav" id="btnPushToNav" title="Push stock count records to Navision [GITL APP Inventory Count]">
+                        <i class="ri-upload-cloud-2-line"></i>
+                        <span id="pushBtnText">Push to Nav</span>
+                    </button>
+                    <button class="btn-compact" id="btnRefreshGrid" title="Refresh records list">
+                        <i class="ri-refresh-line"></i>
+                        <span>Refresh</span>
+                    </button>
+                    <button class="btn-compact" id="btnExportCsv" title="Export current list to CSV">
+                        <i class="ri-file-excel-2-line"></i>
+                        <span>Export CSV</span>
+                    </button>
+                    <div class="user-profile-badge">
+                        <i class="ri-map-pin-line"></i>
+                        <span id="header-location">HO</span>
+                    </div>
+                    <div class="topbar-actions">
+                        <button class="icon-btn" id="lang-toggle" title="Switch Language">
+                            <span id="current-lang" style="font-size: 0.8rem; font-weight: 700;">العربية</span>
+                        </button>
+                        <div class="user-block" style="padding: 0.25rem 0.65rem; border-radius: 20px; background: #f1f5f9; display: flex; align-items: center; gap: 0.4rem;">
+                            <i class="ri-user-3-line" style="color: var(--primary, #6366f1); font-size: 0.95rem;"></i>
+                            <span style="font-size: 0.82rem; font-weight: 600; color: #1e293b;" id="user-display-name">Admin User</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Screen-Fitting Navigation Push Workspace -->
+            <div class="nav-sync-page">
+                <!-- Metrics Summary Strip -->
+                <div class="metrics-strip">
+                    <div class="metric-card-nav total">
+                        <div class="m-info">
+                            <span class="m-label">Total Unpushed</span>
+                            <span class="m-val" id="metricTotalPending">0</span>
+                        </div>
+                        <div class="m-icon"><i class="ri-database-2-line"></i></div>
+                    </div>
+                    <div class="metric-card-nav unverified">
+                        <div class="m-info">
+                            <span class="m-label">Unverified (Status=0)</span>
+                            <span class="m-val" id="metricTotalUnverified">0</span>
+                        </div>
+                        <div class="m-icon"><i class="ri-error-warning-line"></i></div>
+                    </div>
+                    <div class="metric-card-nav verified">
+                        <div class="m-info">
+                            <span class="m-label">Verified (Status=1)</span>
+                            <span class="m-val" id="metricTotalVerified">0</span>
+                        </div>
+                        <div class="m-icon"><i class="ri-checkbox-circle-line"></i></div>
+                    </div>
+                    <div class="metric-card-nav filtered">
+                        <div class="m-info">
+                            <span class="m-label">Current Filtered Qty</span>
+                            <span class="m-val" id="metricTotalConverted">0</span>
+                        </div>
+                        <div class="m-icon"><i class="ri-calculator-line"></i></div>
+                    </div>
+                </div>
+
+                <!-- Filter Controls Toolbar -->
+                <div class="nav-filter-panel">
+                    <div class="filter-controls-left">
+                        <!-- Created By Filter -->
+                        <div class="filter-group">
+                            <label><i class="ri-user-line"></i> Created By:</label>
+                            <select id="filterCreatedBy" class="filter-select">
+                                <option value="">All Users</option>
+                            </select>
+                        </div>
+
+                        <!-- Location Filter -->
+                        <div class="filter-group">
+                            <label><i class="ri-map-pin-line"></i> Location:</label>
+                            <select id="filterLocation" class="filter-select">
+                                <option value="">All Locations</option>
+                            </select>
+                        </div>
+
+                        <!-- Status Filter (Default Status = 1: Verified) -->
+                        <div class="filter-group">
+                            <label><i class="ri-flag-line"></i> Status:</label>
+                            <select id="filterStatus" class="filter-select">
+                                <option value="1" selected>Status = 1 (Verified)</option>
+                                <option value="all">All Pending (0 & 1)</option>
+                                <option value="0">Status = 0 (Unverified)</option>
+                            </select>
+                        </div>
+
+                        <!-- Search Filter Box -->
+                        <div class="filter-search-box">
+                            <i class="ri-search-line"></i>
+                            <input type="text" id="filterSearch" placeholder="Filter SKU, Desc, Batch..." autocomplete="off">
+                        </div>
+
+                        <button class="btn-compact" id="btnResetFilters" title="Reset all filters">
+                            <i class="ri-filter-off-line"></i>
+                            <span>Reset</span>
+                        </button>
+                    </div>
+
+                    <div class="filter-controls-right">
+                        <span id="selectionSummary" style="font-size: 0.74rem; font-weight: 600; color: #475569;">
+                            0 selected
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Table Card Container -->
+                <div class="nav-grid-card">
+                    <div class="grid-header-strip">
+                        <div class="grid-header-left">
+                            <h2>Stock Count Entries For NAV Push</h2>
+                            <span class="count-badge" id="gridRecordsCount">0 records</span>
+                        </div>
+                        <div class="grid-header-right">
+                            <button class="btn-compact" id="btnSelectAll" style="height: 24px; padding: 0 0.5rem; font-size: 0.72rem;">
+                                <i class="ri-checkbox-line"></i>
+                                <span>Select All</span>
+                            </button>
+                            <button class="btn-compact" id="btnDeselectAll" style="height: 24px; padding: 0 0.5rem; font-size: 0.72rem;">
+                                <i class="ri-checkbox-blank-line"></i>
+                                <span>Deselect All</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="nav-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 32px; text-align: center;">
+                                        <input type="checkbox" id="thSelectAllCheckbox" title="Select / Deselect all visible rows">
+                                    </th>
+                                    <th style="width: 38px;">#</th>
+                                    <th style="width: 105px;">Status</th>
+                                    <th style="width: 90px;">SKU</th>
+                                    <th>Description (Arabic)</th>
+                                    <th style="width: 110px;">Scanned UOM</th>
+                                    <th style="width: 70px;">Qty</th>
+                                    <th style="width: 85px;">Phys. Qty</th>
+                                    <th style="width: 75px;">Base UOM</th>
+                                    <th style="width: 95px;">Location</th>
+                                    <th style="width: 110px;">Mobile Batch</th>
+                                    <th style="width: 140px;">Created By</th>
+                                    <th style="width: 125px;">Scanned At</th>
+                                </tr>
+                            </thead>
+                            <tbody id="navGridBody">
+                                <!-- Dynamic rows rendered here -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Footer Totals Bar -->
+                    <div class="grid-footer-bar">
+                        <div class="footer-left">
+                            <span>Ready to bridge to NAV table <strong>[House Care Live$GITL APP Inventory Count]</strong></span>
+                        </div>
+                        <div class="footer-totals">
+                            <span>Rows: <strong id="footRows">0</strong></span>
+                            <span>Total Qty: <strong id="footTotalQty">0</strong></span>
+                            <span>Total Phys. Qty: <strong id="footTotalConv" style="color: #059669;">0</strong></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Warning / Confirmation Modal -->
+    <div class="nav-modal-backdrop" id="navModalBackdrop">
+        <div class="nav-modal-box">
+            <div class="nav-modal-header" id="navModalHeader">
+                <div class="nav-modal-icon" id="navModalIcon">
+                    <i class="ri-alert-line"></i>
+                </div>
+                <h3 class="nav-modal-title" id="navModalTitle">Confirmation</h3>
+            </div>
+            <div class="nav-modal-body" id="navModalBody">
+                <div class="nav-modal-highlight" id="navModalHighlightText"></div>
+                <p id="navModalDescription" style="margin: 0;"></p>
+                <div id="navModalPendingBanner" style="display: none;"></div>
+            </div>
+            <div class="nav-modal-footer">
+                <button type="button" class="btn-modal-cancel" id="navModalBtnCancel">Cancel</button>
+                <button type="button" class="btn-modal-confirm" id="navModalBtnConfirm">
+                    <span id="navModalConfirmLabel">Continue</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="translations.js"></script>
+    <script src="common.js"></script>
+    <script src="inventory-altx-nav.js?v=1"></script>
+</body>
+
+</html>

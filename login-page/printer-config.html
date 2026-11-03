@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DynamicsAltx - Printer Configuration</title>
+    <!-- Google Fonts: Inter & Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@600;700&display=swap" rel="stylesheet">
+    <!-- Remix Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="dashboard.css">
+    <style>
+        .settings-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            max-width: 1000px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .settings-header {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .settings-header h3 {
+            margin: 0;
+            font-size: 1.25rem;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-section {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 900px) {
+            .form-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-main);
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: var(--transition);
+            background: white;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: var(--bg-surface);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+
+        .badge-type {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .type-shelf { background: #e0e7ff; color: #4338ca; }
+        .type-item { background: #fef3c7; color: #92400e; }
+        .type-normal { background: #d1fae5; color: #065f46; }
+
+        .type-badge-icon {
+            margin-right: 0.3rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="erp-app">
+        <!-- Sidebar Navigation -->
+        <div id="sidebar-container"></div>
+
+        <!-- Main Workspace -->
+        <main class="main-content">
+            <!-- Top App Bar -->
+            <header class="top-bar">
+                <div class="breadcrumb">
+                    <span data-i18n="system">System</span>
+                    <i class="ri-arrow-right-s-line"></i>
+                    <span class="active" data-i18n="nav_printer_config">Printer Configuration</span>
+                </div>
+
+                <div class="top-actions">
+                    <button class="icon-btn" id="refresh-printers-btn" title="Refresh Printers">
+                        <i class="ri-refresh-line"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Dashboard Content Container -->
+            <div class="content-body">
+                <div class="page-title-box">
+                    <h2><i class="ri-printer-line" style="color: var(--primary);"></i> <span data-i18n="printer_config_title">Printer Configuration</span></h2>
+                    <p data-i18n="printer_config_desc">Manage and map barcode label printers for each store location.</p>
+                </div>
+
+                <!-- Form Card -->
+                <div class="settings-card">
+                    <div class="settings-header">
+                        <h3 id="form-card-title"><i class="ri-add-line"></i> Add / Edit Printer Setting</h3>
+                        <button type="button" class="btn-secondary" id="cancel-edit-btn" style="display: none;">
+                            <i class="ri-close-line"></i> Cancel Edit
+                        </button>
+                    </div>
+
+                    <form id="printer-config-form">
+                        <input type="hidden" id="setting-id" value="0">
+
+                        <div class="form-section" style="grid-template-columns: repeat(4, 1fr);">
+                            <div class="form-group">
+                                <label for="print-type" data-i18n="printer_type">Type</label>
+                                <select id="print-type" required>
+                                    <option value="">-- Select Type --</option>
+                                    <option value="Shelf Label">Shelf Label</option>
+                                    <option value="Item Label">Item Label</option>
+                                    <option value="Normal Print">Normal Print</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="print-location" data-i18n="location">Location</label>
+                                <select id="print-location" required>
+                                    <option value="">-- Loading Locations... --</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="print-printer-name" data-i18n="printer_name">Printer Name (Local PC)</label>
+                                <select id="print-printer-name">
+                                    <option value="">-- Scanning Local PC Printers... --</option>
+                                </select>
+                                <input type="text" id="print-printer-custom" placeholder="e.g. POS-80, Epson TM-T88, ZDesigner GK420t (Copy 2), HP LaserJet" style="margin-top: 0.5rem; display: none;">
+                                <small id="printer-scan-hint" style="color: var(--text-muted); font-size: 0.8rem; display: block; margin-top: 0.35rem;">
+                                    Scanning printers connected to this computer...
+                                </small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="print-method">Print Method</label>
+                                <select id="print-method" required>
+                                    <option value="Zebra Command">Zebra Command (ZPL)</option>
+                                    <option value="Report Printing">Report Printing (Windows Driver)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 1rem; align-items: center;">
+                            <button type="submit" class="btn-primary" id="save-btn">
+                                <i class="ri-save-line"></i> <span data-i18n="save_configuration">Save Configuration</span>
+                            </button>
+                            <button type="button" class="btn-secondary" id="toggle-custom-printer-btn">
+                                <i class="ri-edit-line"></i> Enter Manually
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Table Card -->
+                <div class="settings-card" style="max-width: 100%;">
+                    <div class="settings-header">
+                        <h3><i class="ri-list-check-2"></i> Configured Printer Settings</h3>
+                        <span id="record-count-badge" class="badge-type type-normal">0 Records</span>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="data-table" id="printer-settings-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Type</th>
+                                    <th>Location</th>
+                                    <th>Printer Name</th>
+                                    <th>Print Method</th>
+                                    <th style="text-align: center;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="printer-settings-tbody">
+                                <tr>
+                                    <td colspan="5" class="text-center" style="padding: 2rem; color: var(--text-muted);">
+                                        Loading printer settings...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Common JS -->
+    <script src="common.js"></script>
+    <script src="printer-config.js"></script>
+</body>
+
+</html>
